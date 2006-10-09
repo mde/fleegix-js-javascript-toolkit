@@ -17,7 +17,7 @@
  * Version 1.2.1
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.ajax = new function() {
+fleegix.xhr = new function() {
 
   // Properties
   // ================================
@@ -208,4 +208,4 @@ fleegix.ajax = new function() {
   };
 }
 
-fleegix.ajax.constructor = null;
+fleegix.xhr.constructor = null;
