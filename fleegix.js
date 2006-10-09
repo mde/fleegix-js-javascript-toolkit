@@ -1,110 +1,7 @@
 if(typeof fleegix=="undefined"){
 var fleegix={};
 }
-fleegix.popup=new function(){
-var _1=this;
-this.win=null;
-this.open=function(_2,_3){
-var _4=_3||{};
-var _5="";
-var _6={"width":"","height":"","location":0,"menubar":0,"resizable":1,"scrollbars":0,"status":0,"titlebar":1,"toolbar":0};
-for(var _7 in _6){
-_5+=_7+"=";
-_5+=_4[_7]?_4[_7]:_6[_7];
-_5+=",";
-}
-var _8=_5.length;
-if(_8){
-_5=_5.substr(0,_8-1);
-}
-if(!_1.win||_1.win.closed){
-_1.win=null;
-_1.win=window.open(_2,"thePopupWin",_5);
-}else{
-_1.win.focus();
-_1.win.document.location=_2;
-}
-};
-this.close=function(){
-if(_1.win){
-_1.win.window.close();
-_1.win=null;
-}
-};
-this.goURLMainWin=function(_9){
-location=_9;
-_1.close();
-};
-};
-fleegix.popup.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
-fleegix.form={};
-fleegix.form.serialize=function(_a,_b){
-var _c=_b||{};
-var _d="";
-var _e;
-var _f="";
-for(i=0;i<_a.elements.length;i++){
-_e=_a.elements[i];
-switch(_e.type){
-case "text":
-case "hidden":
-case "password":
-case "textarea":
-case "select-one":
-_d+=_e.name+"="+encodeURI(_e.value)+"&";
-break;
-case "select-multiple":
-var _10=false;
-for(var j=0;j<_e.options.length;j++){
-var _12=_e.options[j];
-if(_12.selected){
-if(_c.collapseMulti){
-if(_10){
-_d+=","+encodeURI(_12.value);
-}else{
-_d+=_e.name+"="+encodeURI(_12.value);
-_10=true;
-}
-}else{
-_d+=_e.name+"="+encodeURI(_12.value)+"&";
-}
-}
-}
-if(_c.collapseMulti){
-_d+="&";
-}
-break;
-case "radio":
-if(_e.checked){
-_d+=_e.name+"="+encodeURI(_e.value)+"&";
-}
-break;
-case "checkbox":
-if(_e.checked){
-if(_c.collapseMulti&&(_e.name==_f)){
-if(_d.lastIndexOf("&")==_d.length-1){
-_d=_d.substr(0,_d.length-1);
-}
-_d+=","+encodeURI(_e.value);
-}else{
-_d+=_e.name+"="+encodeURI(_e.value);
-}
-_d+="&";
-_f=_e.name;
-}
-break;
-}
-}
-_d=_d.substr(0,_d.length-1);
-return _d;
-};
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
-fleegix.ajax=new function(){
+fleegix.xhr=new function(){
 this.req=null;
 this.reqId=0;
 this.url=null;
@@ -122,16 +19,16 @@ this.username="";
 this.password="";
 this.headers=[];
 var i=0;
-var _14=[function(){
+var _2=[function(){
 return new XMLHttpRequest();
 },function(){
 return new ActiveXObject("Msxml2.XMLHTTP");
 },function(){
 return new ActiveXObject("Microsoft.XMLHTTP");
 }];
-while(!this.req&&(i<_14.length)){
+while(!this.req&&(i<_2.length)){
 try{
-this.req=_14[i++]();
+this.req=_2[i++]();
 }
 catch(e){
 }
@@ -141,86 +38,86 @@ this.reqId=0;
 }else{
 alert("Could not create XMLHttpRequest object.");
 }
-this.doGet=function(url,_16,_17){
-this.url=url;
-this.handleResp=_16;
-this.responseFormat=_17||"text";
+this.doGet=function(_3,_4,_5){
+this.url=_3;
+this.handleResp=_4;
+this.responseFormat=_5||"text";
 return this.doReq();
 };
-this.doPost=function(url,_19,_1a,_1b){
-this.url=url;
-this.dataPayload=_19;
-this.handleResp=_1a;
-this.responseFormat=_1b||"text";
+this.doPost=function(_6,_7,_8,_9){
+this.url=_6;
+this.dataPayload=_7;
+this.handleResp=_8;
+this.responseFormat=_9||"text";
 this.method="POST";
 return this.doReq();
 };
 this.doReq=function(){
-var _1c=null;
-var req=null;
+var _a=null;
+var _b=null;
 var id=null;
-var _1f=[];
-req=this.req;
+var _d=[];
+_b=this.req;
 this.reqId++;
 id=this.reqId;
 if(this.username&&this.password){
-req.open(this.method,this.url,this.async,this.username,this.password);
+_b.open(this.method,this.url,this.async,this.username,this.password);
 }else{
-req.open(this.method,this.url,this.async);
+_b.open(this.method,this.url,this.async);
 }
 if(this.mimeType&&navigator.userAgent.indexOf("MSIE")==-1){
-req.overrideMimeType(this.mimeType);
+_b.overrideMimeType(this.mimeType);
 }
 if(this.headers.length){
 for(var i=0;i<this.headers.length;i++){
-_1f=this.headers[i].split(": ");
-req.setRequestHeader(_1f[i],_1f[1]);
+_d=this.headers[i].split(": ");
+_b.setRequestHeader(_d[i],_d[1]);
 }
 this.headers=[];
 }else{
 if(this.method=="POST"){
-req.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+_b.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 }
 }
-_1c=this;
-req.onreadystatechange=function(){
-var _21=null;
-_1c.readyState=req.readyState;
-if(req.readyState==4){
-_1c.status=req.status;
-_1c.statusText=req.statusText;
-_1c.responseText=req.responseText;
-_1c.responseXML=req.responseXML;
-switch(_1c.responseFormat){
+_a=this;
+_b.onreadystatechange=function(){
+var _f=null;
+_a.readyState=_b.readyState;
+if(_b.readyState==4){
+_a.status=_b.status;
+_a.statusText=_b.statusText;
+_a.responseText=_b.responseText;
+_a.responseXML=_b.responseXML;
+switch(_a.responseFormat){
 case "text":
-_21=_1c.responseText;
+_f=_a.responseText;
 break;
 case "xml":
-_21=_1c.responseXML;
+_f=_a.responseXML;
 break;
 case "object":
-_21=req;
+_f=_b;
 break;
 }
-if(_1c.status>199&&_1c.status<300){
-if(_1c.async){
-if(!_1c.handleResp){
+if(_a.status>199&&_a.status<300){
+if(_a.async){
+if(!_a.handleResp){
 alert("No response handler defined "+"for this XMLHttpRequest object.");
 return;
 }else{
-_1c.handleResp(_21,id);
+_a.handleResp(_f,id);
 }
 }
 }else{
-_1c.handleErr(_21);
+_a.handleErr(_f);
 }
 }
 };
-req.send(this.dataPayload);
+_b.send(this.dataPayload);
 if(this.async){
 return id;
 }else{
-return req;
+return _b;
 }
 };
 this.abort=function(){
@@ -232,33 +129,136 @@ this.req=null;
 }
 };
 this.handleErr=function(){
-var _22;
+var _10;
 try{
-_22=window.open("","errorWin");
-_22.document.body.innerHTML=this.responseText;
+_10=window.open("","errorWin");
+_10.document.body.innerHTML=this.responseText;
 }
 catch(e){
 alert("An error occurred, but the error message cannot be"+" displayed because of your browser's pop-up blocker.\n"+"Please allow pop-ups from this Web site.");
 }
 };
-this.setMimeType=function(_23){
-this.mimeType=_23;
+this.setMimeType=function(_11){
+this.mimeType=_11;
 };
-this.setHandlerResp=function(_24){
-this.handleResp=_24;
+this.setHandlerResp=function(_12){
+this.handleResp=_12;
 };
-this.setHandlerErr=function(_25){
-this.handleErr=_25;
+this.setHandlerErr=function(_13){
+this.handleErr=_13;
 };
-this.setHandlerBoth=function(_26){
-this.handleResp=_26;
-this.handleErr=_26;
+this.setHandlerBoth=function(_14){
+this.handleResp=_14;
+this.handleErr=_14;
 };
-this.setRequestHeader=function(_27,_28){
-this.headers.push(_27+": "+_28);
+this.setRequestHeader=function(_15,_16){
+this.headers.push(_15+": "+_16);
 };
 };
-fleegix.ajax.constructor=null;
+fleegix.xhr.constructor=null;
+if(typeof fleegix=="undefined"){
+var fleegix={};
+}
+fleegix.popup=new function(){
+var _17=this;
+this.win=null;
+this.open=function(url,_19){
+var _1a=_19||{};
+var str="";
+var _1c={"width":"","height":"","location":0,"menubar":0,"resizable":1,"scrollbars":0,"status":0,"titlebar":1,"toolbar":0};
+for(var _1d in _1c){
+str+=_1d+"=";
+str+=_1a[_1d]?_1a[_1d]:_1c[_1d];
+str+=",";
+}
+var len=str.length;
+if(len){
+str=str.substr(0,len-1);
+}
+if(!_17.win||_17.win.closed){
+_17.win=null;
+_17.win=window.open(url,"thePopupWin",str);
+}else{
+_17.win.focus();
+_17.win.document.location=url;
+}
+};
+this.close=function(){
+if(_17.win){
+_17.win.window.close();
+_17.win=null;
+}
+};
+this.goURLMainWin=function(url){
+location=url;
+_17.close();
+};
+};
+fleegix.popup.constructor=null;
+if(typeof fleegix=="undefined"){
+var fleegix={};
+}
+fleegix.form={};
+fleegix.form.serialize=function(_20,_21){
+var _22=_21||{};
+var str="";
+var _24;
+var _25="";
+for(i=0;i<_20.elements.length;i++){
+_24=_20.elements[i];
+switch(_24.type){
+case "text":
+case "hidden":
+case "password":
+case "textarea":
+case "select-one":
+str+=_24.name+"="+encodeURI(_24.value)+"&";
+break;
+case "select-multiple":
+var _26=false;
+for(var j=0;j<_24.options.length;j++){
+var _28=_24.options[j];
+if(_28.selected){
+if(_22.collapseMulti){
+if(_26){
+str+=","+encodeURI(_28.value);
+}else{
+str+=_24.name+"="+encodeURI(_28.value);
+_26=true;
+}
+}else{
+str+=_24.name+"="+encodeURI(_28.value)+"&";
+}
+}
+}
+if(_22.collapseMulti){
+str+="&";
+}
+break;
+case "radio":
+if(_24.checked){
+str+=_24.name+"="+encodeURI(_24.value)+"&";
+}
+break;
+case "checkbox":
+if(_24.checked){
+if(_22.collapseMulti&&(_24.name==_25)){
+if(str.lastIndexOf("&")==str.length-1){
+str=str.substr(0,str.length-1);
+}
+str+=","+encodeURI(_24.value);
+}else{
+str+=_24.name+"="+encodeURI(_24.value);
+}
+str+="&";
+_25=_24.name;
+}
+break;
+}
+}
+str=str.substr(0,str.length-1);
+return str;
+};
 if(typeof fleegix=="undefined"){
 var fleegix={};
 }
