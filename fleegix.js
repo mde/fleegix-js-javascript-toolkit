@@ -156,9 +156,6 @@ this.headers.push(_15+": "+_16);
 };
 };
 fleegix.xhr.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.form={};
 fleegix.form.serialize=function(_17,_18){
 var _19=_18||{};
@@ -220,9 +217,6 @@ break;
 str=str.substr(0,str.length-1);
 return str;
 };
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.popup=new function(){
 var _20=this;
 this.win=null;
@@ -259,9 +253,6 @@ _20.close();
 };
 };
 fleegix.popup.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.event=new function(){
 var _29={};
 this.subscribe=function(_2a,obj,_2c){
@@ -302,9 +293,6 @@ _34[_35](_32);
 };
 };
 fleegix.event.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.xml=new function(){
 var _36=this;
 this.parse=function(_37,_38){
@@ -378,9 +366,6 @@ return _4c;
 };
 };
 fleegix.xml.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.uri=new function(){
 var _4f=this;
 this.params={};
@@ -407,9 +392,6 @@ return location.href.split("?")[1];
 this.params=this.getParamHash();
 };
 fleegix.uri.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.ui=new function(){
 this.getWindowHeight=function(){
 if(document.all){
@@ -435,9 +417,6 @@ return window.innerWidth;
 };
 };
 fleegix.ui.constructor=null;
-if(typeof fleegix=="undefined"){
-var fleegix={};
-}
 fleegix.cookie=new function(){
 this.set=function(_56,_57,_58){
 var _59=_58||{};

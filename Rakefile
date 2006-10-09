@@ -15,9 +15,16 @@ end
 
 def concat_sourcefiles(files)
   dist = File.new('fleegix.js.uncompressed.js', 'w')
+  js_file = File.new('./src/base.js')
+  js = js_file.readlines.join
+  dist << js
+  # if (typeof fleegix == 'undefined') { var fleegix = {}; }
+  re = Regexp.new('\/\*.*if \(typeof fleegix == \'undefined\'\) \{ var fleegix = \{\}; \}', Regexp::MULTILINE)
   files.each do |f|
     js_file = File.new(f)
-    dist << js_file.readlines.join
+    js = js_file.readlines.join
+    js.sub!(re, '')
+    dist << js
   end
   dist.close
   true

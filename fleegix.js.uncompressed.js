@@ -1,21 +1,22 @@
 /*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org) 
- * and SitePoint Pty. Ltd, www.sitepoint.com
+ * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS;
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
+
 fleegix.xhr = new function() {
 
   // Properties
@@ -208,28 +209,9 @@ fleegix.xhr = new function() {
 }
 
 fleegix.xhr.constructor = null;
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Original code by Matthew Eernisse (mde@fleegix.org), March 2005
- * Additional bugfixes by Mark Pruett (mark.pruett@comcast.net), 12th July 2005
- * Multi-select added by Craig Anderson (craig@sitepoint.com), 24th August 2006
- *
-*/
 
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
+
 /**
  * Serializes the data from all the inputs in a Web form
  * into a query-string style string.
@@ -322,23 +304,7 @@ fleegix.form.serialize = function(docForm, formatOpts) {
   return str;
 };
 
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.popup = new function() {
   
   var self = this;
@@ -391,23 +357,7 @@ fleegix.popup.constructor = null;
 
 
 
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *         http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.event = new function() {
     
     // List of channels being published to
@@ -464,23 +414,7 @@ fleegix.event = new function() {
 }
 fleegix.event.constructor = null;
 
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *         http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.xml = new function(){
     
     var self = this;
@@ -629,23 +563,7 @@ fleegix.xml = new function(){
     };
 }
 fleegix.xml.constructor = null;
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *         http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.uri = new function() {
   var self = this;
   
@@ -674,23 +592,7 @@ fleegix.uri = new function() {
   this.params = this.getParamHash();
 }
 fleegix.uri.constructor = null;
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *         http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.ui = new function() {
   this.getWindowHeight = function() {
     // IE
@@ -726,23 +628,7 @@ fleegix.ui = new function() {
   };
 };
 fleegix.ui.constructor = null;
-/*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == 'undefined') { var fleegix = {}; }
+
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
     var opts = optParam || {}
