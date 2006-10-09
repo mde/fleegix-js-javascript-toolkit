@@ -4,7 +4,7 @@ def read_sourcefiles
   require 'find'
   files = Array.new
   Find.find('./src/') do |f| 
-    if FileTest.file?(f) 
+    if FileTest.file?(f) and not f.include? '.svn' 
       files.push(f)
     end
   end
