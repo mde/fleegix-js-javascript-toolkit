@@ -17,7 +17,6 @@
  * Additional bugfixes by Mark Pruett (mark.pruett@comcast.net), 12th July 2005
  * Multi-select added by Craig Anderson (craig@sitepoint.com), 24th August 2006
  *
- * Version 1.3
 */
 
 if (typeof fleegix == 'undefined') { var fleegix = {}; }

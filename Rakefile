@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+$SHRINKSAFE_PATH = 'lib/custom_rhino.jar'
+
 def read_sourcefiles
   require 'find'
   files = Array.new
@@ -22,7 +24,7 @@ def concat_sourcefiles(files)
 end
 
 def compress_dist
-  sh %{java -jar lib/custom_rhino.jar -c fleegix.js.uncompressed.js > fleegix.js 2>&1}
+  sh %{java -jar #{ $SHRINKSAFE_PATH } -c fleegix.js.uncompressed.js > fleegix.js 2>&1}
   true
 end
 

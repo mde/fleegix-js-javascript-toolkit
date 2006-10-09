@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Version 1.0
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.ui = new function() {
