@@ -359,60 +359,179 @@ fleegix.popup.constructor = null;
 
 
 fleegix.event = new function() {
+  
+  // List of handlers for event listeners
+  var listenerCache = [];
+  // List of channels being published to
+  var channels = {};
+  
+  this.listen = function() {
+    var tgtObj = arguments[0]; // Target object for the new listener
+    var tgtMeth = arguments[1]; // Method to listen for
+    // Look to see if there's already a registry of listeners
+    var listenReg = tgtObj[tgtMeth] ? 
+      tgtObj[tgtMeth].listenReg : null;
     
-    // List of channels being published to
-    var channels = {};
+    // Create the registry of listeners if need be
+    // -----------------
+    if (!listenReg) {
+      listenReg = {};
+      // The original obj and method name 
+      listenReg.orig = {}
+      listenReg.orig.obj = tgtObj, 
+      listenReg.orig.methName = tgtMeth;
+      // Clone existing method code if it exists
+      if (tgtObj[tgtMeth]) {
+        listenReg.orig.methCode = 
+          eval(tgtObj[tgtMeth].valueOf());
+      }
+      // Array of handlers to execute if the method fires
+      listenReg.after = [];
+      // Replace the original method with the exec proxy
+      tgtObj[tgtMeth] = function() {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        fleegix.event.exec(
+          tgtObj[tgtMeth].listenReg, args);
+      }
+      tgtObj[tgtMeth].listenReg = listenReg;
+      // Add to global cache -- so we can remove listeners
+      // on unload to avoid memleak in IE6
+      listenerCache.push(tgtObj[tgtMeth].listenReg);
+    }
     
-    this.subscribe = function(subscr, obj, method) {
-        // Make sure there's an obj param
-        if (!obj) { return };
-        // Create the channel if it doesn't exist
-        if (!channels[subscr]) {
-            channels[subscr] = {};
-            channels[subscr].audience = [];
+    // Add the new handler to the listener registry
+    // -----------------
+    // Simple function
+    if (typeof arguments[2] == 'function') {
+      listenReg.after.push(arguments[2]);
+    }
+    // Object and method
+    else {
+      listenReg.after.push([arguments[2], arguments[3]]);
+    }
+    
+    tgtObj[tgtMeth].listenReg = listenReg;
+  }
+  this.exec = function(reg, args) {
+    // Execute the original code for the trigger
+    // method if there is any -- apply arguments
+    // passed in the right execution context
+    if (reg.orig.methCode) {
+      reg.orig.methCode.apply(reg.orig.obj, args);
+    }
+    // Execute all the handler functions registered
+    for (var i = 0; i < reg.after.length; i++) {
+      var ex = reg.after[i];
+      // Single functions
+      if (ex.length == 0) {
+        var execFunction = ex;
+        execFunction();
+      }
+      // Methods of objects
+      else {
+        execObj = ex[0];
+        execMethod = ex[1];
+        execObj[execMethod](); 
+      }
+    }
+  }
+  this.unlisten = function() {
+    var tgtObj = arguments[0]; // Obj from which to remove
+    var tgtMeth = arguments[1]; // Trigger method
+    var listenReg = tgtObj[tgtMeth] ? 
+      tgtObj[tgtMeth].listenReg : null;
+    var remove = null;
+    
+    // Bail out if no handlers
+    if (!listenReg) {
+      return false;
+    }
+    
+    // Simple function
+    // Remove the handler if it's in the list
+    for (var i = 0; i < listenReg.after.length; i++) {
+      var ex = listenReg.after[i];
+      if (typeof arguments[2] == 'function') {
+        if (ex == arguments[2]) {
+          listenReg.after.splice(i, 1);
         }
-        else {
-            // Remove any previous listener method for the obj
-            this.unsubscribe(subscr, obj);
+      }
+      // Object and method
+      else {
+        if (ex[0] == arguments[2] && ex[1] == 
+          arguments[3]) {
+          listenReg.after.splice(i, 1);
         }
-        // Add the object and its handler to the array
-        // for the channel
-        channels[subscr].audience.push([obj, method]);
-    };
-    this.unsubscribe = function(unsubscr, obj) {
-        // If not listener obj specified, kill the
-        // entire channel
-        if (!obj) {
-            channels[unsubscr] = null;
+      }
+    }
+     tgtObj[tgtMeth].listenReg = listenReg;
+  }
+  this.flush = function() {
+    // Remove all the registered listeners to avoid
+    // IE6 memleak
+    for (var i = 0; i < listenerCache.length; i++) {
+      var reg = listenerCache[i];
+      removeObj = reg.orig.obj;
+      removeMethod = reg.orig.methName;
+      removeObj[removeMethod] = null;
+    }
+  }
+  
+  this.subscribe = function(subscr, obj, method) {
+    // Make sure there's an obj param
+    if (!obj) { return };
+    // Create the channel if it doesn't exist
+    if (!channels[subscr]) {
+      channels[subscr] = {};
+      channels[subscr].audience = [];
+    }
+    else {
+      // Remove any previous listener method for the obj
+      this.unsubscribe(subscr, obj);
+    }
+    // Add the object and its handler to the array
+    // for the channel
+    channels[subscr].audience.push([obj, method]);
+  };
+  this.unsubscribe = function(unsubscr, obj) {
+    // If not listener obj specified, kill the
+    // entire channel
+    if (!obj) {
+      channels[unsubscr] = null;
+    }
+    // Otherwise remove the object and its handler
+    // from the array for the channel
+    else {
+      if (channels[unsubscr]) {
+        var aud = channels[unsubscr].audience;
+        for (var i = 0; i < aud.length; i++) {
+          if (aud[i][0] == obj) {
+             aud.splice(i, 1); 
+          }
         }
-        // Otherwise remove the object and its handler
-        // from the array for the channel
-        else {
-            if (channels[unsubscr]) {
-                var aud = channels[unsubscr].audience;
-                for (var i = 0; i < aud.length; i++) {
-                    if (aud[i][0] == obj) {
-                       aud.splice(i, 1); 
-                    }
-                }
-            }
-        }
-    };
-    this.publish = function(pub, data) {
-        // Make sure the channel exists
-        if (channels[pub]) {
-            aud = channels[pub].audience;
-            // Pass the published data to all the 
-            // obj/methods listening to the channel
-            for (var i = 0; i < aud.length; i++) {
-                var listenerObject = aud[i][0];
-                var handlerMethod = aud[i][1];
-                listenerObject[handlerMethod](data);
-            }
-        }
-    };
+      }
+    }
+  };
+  this.publish = function(pub, data) {
+    // Make sure the channel exists
+    if (channels[pub]) {
+      aud = channels[pub].audience;
+      // Pass the published data to all the 
+      // obj/methods listening to the channel
+      for (var i = 0; i < aud.length; i++) {
+        var listenerObject = aud[i][0];
+        var handlerMethod = aud[i][1];
+        listenerObject[handlerMethod](data);
+      }
+    }
+  };
 }
 fleegix.event.constructor = null;
+// Prevent memleak in IE6
+fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
 fleegix.xml = new function(){
