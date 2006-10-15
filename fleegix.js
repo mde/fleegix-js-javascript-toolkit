@@ -293,11 +293,11 @@ for(var i=0;i<reg.after.length;i++){
 var ex=reg.after[i];
 if(ex.length==0){
 var _34=ex;
-_34();
+_34(_31);
 }else{
 execObj=ex[0];
 execMethod=ex[1];
-execObj[execMethod]();
+execObj[execMethod].apply(execObj,_31);
 }
 }
 };

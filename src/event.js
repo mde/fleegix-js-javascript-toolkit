@@ -72,7 +72,7 @@ fleegix.event = new function() {
     }
     
     tgtObj[tgtMeth].listenReg = listenReg;
-  }
+  };
   this.exec = function(reg, args) {
     // Execute the original code for the trigger
     // method if there is any -- apply arguments
@@ -86,16 +86,17 @@ fleegix.event = new function() {
       // Single functions
       if (ex.length == 0) {
         var execFunction = ex;
-        execFunction();
+        execFunction(args);
       }
       // Methods of objects
       else {
         execObj = ex[0];
         execMethod = ex[1];
-        execObj[execMethod](); 
+        // Pass args and exec in correct scope
+        execObj[execMethod].apply(execObj, args);
       }
     }
-  }
+  };
   this.unlisten = function() {
     var tgtObj = arguments[0]; // Obj from which to remove
     var tgtMeth = arguments[1]; // Trigger method
@@ -126,7 +127,7 @@ fleegix.event = new function() {
       }
     }
      tgtObj[tgtMeth].listenReg = listenReg;
-  }
+  };
   this.flush = function() {
     // Remove all the registered listeners to avoid
     // IE6 memleak
@@ -136,8 +137,7 @@ fleegix.event = new function() {
       removeMethod = reg.orig.methName;
       removeObj[removeMethod] = null;
     }
-  }
-  
+  };
   this.subscribe = function(subscr, obj, method) {
     // Make sure there's an obj param
     if (!obj) { return };
