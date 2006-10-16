@@ -80,6 +80,10 @@ fleegix.event = new function() {
     if (reg.orig.methCode) {
       reg.orig.methCode.apply(reg.orig.obj, args);
     }
+    if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
+      args[0] = args[0] || window.event;
+    }
+    
     // Execute all the handler functions registered
     for (var i = 0; i < reg.after.length; i++) {
       var ex = reg.after[i];
@@ -185,6 +189,30 @@ fleegix.event = new function() {
         listenerObject[handlerMethod](data);
       }
     }
+  };
+  this.getSrcElementId = function(e) {
+    var ret = null;
+    if (e.srcElement) ret = e.srcElement;
+    else if (e.target) ret = e.target;
+    // Avoid trying to use fake obj from IE on disabled
+    // form elements
+    if (typeof ret.id == 'undefined') {
+      return null;
+    }
+    // Look up the id of the elem or its parent
+    else {
+      // Look for something with an id -- not a text node
+      while (!ret.id || ret.nodeType == 3) {
+        // Bail if we run out of parents
+        if (ret.parentNode) {
+          ret = ret.parentNode;
+        }
+        else {
+          return null;
+        }
+      }
+    }
+    return ret.id;
   };
 }
 fleegix.event.constructor = null;
