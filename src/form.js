@@ -36,9 +36,12 @@ fleegix.form = {};
 fleegix.form.serialize = function(docForm, formatOpts) {
   
   var opts = formatOpts || {};
+  var s = '';
   var str = '';
   var formElem;
   var lastElemName = '';
+  var pat = null;
+  if (opts.stripTags) { pat = /<[^>]*>/g };
   
   for (i = 0; i < docForm.elements.length; i++) {
     formElem = docForm.elements[i];
@@ -50,7 +53,8 @@ fleegix.form.serialize = function(docForm, formatOpts) {
       case 'password':
       case 'textarea':
       case 'select-one':
-        str += formElem.name + '=' + encodeURI(formElem.value) + '&'
+        s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+        str += formElem.name + '=' + encodeURIComponent(s) + '&'
         break;
         
       // Multi-option select
@@ -61,15 +65,18 @@ fleegix.form.serialize = function(docForm, formatOpts) {
           if(currOpt.selected) {
             if (opts.collapseMulti) {
               if (isSet) {
-                str += ',' + encodeURI(currOpt.value);
+                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+                str += ',' + encodeURIComponent(s);
               }
               else {
-                str += formElem.name + '=' + encodeURI(currOpt.value);
+                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+                str += formElem.name + '=' + encodeURIComponent(s);
                 isSet = true;
               }
             }
             else {
-              str += formElem.name + '=' + encodeURI(currOpt.value) + '&';
+              s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+              str += formElem.name + '=' + encodeURIComponent(currOpt.value) + '&';
             }
           }
         }
@@ -81,7 +88,8 @@ fleegix.form.serialize = function(docForm, formatOpts) {
       // Radio buttons
       case 'radio':
         if (formElem.checked) {
-          str += formElem.name + '=' + encodeURI(formElem.value) + '&'
+          s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+          str += formElem.name + '=' + encodeURIComponent(formElem.value) + '&'
         }
         break;
         
@@ -95,10 +103,12 @@ fleegix.form.serialize = function(docForm, formatOpts) {
               str = str.substr(0, str.length - 1);
             }
             // Append value as comma-delimited string
-            str += ',' + encodeURI(formElem.value);
+            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+            str += ',' + encodeURIComponent(s);
           }
           else {
-            str += formElem.name + '=' + encodeURI(formElem.value);
+            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+            str += formElem.name + '=' + encodeURIComponent(s);
           }
           str += '&';
           lastElemName = formElem.name;

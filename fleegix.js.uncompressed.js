@@ -17,6 +17,51 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 
+fleegix.json = new function() {
+  this.serialize = function(obj) {
+    var str = '';
+    switch (typeof obj) {
+      case 'object':
+        // Arrays
+        if (obj instanceof Array) {
+          for (var i = 0; i < obj.length; i++) {
+            if (str) { str += ',' }
+            str += fleegix.json.serialize(obj[i]);
+          }
+          return '[' + str + ']';
+        }
+        // Objects
+        else if (typeof obj.toString != 'undefined') {
+          for (var i in obj) {
+            if (str) { str += ',' }
+            str += i + ':';
+            str += (obj[i] == undefined) ? 
+              'undefined' : fleegix.json.serialize(obj[i]); 
+          }
+          return '{' + str + '}';
+        }
+        return str;
+        break;
+      case 'unknown':
+      case 'undefined':
+      case 'function':
+        return 'undefined';
+        break;
+      case 'string':
+        str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
+          /\r/g, '').replace(/\n/g, '\\n') + '"';
+        return str;
+        break;
+      default:
+        return String(obj);
+        break;
+    }
+  };
+}
+
+fleegix.json.constructor = null;
+
+
 fleegix.xhr = new function() {
 
   // Properties
@@ -58,16 +103,16 @@ fleegix.xhr = new function() {
   
   // Methods
   // ================================
-  this.doGet = function(url, hand, format) {
-    this.url = url;
+  this.doGet = function(hand, url, format) {
     this.handleResp = hand;
+    this.url = url;
     this.responseFormat = format || 'text';
     return this.doReq();
   };
-  this.doPost = function(url, dataPayload, hand, format) {
+  this.doPost = function(hand, url, dataPayload, format) {
+    this.handleResp = hand;
     this.url = url;
     this.dataPayload = dataPayload;
-    this.handleResp = hand;
     this.responseFormat = format || 'text';
     this.method = 'POST';
     return this.doReq();
@@ -228,9 +273,12 @@ fleegix.form = {};
 fleegix.form.serialize = function(docForm, formatOpts) {
   
   var opts = formatOpts || {};
+  var s = '';
   var str = '';
   var formElem;
   var lastElemName = '';
+  var pat = null;
+  if (opts.stripTags) { pat = /<[^>]*>/g };
   
   for (i = 0; i < docForm.elements.length; i++) {
     formElem = docForm.elements[i];
@@ -242,7 +290,8 @@ fleegix.form.serialize = function(docForm, formatOpts) {
       case 'password':
       case 'textarea':
       case 'select-one':
-        str += formElem.name + '=' + encodeURI(formElem.value) + '&'
+        s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+        str += formElem.name + '=' + encodeURIComponent(s) + '&'
         break;
         
       // Multi-option select
@@ -253,15 +302,18 @@ fleegix.form.serialize = function(docForm, formatOpts) {
           if(currOpt.selected) {
             if (opts.collapseMulti) {
               if (isSet) {
-                str += ',' + encodeURI(currOpt.value);
+                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+                str += ',' + encodeURIComponent(s);
               }
               else {
-                str += formElem.name + '=' + encodeURI(currOpt.value);
+                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+                str += formElem.name + '=' + encodeURIComponent(s);
                 isSet = true;
               }
             }
             else {
-              str += formElem.name + '=' + encodeURI(currOpt.value) + '&';
+              s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
+              str += formElem.name + '=' + encodeURIComponent(currOpt.value) + '&';
             }
           }
         }
@@ -273,7 +325,8 @@ fleegix.form.serialize = function(docForm, formatOpts) {
       // Radio buttons
       case 'radio':
         if (formElem.checked) {
-          str += formElem.name + '=' + encodeURI(formElem.value) + '&'
+          s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+          str += formElem.name + '=' + encodeURIComponent(formElem.value) + '&'
         }
         break;
         
@@ -287,10 +340,12 @@ fleegix.form.serialize = function(docForm, formatOpts) {
               str = str.substr(0, str.length - 1);
             }
             // Append value as comma-delimited string
-            str += ',' + encodeURI(formElem.value);
+            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+            str += ',' + encodeURIComponent(s);
           }
           else {
-            str += formElem.name + '=' + encodeURI(formElem.value);
+            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
+            str += formElem.name + '=' + encodeURIComponent(s);
           }
           str += '&';
           lastElemName = formElem.name;

@@ -57,16 +57,16 @@ fleegix.xhr = new function() {
   
   // Methods
   // ================================
-  this.doGet = function(url, hand, format) {
-    this.url = url;
+  this.doGet = function(hand, url, format) {
     this.handleResp = hand;
+    this.url = url;
     this.responseFormat = format || 'text';
     return this.doReq();
   };
-  this.doPost = function(url, dataPayload, hand, format) {
+  this.doPost = function(hand, url, dataPayload, format) {
+    this.handleResp = hand;
     this.url = url;
     this.dataPayload = dataPayload;
-    this.handleResp = hand;
     this.responseFormat = format || 'text';
     this.method = 'POST';
     return this.doReq();
