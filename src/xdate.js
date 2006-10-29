@@ -21,8 +21,11 @@ fleegix.date.XDate = function() {
   var a = [];
   var dt = null;
    
+  if (!arguments.length) {
+    dt = new Date();
+  }
   // Use Date obj proxy for instantiation
-  if (arguments.length == 1) {
+  else if (arguments.length == 1) {
     if (typeof arguments[0] == 'string') {
       dt = new Date(arguments[0]);
     }
@@ -80,8 +83,7 @@ fleegix.date.XDate.prototype = {
   },
   setAttribute: function(unit, n) {
     if (isNaN(n)) { throw('Units must be a number.'); }
-    var dt = new Date(this.year, this.month, this.date,
-      this.hours, this.minutes, this.seconds, this.milliseconds);
+    var dt = new Date(this.year, this.month, this.date);
     var meth = unit == 'year' ? 'FullYear' : unit.substr(0, 1).toUpperCase() +
       unit.substr(1);
     dt['set' + meth](n);
@@ -115,8 +117,11 @@ fleegix.date.XDateTime = function() {
   var a = [];
   var dt = null;
    
+  if (!arguments.length) {
+    dt = new Date();
+  }
   // Use Date obj proxy for instantiation
-  if (arguments.length == 1) {
+  else if (arguments.length == 1) {
     if (typeof arguments[0] == 'string') {
       dt = new Date(arguments[0]);
     }
@@ -315,6 +320,15 @@ fleegix.date.XDateTime.prototype.setFromDateObjProxy = function(dt, fromUTC) {
   this.minutes = fromUTC ? dt.getUTCMinutes() : dt.getMinutes();
   this.seconds = fromUTC ? dt.getUTCSeconds() : dt.getSeconds();
   this.milliseconds = fromUTC ? dt.getUTCMilliseconds() : dt.getMilliseconds();
+};
+fleegix.date.XDateTime.prototype.setAttribute = function(unit, n) {
+  if (isNaN(n)) { throw('Units must be a number.'); }
+  var dt = new Date(this.year, this.month, this.date,
+    this.hours, this.minutes, this.seconds, this.milliseconds);
+  var meth = unit == 'year' ? 'FullYear' : unit.substr(0, 1).toUpperCase() +
+    unit.substr(1);
+  dt['set' + meth](n);
+  this.setFromDateObjProxy(dt);
 };
 fleegix.date.XDateTime.prototype.getUTCDateProxy = function() {
   var dt = new Date(Date.UTC(this.year, this.month, this.date, 
