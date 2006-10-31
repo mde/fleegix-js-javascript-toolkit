@@ -33,7 +33,7 @@ fleegix.json = new function() {
         else if (typeof obj.toString != 'undefined') {
           for (var i in obj) {
             if (str) { str += ',' }
-            str += i + ':';
+            str += '"' + i + '":';
             str += (obj[i] == undefined) ? 
               'undefined' : fleegix.json.serialize(obj[i]); 
           }
