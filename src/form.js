@@ -98,7 +98,7 @@ fleegix.form.serialize = function(docForm, formatOpts) {
         if (formElem.checked) {
           // Collapse multi-select into comma-separated list
           if (opts.collapseMulti && (formElem.name == lastElemName)) {
-            // Strip of end ampersand if there is one
+            // Strip off end ampersand if there is one
             if (str.lastIndexOf('&') == str.length-1) {
               str = str.substr(0, str.length - 1);
             }
@@ -121,4 +121,49 @@ fleegix.form.serialize = function(docForm, formatOpts) {
   str = str.substr(0, str.length - 1);
   return str;
 };
+
+fleegix.form.deserialize = function(form, str) {
+  var arr = str.split('&');
+  var d = {};
+  for (var i = 0; i < arr.length; i++) {
+    var pair = arr[i].split('=');
+    var name = pair[0];
+    var val = pair[1];
+    if (typeof d[name] == 'undefined') {
+      d[name] = val;
+    }
+    else {
+      if (!(d[name] instanceof Array)) {
+        var t = d[name];
+        d[name] = [];
+        d[name].push(t);
+      }
+      d[name].push(val);
+    }
+  }
+  for (var i = 0; i < form.elements.length; i++) {
+    elem = form.elements[i];
+    if (typeof d[elem.name] != 'undefined') {
+      val = d[elem.name];
+      switch (elem.type) {
+        case 'text':
+          elem.value = decodeURIComponent(val);
+          break;
+        case 'radio':
+          if (encodeURIComponent(elem.value) == val) {
+            elem.checked = true; 
+          }
+          break;
+        case 'checkbox':
+          for (var j = 0; j < val.length; j++) {
+            if (encodeURIComponent(elem.value) == val[j]) {
+              elem.checked = true; 
+            }
+          }
+          break;
+      }
+    }
+  }
+  return form;
+}
 
