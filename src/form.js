@@ -54,7 +54,9 @@ fleegix.form.serialize = function(docForm, formatOpts) {
       case 'textarea':
       case 'select-one':
         s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-        str += formElem.name + '=' + encodeURIComponent(s) + '&'
+        if (s) {
+          str += formElem.name + '=' + encodeURIComponent(s) + '&'
+        }
         break;
         
       // Multi-option select
@@ -122,7 +124,7 @@ fleegix.form.serialize = function(docForm, formatOpts) {
   return str;
 };
 
-fleegix.form.deserialize = function(form, str) {
+fleegix.form.restore = function(form, str) {
   var arr = str.split('&');
   var d = {};
   for (var i = 0; i < arr.length; i++) {
@@ -147,6 +149,10 @@ fleegix.form.deserialize = function(form, str) {
       val = d[elem.name];
       switch (elem.type) {
         case 'text':
+          case 'hidden':
+          case 'password':
+          case 'textarea':
+          case 'select-one':
           elem.value = decodeURIComponent(val);
           break;
         case 'radio':
@@ -158,6 +164,16 @@ fleegix.form.deserialize = function(form, str) {
           for (var j = 0; j < val.length; j++) {
             if (encodeURIComponent(elem.value) == val[j]) {
               elem.checked = true; 
+            }
+          }
+          break;
+        case 'select-multiple':
+          for (var h = 0; h < elem.options.length; h++) {
+            var opt = elem.options[h];
+            for (var j = 0; j < val.length; j++) {
+              if (encodeURIComponent(opt.value) == val[j]) {
+                opt.selected = true; 
+              }
             }
           }
           break;
