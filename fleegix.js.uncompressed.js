@@ -17,304 +17,6 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 
-if (typeof fleegix.date == 'undefined') { fleegix.date = {}; }
-fleegix.date.timezone = new function() {
-  
-  this.zoneAreas = { AFRICA: 'africa', ANTARCTICA: 'antarctica', 
-    ASIA: 'asia', AUSTRALASIA: 'australasia', BACKWARD: 'backward', 
-    ETCETERA: 'etcetera', EUROPE: 'europe', NORTHAMERICA: 'northamerica', 
-    PACIFICNEW: 'pacificnew', SOUTHAMERICA: 'southamerica', 
-    SYSTEMV: 'systemv' };
-  
-  var self = this;
-  var monthMap = { 'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3,'may': 4, 'jun': 5, 
-    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11 } 
-  var dayMap = {'sun': 0,'mon' :1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6 }
-  var zoneKeys = {
-    'Africa': this.zoneAreas.AFRICA,
-    'Indian': this.zoneAreas.AFRICA,
-    'Antarctica': this.zoneAreas.ANTARCTICA,
-    'Asia': this.zoneAreas.ASIA,
-    'Pacific': this.zoneAreas.AUSTRALASIA,
-    'Australia': this.zoneAreas.AUSTRALASIA,
-    'Etc': this.zoneAreas.ETCETERA,
-    'EST': this.zoneAreas.NORTHAMERICA,
-    'MST': this.zoneAreas.NORTHAMERICA,
-    'HST':this.zoneAreas.NORTHAMERICA,
-    'EST5EDT': this.zoneAreas.NORTHAMERICA,
-    'CST6CDT': this.zoneAreas.NORTHAMERICA,
-    'MST7MDT': this.zoneAreas.NORTHAMERICA,
-    'PST8PDT': this.zoneAreas.NORTHAMERICA,
-    'America': function() {
-      var ret = [];
-      if (!this.loadedZoneAreas[this.zoneAreas.NORTHAMERICA]) {
-        ret.push(this.zoneAreas.NORTHAMERICA);
-      }
-      if (!this.loadedZoneAreas[this.zoneAreas.SOUTHAMERICA]) {
-        ret.push(this.zoneAreas.SOUTHAMERICA);
-      u}
-      return ret;
-    },
-    'WET': this.zoneAreas.EUROPE,
-    'CET': this.zoneAreas.EUROPE,
-    'MET': this.zoneAreas.EUROPE,
-    'EET': this.zoneAreas.EUROPE,
-    'Europe': this.zoneAreas.EUROPE,
-    'SystemV': this.zoneAreas.SYSTEMV
-  };
-  var zoneExceptions = {
-    'Pacific/Honolulu': this.zoneAreas.NORTHAMERICA,
-    'Pacific/Easter': this.zoneAreas.SOUTHAMERICA,
-    'Pacific/Galapagos': this.zoneAreas.SOUTHAMERICA,
-    'America/Danmarkshavn': this.zoneAreas.EUROPE,
-    'America/Scoresbysund': this.zoneAreas.EUROPE,
-    'America/Godthab': this.zoneAreas.EUROPE,
-    'America/Thule': this.zoneAreas.EUROPE,
-    'Indian/Kerguelen': this.zoneAreas.ANTARCTICA,
-    'Indian/Chagos': this.zoneAreas.ASIA,
-    'Indian/Maldives': this.zoneAreas.ASIA,
-    'Indian/Christmas': this.zoneAreas.AUSTRALASIA,
-    'Indian/Cocos': this.zoneAreas.AUSTRALASIA,
-    'Europe/Nicosia': this.zoneAreas.ASIA,
-    'Pacific/Easter': this.zoneAreas.SOUTHAMERICA,
-    'Africa/Ceuta': this.zoneAreas.EUROPE,
-    'Asia/Yekaterinburg': this.zoneAreas.EUROPE,
-    'Asia/Omsk': this.zoneAreas.EUROPE,
-    'Asia/Novosibirsk': this.zoneAreas.EUROPE,
-    'Asia/Krasnoyarsk': this.zoneAreas.EUROPE,
-    'Asia/Irkutsk': this.zoneAreas.EUROPE,
-    'Asia/Yakutsk': this.zoneAreas.EUROPE,
-    'Asia/Vladivostok': this.zoneAreas.EUROPE,
-    'Asia/Sakhalin': this.zoneAreas.EUROPE,
-    'Asia/Magadan': this.zoneAreas.EUROPE,
-    'Asia/Kamchatka': this.zoneAreas.EUROPE,
-    'Asia/Anadyr': this.zoneAreas.EUROPE,
-    'Asia/Istanbul': this.zoneAreas.EUROPE
-  };
-  var loadedZoneAreas = {};
-  
-  function parseTimeString(str) {
-    var pat = /(\d+)(?::0*(\d*))?(?::0*(\d*))?([wsugz])?$/;
-    var hms = str.match(pat);
-    hms[1] = parseInt(hms[1]);
-    hms[2] = hms[2] ? parseInt(hms[2]) : 0;
-    hms[3] = hms[3] ? parseInt(hms[3]) : 0;
-    return hms;
-  }
-  function getZone(dt, tz) {
-    var timezone = tz;
-    var zones = self.zones[timezone];
-    while (typeof(zones) == "string") {
-      timezone = zones;
-      zones = self.zones[timezone];
-      if (!zones) {
-        alert('Cannot figure out the timezone ' + timezone);
-      }
-    }
-    for(var i = 0; i < zones.length; i++) {
-      var z = zones[i];
-      if (!z[3]) { break; }
-      var yea = parseInt(z[3]);
-      var mon = 11;
-      var dat = 31;
-      if (z[4]) {
-        mon = monthMap[z[4].substr(0, 3).toLowerCase()];
-        dat = parseInt(z[5]);
-      }
-      var t = z[6] ? z[6] : '23:59:59';
-      t = parseTimeString(t);
-      var d = Date.UTC(yea, mon, dat, t[1], t[2], t[3]);
-      if (dt.getTime() < d) { break; }
-    }
-    if (i == zones.length) {
-       alert('No DST for ' + timezone); 
-    }
-    // Get basic offset
-    else {
-      return zones[i]; 
-    }
-    
-  }
-  function getBasicOffset(z) {
-    var off = parseTimeString(z[0]);
-    var adj = z[0].indexOf('-') == 0 ? -1 : 1
-    off = adj * (((off[1] * 60 + off[2]) *60 + off[3]) * 1000);
-    return -off/60/1000;
-  }
-  function getRule(dt, str) {
-    var currRule = null;
-    var year = dt.getUTCFullYear();
-    var rules = self.rules[str];
-    var ruleHits = [];
-    if (!rules) { return null; }
-    for (var i = 0; i < rules.length; i++) {
-      r = rules[i];
-      if ((r[1] < (year - 1)) || 
-        (r[0] < (year - 1) && r[1] == 'only') ||
-        (r[0] > year)) { 
-        continue; 
-      };
-      var mon = monthMap[r[3].substr(0, 3).toLowerCase()];
-      var day = r[4];
-      
-      if (isNaN(day)) {
-        if (day.substr(0, 4) == 'last') {
-          var day = dayMap[day.substr(4,3).toLowerCase()];
-          var t = parseTimeString(r[5]);
-          // Last day of the month at the desired time of day
-          var d = new Date(Date.UTC(dt.getUTCFullYear(), mon+1, 1, t[1]-24, t[2], t[3]));
-          var dtDay = d.getUTCDay();
-          var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
-          // Set it to the final day of the correct weekday that month
-          d.setUTCDate(d.getUTCDate() + diff);
-          if (dt < d) {
-            // If no match found, check the previous year if rule allows
-            if (r[0] < year) {
-              d.setUTCFullYear(d.getUTCFullYear()-1);
-              if (dt >= d) {
-                ruleHits.push({ 'rule': r, 'date': d });
-              }
-            }
-          }
-          else {
-            ruleHits.push({ 'rule': r, 'date': d });
-          }
-        }
-        else {
-          day = dayMap[day.substr(0, 3).toLowerCase()];
-          if (day != 'undefined') {
-            if(r[4].substr(3, 2) == '>=') {
-              var t = parseTimeString(r[5]);
-              // The stated date of the month
-              var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, 
-                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
-              var dtDay = d.getUTCDay();
-              var diff = (day < dtDay) ? (day - dtDay + 7) : (day - dtDay);
-              // Set to the first correct weekday after the stated date
-              d.setUTCDate(d.getUTCDate() + diff);
-              if (dt < d) {
-                // If no match found, check the previous year if rule allows
-                if (r[0] < year) {
-                  d.setUTCFullYear(d.getUTCFullYear()-1);
-                  if (dt >= d) {
-                    ruleHits.push({ 'rule': r, 'date': d });
-                  }
-                }
-              }
-              else {
-                ruleHits.push({ 'rule': r, 'date': d });
-              }
-            }
-            else if (day.substr(3, 2) == '<=') {
-              var t = parseTimeString(r[5]);
-              // The stated date of the month
-              var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, 
-                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
-              var dtDay = d.getUTCDay();
-              var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
-              // Set to first correct weekday before the stated date
-              d.setUTCDate(d.getUTCDate() + diff);
-              if (dt < d) {
-                // If no match found, check the previous year if rule allows
-                if (r[0] < year) {
-                  d.setUTCFullYear(d.getUTCFullYear()-1);
-                  if (dt >= d) {
-                    ruleHits.push({ 'rule': r, 'date': d });
-                  }
-                }
-              }
-              else {
-                ruleHits.push({ 'rule': r, 'date': d });
-              }
-            }
-          }
-        }
-      }
-      else {
-        var t = parseTimeString(r[5]);
-        var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, day, t[1], t[2], t[3]));
-        d.setUTCHours(d.getUTCHours() - 24*((7 - day + d.getUTCDay()) % 7));
-        if (dt < d) { 
-          continue; 
-        }
-        else {
-          ruleHits.push({ 'rule': r, 'date': d });
-        }
-      }
-    }
-    f = function(a, b) { return (a.date.getTime() >= b.date.getTime()) ?  1 : -1; }
-    ruleHits.sort(f);
-    currRule = ruleHits.pop().rule;
-    return currRule;
-  }
-  function getAdjustedOffset(off, rule) {
-    var save = rule[6];
-    var t = parseTimeString(save);
-    var adj = save.indexOf('-') == 0 ? -1 : 1;
-    var ret = (adj*(((t[1] *60 + t[2]) * 60 + t[3]) * 1000));
-    ret = ret/60/1000;
-    ret -= off
-    ret = -Math.ceil(ret);
-    return ret;
-  }
-  
-  this.defaultZoneArea = this.zoneAreas.NORTHAMERICA;
-  this.zones = {};
-  this.rules = {};
-  this.parseZones = function(str) {
-    var s = '';
-    var lines = str.split('\n');
-    var arr = [];
-    var chunk = '';
-    var zone = null;
-    var rule = null;
-    for (var i = 0; i < lines.length; i++) {
-      l = lines[i];
-      if (l.match(/^\s/)) {
-        l = "Zone " + zone + l;
-      }
-      l = l.split("#")[0];
-      if (l.length > 3) {
-        arr = l.split(/\s+/);
-        chunk = arr.shift();
-        switch(chunk) {
-          case 'Zone':
-            zone = arr.shift();
-            if (!self.zones[zone]) { self.zones[zone] = [] }
-            self.zones[zone].push(arr);
-            break;
-          case 'Rule':
-            rule = arr.shift();
-            if (!self.rules[rule]) { self.rules[rule] = [] }
-            self.rules[rule].push(arr);
-            break;
-          case 'Link':
-            // Shouldn't exist
-            if (self.zones[arr[1]]) { alert('Error with Link ' + arr[1]); }
-            self.zones[arr[1]] = arr[0];
-            break;
-          case 'Leap':
-            break;
-          default:
-            // Fail silently
-            break;
-        }
-      }
-    }
-    return true;
-  };
-  this.getOffset = function(dt, tz) {
-    var zone = getZone(dt, tz);
-    var off = getBasicOffset(zone);
-    var rule = getRule(dt, zone[1]);
-    if (rule) {
-      off = getAdjustedOffset(off, rule);
-    }
-    return off;
-  }
-}
-
-
 fleegix.json = new function() {
   this.serialize = function(obj) {
     var str = '';
@@ -362,6 +64,828 @@ fleegix.json = new function() {
 }
 
 fleegix.json.constructor = null;
+
+
+fleegix.xml = new function(){
+    
+    var self = this;
+    
+    // Takes an array of XML items, transforms into an array of JS objects
+    // Call it like this: res = fleegix.xml.parse(xml, 'Item'); 
+    this.parse = function(xmlDocElem, tagItemName) {
+        var xmlElemArray = new Array;
+        var xmlElemRow;
+        var objArray = [];
+        
+        // Rows returned
+        if (xmlDocElem.hasChildNodes()) {
+            xmlElemArray = xmlDocElem.getElementsByTagName(tagItemName);
+            xmlElemRow = xmlElemArray[0];
+            // Create array of objects and set properties
+            for (var j = 0; j < xmlElemArray.length; j++) {
+                xmlElemRow = xmlElemArray[j];
+                objArray[j] = self.xmlElem2Obj(xmlElemArray[j]);
+            }
+        }
+        return objArray;
+    };
+    
+    // Transforms an XML element into a JS object
+    this.xmlElem2Obj = function(xmlElem) {
+        var ret = new Object();
+        self.setPropertiesRecursive(ret, xmlElem);
+        return ret;
+    };
+    
+    this.setPropertiesRecursive = function(obj, node) {
+        if (node.childNodes.length > 0) {
+            for (var i = 0; i < node.childNodes.length; i++) {
+                if (node.childNodes[i].nodeType == 1 &&
+                  node.childNodes[i].firstChild) {
+                    // If node has only one child
+                    // set the obj property to the value of the node
+                    if(node.childNodes[i].childNodes.length == 1) {
+                        obj[node.childNodes[i].tagName] = 
+                        node.childNodes[i].firstChild.nodeValue;
+                    }
+                    // Otherwise this obj property is an array
+                    // Recurse to set its multiple properties
+                    else {
+                        obj[node.childNodes[i].tagName] = [];
+                        // Call recursively -- rinse and repeat
+                        // ==============
+                        self.setPropertiesRecursive(
+                        obj[node.childNodes[i].tagName], 
+                        node.childNodes[i]);
+                    }
+                }
+            }
+        }
+    };
+    
+    this.cleanXMLObjText = function(xmlObj) {
+        var cleanObj = xmlObj;
+        for (var prop in cleanObj) {
+            cleanObj[prop] = cleanText(cleanObj[prop]);
+        }
+        return cleanObj;
+    };
+    
+    this.cleanText = function(str) {
+        var ret = str;
+        ret = ret.replace(/\n/g, '');
+        ret = ret.replace(/\r/g, '');
+        ret = ret.replace(/\'/g, "\\'");
+        ret = ret.replace(/\[CDATA\[/g, '');
+        ret = ret.replace(/\]]/g, '');
+        return ret;
+    };
+    
+    this.rendered2Source = function(str) {
+        // =============
+        // Convert string of markup into format which will display
+        // markup in the browser instead of rendering it
+        // =============
+        var proc = str;    
+        proc = proc.replace(/</g, '&lt;');
+        proc = proc.replace(/>/g, '&gt;');
+        return '<pre>' + proc + '</pre>';
+    };
+    
+    /*
+    Works with embedded XML document structured like this:
+    =====================
+    <div id="xmlThingDiv" style="display:none;">
+        <xml>
+            <thinglist>
+                <thingsection sectionname="First Section o' Stuff">
+                    <thingitem>
+                        <thingproperty1>Foo</thingproperty1>
+                        <thingproperty2>Bar</thingproperty2>
+                        <thingproperty3>
+                            <![CDATA[Blah blah ...]]>
+                        </thingproperty3>
+                    </thingitem>
+                    <thingitem>
+                        <thingproperty1>Free</thingproperty1>
+                        <thingproperty2>Beer</thingproperty2>
+                        <thingproperty3>
+                            <![CDATA[Blah blah ...]]>
+                        </thingproperty3>
+                    </thingitem>
+                </thingsection> 
+                <thingsection sectionname="Second Section o' Stuff">
+                    <thingitem>
+                        <thingproperty1>Far</thingproperty1>
+                        <thingproperty2>Boor</thingproperty2>
+                        <thingproperty3>
+                            <![CDATA[Blah blah ...]]>
+                        </thingproperty3>
+                    </thingitem>
+                </thingsection>
+            </thinglist>
+        </xml>
+    </div>
+    
+    Call the function like this:
+    var xmlElem = getXMLDocElem('xmlThingDiv', 'thinglist');
+    --------
+    xmlDivId: For IE to pull using documentElement
+    xmlNodeName: For Moz/compat to pull using getElementsByTagName
+    */
+    
+    // Returns a single, top-level XML document node
+    this.getXMLDocElem = function(xmlDivId, xmlNodeName) {
+        var xmlElemArray = [];
+        var xmlDocElem = null;
+        if (document.all) {
+                var xmlStr = document.getElementById(xmlDivId).innerHTML;
+                var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+                xmlDoc.loadXML(xmlStr);    
+                xmlDocElem = xmlDoc.documentElement;
+          }
+          // Moz/compat can access elements directly
+          else {
+            xmlElemArray = 
+                window.document.body.getElementsByTagName(xmlNodeName);
+            xmlDocElem = xmlElemArray[0]; ;
+          }
+          return xmlDocElem;
+    };
+}
+fleegix.xml.constructor = null;
+
+fleegix.xhr = new function() {
+
+  // Properties
+  // ================================
+  this.req = null;
+  this.reqId = 0;
+  this.url = null;
+  this.status = null;
+  this.statusText = '';
+  this.method = 'GET';
+  this.async = true;
+  this.dataPayload = null;
+  this.readyState = null;
+  this.responseText = null;
+  this.responseXML = null;
+  this.handleResp = null;
+  this.responseFormat = 'text', // 'text', 'xml', 'object'
+  this.mimeType = null;
+  this.username = '';
+  this.password = '';
+  this.headers = [];
+  
+  var i = 0;
+  var reqTry = [ 
+    function() { return new XMLHttpRequest(); },
+    function() { return new ActiveXObject('Msxml2.XMLHTTP') },
+    function() { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
+  
+  while (!this.req && (i < reqTry.length)) {
+    try { this.req = reqTry[i++](); } 
+    catch(e) {}
+  }
+  if (this.req) {
+    this.reqId = 0;
+  }
+  else {
+    alert('Could not create XMLHttpRequest object.');
+  }
+  
+  // Methods
+  // ================================
+  this.doGet = function(hand, url, format) {
+    this.handleResp = hand;
+    this.url = url;
+    this.responseFormat = format || 'text';
+    return this.doReq();
+  };
+  this.doPost = function(hand, url, dataPayload, format) {
+    this.handleResp = hand;
+    this.url = url;
+    this.dataPayload = dataPayload;
+    this.responseFormat = format || 'text';
+    this.method = 'POST';
+    return this.doReq();
+  };
+  this.doReq = function() {
+    var self = null;
+    var req = null;
+    var id = null;
+    var headArr = [];
+     
+    req = this.req;
+    this.reqId++;
+    id = this.reqId;
+    // Set up the request
+    // ==========================
+    if (this.username && this.password) {
+      req.open(this.method, this.url, this.async, this.username, this.password);
+    }
+    else {
+      req.open(this.method, this.url, this.async);
+    }
+    // Override MIME type if necessary for Mozilla/Firefox & Safari
+    if (this.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
+      req.overrideMimeType(this.mimeType);
+    }
+    
+    // Add any custom headers that are defined
+    if (this.headers.length) {
+      // Set any custom headers
+      for (var i = 0; i < this.headers.length; i++) {
+        headArr = this.headers[i].split(': ');
+        req.setRequestHeader(headArr[i], headArr[1]);
+      }
+      this.headers = [];
+    }
+    // Otherwise set correct content-type for POST
+    else {
+      if (this.method == 'POST') {
+        req.setRequestHeader('Content-Type', 
+          'application/x-www-form-urlencoded');
+      }
+    }
+    
+    self = this; // Fix loss-of-scope in inner function
+    req.onreadystatechange = function() {
+      var resp = null;
+      self.readyState = req.readyState;
+      if (req.readyState == 4) {
+        
+        // Make these properties available to the Ajax object
+        self.status = req.status;
+        self.statusText = req.statusText;
+        self.responseText = req.responseText;
+        self.responseXML = req.responseXML;
+        
+        // Set the response according to the desired format
+        switch(self.responseFormat) {
+          // Text
+          case 'text':
+            resp = self.responseText;
+            break;
+          // XML
+          case 'xml':
+            resp = self.responseXML;
+            break;
+          // The object itself
+          case 'object':
+            resp = req;
+            break;
+        }
+        
+        // Request is successful -- pass off to response handler
+        if (self.status > 199 && self.status < 300) {
+          if (self.async) {
+              // Make sure handler is defined
+              if (!self.handleResp) {
+                alert('No response handler defined ' +
+                  'for this XMLHttpRequest object.');
+                return;
+              }
+              else {
+                self.handleResp(resp, id);
+              }
+          }
+        }
+        // Request fails -- pass to error handler
+        else {
+          self.handleErr(resp);
+        }
+      }
+    }
+    // Send the request, along with any data for POSTing
+    // ==========================
+    req.send(this.dataPayload);
+    if (this.async) {
+        return id;
+    }
+    else {
+        return req;
+    }
+  };
+  this.abort = function() {
+    if (this.req) {
+      this.req.onreadystatechange = function() { };
+      this.req.abort();
+      this.req = null;
+    }
+  };
+  this.handleErr = function() {
+    var errorWin;
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = this.responseText;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
+  };
+  this.setMimeType = function(mimeType) {
+    this.mimeType = mimeType;
+  };
+  this.setHandlerResp = function(funcRef) {
+    this.handleResp = funcRef;
+  };
+  this.setHandlerErr = function(funcRef) {
+    this.handleErr = funcRef; 
+  };
+  this.setHandlerBoth = function(funcRef) {
+    this.handleResp = funcRef;
+    this.handleErr = funcRef;
+  };
+  this.setRequestHeader = function(headerName, headerValue) {
+    this.headers.push(headerName + ': ' + headerValue);
+  };
+}
+
+fleegix.xhr.constructor = null;
+
+
+
+/**
+ * Serializes the data from all the inputs in a Web form
+ * into a query-string style string.
+ * @param docForm -- Reference to a DOM node of the form element
+ * @param formatOpts -- JS object of options for how to format
+ * the return string. Supported options:
+ *    collapseMulti: (Boolean) take values from elements that
+ *    can return multiple values (multi-select, checkbox groups)
+ *    and collapse into a single, comman-delimited value
+ *    (e.g., thisVar=asdf,qwer,zxcv)
+ * @returns query-string style String of variable-value pairs
+ */
+fleegix.form = {};
+fleegix.form.serialize = function (f, o) {
+  var h = fleegix.form.toHash(f);
+  var opts = o || {};
+  var str = '';
+  var pat = null;
+
+  if (opts.stripTags) { pat = /<[^>]*>/g; }
+  for (var n in h) {
+    var s = '';
+    var v = h[n];
+    if (v) {
+      // Single val -- string
+      if (typeof v == 'string') {
+        s = opts.stripTags ? v.replace(pat, '') : v;
+        str += n + '=' + encodeURIComponent(s);
+      }
+      // Multiple vals -- array
+      else {
+        var sep = ''; 
+        if (opts.collapseMulti) {
+          sep = ',';
+          str += n + '=';
+        }
+        else {
+          sep = '&';
+        }
+        for (var j = 0; j < v.length; j++) {
+          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) : 
+            encodeURIComponent(s);
+          str += s + sep;
+        }
+        str = str.substr(0, str.length - 1);
+      }
+      str += '&'
+    }
+    else {
+      if (opts.includeEmpty) { str += n + '=&'; }
+    }
+  }
+  str = str.substr(0, str.length - 1);
+  return str;
+};
+
+fleegix.form.toHash = function (f) { 
+  var h = {};
+  
+  function expandToArr(orig, val) {
+    if (orig) {
+      var r = null;
+      if (typeof orig == 'string') {
+        r = [];
+        r.push(orig);
+      }
+      else {
+        r = orig;
+      }
+      r.push(val);
+      return r;
+    }
+    else {
+      return val;
+    }
+  }
+  
+  for (i = 0; i < f.elements.length; i++) {
+    elem = f.elements[i];
+    
+    switch (elem.type) {
+      // Text fields, hidden form elements
+      case 'text':
+      case 'hidden':
+      case 'password':
+      case 'textarea':
+      case 'select-one':
+        h[elem.name] = elem.value;
+        break;
+        
+      // Multi-option select
+      case 'select-multiple':
+        h[elem.name] = null;
+        for(var j = 0; j < elem.options.length; j++) {
+          var o = elem.options[j];
+          if(o.selected) {
+            h[elem.name] = expandToArr(h[elem.name], o.value);
+          }
+        }
+        break;
+      
+      // Radio buttons
+      case 'radio':
+        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (elem.checked) {
+          h[elem.name] = elem.value; 
+        }
+        break;
+        
+      // Checkboxes
+      case 'checkbox':
+        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (elem.checked) {
+          h[elem.name] = expandToArr(h[elem.name], elem.value);
+        }
+        break;
+        
+    }
+  }
+  return h;
+};
+
+fleegix.form.restore = function (form, str) {
+  var arr = str.split('&');
+  var d = {};
+  for (var i = 0; i < arr.length; i++) {
+    var pair = arr[i].split('=');
+    var name = pair[0];
+    var val = pair[1];
+    if (typeof d[name] == 'undefined') {
+      d[name] = val;
+    }
+    else {
+      if (!(d[name] instanceof Array)) {
+        var t = d[name];
+        d[name] = [];
+        d[name].push(t);
+      }
+      d[name].push(val);
+    }
+  }
+  for (var i = 0; i < form.elements.length; i++) {
+    elem = form.elements[i];
+    if (typeof d[elem.name] != 'undefined') {
+      val = d[elem.name];
+      switch (elem.type) {
+        case 'text':
+          case 'hidden':
+          case 'password':
+          case 'textarea':
+          case 'select-one':
+          elem.value = decodeURIComponent(val);
+          break;
+        case 'radio':
+          if (encodeURIComponent(elem.value) == val) {
+            elem.checked = true; 
+          }
+          break;
+        case 'checkbox':
+          for (var j = 0; j < val.length; j++) {
+            if (encodeURIComponent(elem.value) == val[j]) {
+              elem.checked = true; 
+            }
+          }
+          break;
+        case 'select-multiple':
+          for (var h = 0; h < elem.options.length; h++) {
+            var opt = elem.options[h];
+            for (var j = 0; j < val.length; j++) {
+              if (encodeURIComponent(opt.value) == val[j]) {
+                opt.selected = true; 
+              }
+            }
+          }
+          break;
+      }
+    }
+  }
+  return form;
+};
+
+fleegix.form.diff = function (formA, formB) {
+  hA = fleegix.form.toHash(formA);
+  hB = fleegix.form.toHash(formB);
+  var diff = [];
+
+  for (n in hA) {
+    // Elem doesn't exist in B
+    if (typeof hB[n] == 'undefined') {
+      diff.push(n);
+    }
+    // Elem exists in both
+    else {
+      v = hA[n];
+      // Multi-value -- array
+      if (v instanceof Array) {
+        if (hB[n].toString() != v.toString()) {
+          diff.push(n);
+        }
+      }
+      // Single value -- null or string
+      else {
+        if (hB[n] != v) {
+          diff.push(n);
+        }
+      }
+    }
+  }
+  return diff;
+}
+
+
+
+
+
+
+
+
+
+
+fleegix.popup = new function() {
+  
+  var self = this;
+  
+  this.win = null;
+  this.open = function(url, optParam) {
+    var opts = optParam || {}
+    var str = '';
+    var propList = {
+      'width':'', 
+      'height':'', 
+      'location':0, 
+      'menubar':0, 
+      'resizable':1, 
+      'scrollbars':0,
+      'status':0,
+      'titlebar':1,
+      'toolbar':0
+      };
+    for (var prop in propList) {
+      str += prop + '=';
+      str += opts[prop] ? opts[prop] : propList[prop];
+      str += ',';
+    }
+    var len = str.length;
+    if (len) {
+      str = str.substr(0, len-1);
+    }
+    if(!self.win || self.win.closed) {
+      self.win = null;  
+      self.win = window.open(url, 'thePopupWin', str);
+    }
+    else {	  
+      self.win.focus(); 
+      self.win.document.location = url;
+    }
+  };
+  this.close = function() {
+    if (self.win) {
+    self.win.window.close();
+    self.win = null;
+    }
+  };
+  this.goURLMainWin = function(url) {
+    location = url;
+    self.close();
+  };
+}
+fleegix.popup.constructor = null;
+
+
+
+
+fleegix.event = new function() {
+  
+  // List of handlers for event listeners
+  var listenerCache = [];
+  // List of channels being published to
+  var channels = {};
+  
+  this.listen = function() {
+    var tgtObj = arguments[0]; // Target object for the new listener
+    var tgtMeth = arguments[1]; // Method to listen for
+    // Look to see if there's already a registry of listeners
+    var listenReg = tgtObj[tgtMeth] ? 
+      tgtObj[tgtMeth].listenReg : null;
+    
+    // Create the registry of listeners if need be
+    // -----------------
+    if (!listenReg) {
+      listenReg = {};
+      // The original obj and method name 
+      listenReg.orig = {}
+      listenReg.orig.obj = tgtObj, 
+      listenReg.orig.methName = tgtMeth;
+      // Clone existing method code if it exists
+      if (tgtObj[tgtMeth]) {
+        listenReg.orig.methCode = 
+          eval(tgtObj[tgtMeth].valueOf());
+      }
+      // Array of handlers to execute if the method fires
+      listenReg.after = [];
+      // Replace the original method with the exec proxy
+      tgtObj[tgtMeth] = function() {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        fleegix.event.exec(
+          tgtObj[tgtMeth].listenReg, args);
+      }
+      tgtObj[tgtMeth].listenReg = listenReg;
+      // Add to global cache -- so we can remove listeners
+      // on unload to avoid memleak in IE6
+      listenerCache.push(tgtObj[tgtMeth].listenReg);
+    }
+    
+    // Add the new handler to the listener registry
+    // -----------------
+    // Simple function
+    if (typeof arguments[2] == 'function') {
+      listenReg.after.push(arguments[2]);
+    }
+    // Object and method
+    else {
+      listenReg.after.push([arguments[2], arguments[3]]);
+    }
+    
+    tgtObj[tgtMeth].listenReg = listenReg;
+  };
+  this.exec = function(reg, args) {
+    // Execute the original code for the trigger
+    // method if there is any -- apply arguments
+    // passed in the right execution context
+    if (reg.orig.methCode) {
+      reg.orig.methCode.apply(reg.orig.obj, args);
+    }
+    if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
+      args[0] = args[0] || window.event;
+    }
+    
+    // Execute all the handler functions registered
+    for (var i = 0; i < reg.after.length; i++) {
+      var ex = reg.after[i];
+      // Single functions
+      if (ex.length == 0) {
+        var execFunction = ex;
+        execFunction(args);
+      }
+      // Methods of objects
+      else {
+        execObj = ex[0];
+        execMethod = ex[1];
+        // Pass args and exec in correct scope
+        execObj[execMethod].apply(execObj, args);
+      }
+    }
+  };
+  this.unlisten = function() {
+    var tgtObj = arguments[0]; // Obj from which to remove
+    var tgtMeth = arguments[1]; // Trigger method
+    var listenReg = tgtObj[tgtMeth] ? 
+      tgtObj[tgtMeth].listenReg : null;
+    var remove = null;
+    
+    // Bail out if no handlers
+    if (!listenReg) {
+      return false;
+    }
+    
+    // Simple function
+    // Remove the handler if it's in the list
+    for (var i = 0; i < listenReg.after.length; i++) {
+      var ex = listenReg.after[i];
+      if (typeof arguments[2] == 'function') {
+        if (ex == arguments[2]) {
+          listenReg.after.splice(i, 1);
+        }
+      }
+      // Object and method
+      else {
+        if (ex[0] == arguments[2] && ex[1] == 
+          arguments[3]) {
+          listenReg.after.splice(i, 1);
+        }
+      }
+    }
+     tgtObj[tgtMeth].listenReg = listenReg;
+  };
+  this.flush = function() {
+    // Remove all the registered listeners to avoid
+    // IE6 memleak
+    for (var i = 0; i < listenerCache.length; i++) {
+      var reg = listenerCache[i];
+      removeObj = reg.orig.obj;
+      removeMethod = reg.orig.methName;
+      removeObj[removeMethod] = null;
+    }
+  };
+  this.subscribe = function(subscr, obj, method) {
+    // Make sure there's an obj param
+    if (!obj) { return };
+    // Create the channel if it doesn't exist
+    if (!channels[subscr]) {
+      channels[subscr] = {};
+      channels[subscr].audience = [];
+    }
+    else {
+      // Remove any previous listener method for the obj
+      this.unsubscribe(subscr, obj);
+    }
+    // Add the object and its handler to the array
+    // for the channel
+    channels[subscr].audience.push([obj, method]);
+  };
+  this.unsubscribe = function(unsubscr, obj) {
+    // If not listener obj specified, kill the
+    // entire channel
+    if (!obj) {
+      channels[unsubscr] = null;
+    }
+    // Otherwise remove the object and its handler
+    // from the array for the channel
+    else {
+      if (channels[unsubscr]) {
+        var aud = channels[unsubscr].audience;
+        for (var i = 0; i < aud.length; i++) {
+          if (aud[i][0] == obj) {
+             aud.splice(i, 1); 
+          }
+        }
+      }
+    }
+  };
+  this.publish = function(pub, data) {
+    // Make sure the channel exists
+    if (channels[pub]) {
+      aud = channels[pub].audience;
+      // Pass the published data to all the 
+      // obj/methods listening to the channel
+      for (var i = 0; i < aud.length; i++) {
+        var listenerObject = aud[i][0];
+        var handlerMethod = aud[i][1];
+        listenerObject[handlerMethod](data);
+      }
+    }
+  };
+  this.getSrcElementId = function(e) {
+    var ret = null;
+    if (e.srcElement) ret = e.srcElement;
+    else if (e.target) ret = e.target;
+    // Avoid trying to use fake obj from IE on disabled
+    // form elements
+    if (typeof ret.id == 'undefined') {
+      return null;
+    }
+    // Look up the id of the elem or its parent
+    else {
+      // Look for something with an id -- not a text node
+      while (!ret.id || ret.nodeType == 3) {
+        // Bail if we run out of parents
+        if (ret.parentNode) {
+          ret = ret.parentNode;
+        }
+        else {
+          return null;
+        }
+      }
+    }
+    return ret.id;
+  };
+}
+fleegix.event.constructor = null;
+// Prevent memleak in IE6
+fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
 if (typeof fleegix.date == 'undefined') { fleegix.date = {}; }
@@ -712,348 +1236,6 @@ fleegix.date.XDateTime.prototype.jDNToAJD = function(jd, fr, of) {
 }
 
 
-fleegix.xml = new function(){
-    
-    var self = this;
-    
-    // Takes an array of XML items, transforms into an array of JS objects
-    // Call it like this: res = fleegix.xml.parse(xml, 'Item'); 
-    this.parse = function(xmlDocElem, tagItemName) {
-        var xmlElemArray = new Array;
-        var xmlElemRow;
-        var objArray = [];
-        
-        // Rows returned
-        if (xmlDocElem.hasChildNodes()) {
-            xmlElemArray = xmlDocElem.getElementsByTagName(tagItemName);
-            xmlElemRow = xmlElemArray[0];
-            // Create array of objects and set properties
-            for (var j = 0; j < xmlElemArray.length; j++) {
-                xmlElemRow = xmlElemArray[j];
-                objArray[j] = self.xmlElem2Obj(xmlElemArray[j]);
-            }
-        }
-        return objArray;
-    };
-    
-    // Transforms an XML element into a JS object
-    this.xmlElem2Obj = function(xmlElem) {
-        var ret = new Object();
-        self.setPropertiesRecursive(ret, xmlElem);
-        return ret;
-    };
-    
-    this.setPropertiesRecursive = function(obj, node) {
-        if (node.childNodes.length > 0) {
-            for (var i = 0; i < node.childNodes.length; i++) {
-                if (node.childNodes[i].nodeType == 1 &&
-                  node.childNodes[i].firstChild) {
-                    // If node has only one child
-                    // set the obj property to the value of the node
-                    if(node.childNodes[i].childNodes.length == 1) {
-                        obj[node.childNodes[i].tagName] = 
-                        node.childNodes[i].firstChild.nodeValue;
-                    }
-                    // Otherwise this obj property is an array
-                    // Recurse to set its multiple properties
-                    else {
-                        obj[node.childNodes[i].tagName] = [];
-                        // Call recursively -- rinse and repeat
-                        // ==============
-                        self.setPropertiesRecursive(
-                        obj[node.childNodes[i].tagName], 
-                        node.childNodes[i]);
-                    }
-                }
-            }
-        }
-    };
-    
-    this.cleanXMLObjText = function(xmlObj) {
-        var cleanObj = xmlObj;
-        for (var prop in cleanObj) {
-            cleanObj[prop] = cleanText(cleanObj[prop]);
-        }
-        return cleanObj;
-    };
-    
-    this.cleanText = function(str) {
-        var ret = str;
-        ret = ret.replace(/\n/g, '');
-        ret = ret.replace(/\r/g, '');
-        ret = ret.replace(/\'/g, "\\'");
-        ret = ret.replace(/\[CDATA\[/g, '');
-        ret = ret.replace(/\]]/g, '');
-        return ret;
-    };
-    
-    this.rendered2Source = function(str) {
-        // =============
-        // Convert string of markup into format which will display
-        // markup in the browser instead of rendering it
-        // =============
-        var proc = str;    
-        proc = proc.replace(/</g, '&lt;');
-        proc = proc.replace(/>/g, '&gt;');
-        return '<pre>' + proc + '</pre>';
-    };
-    
-    /*
-    Works with embedded XML document structured like this:
-    =====================
-    <div id="xmlThingDiv" style="display:none;">
-        <xml>
-            <thinglist>
-                <thingsection sectionname="First Section o' Stuff">
-                    <thingitem>
-                        <thingproperty1>Foo</thingproperty1>
-                        <thingproperty2>Bar</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                    <thingitem>
-                        <thingproperty1>Free</thingproperty1>
-                        <thingproperty2>Beer</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                </thingsection> 
-                <thingsection sectionname="Second Section o' Stuff">
-                    <thingitem>
-                        <thingproperty1>Far</thingproperty1>
-                        <thingproperty2>Boor</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                </thingsection>
-            </thinglist>
-        </xml>
-    </div>
-    
-    Call the function like this:
-    var xmlElem = getXMLDocElem('xmlThingDiv', 'thinglist');
-    --------
-    xmlDivId: For IE to pull using documentElement
-    xmlNodeName: For Moz/compat to pull using getElementsByTagName
-    */
-    
-    // Returns a single, top-level XML document node
-    this.getXMLDocElem = function(xmlDivId, xmlNodeName) {
-        var xmlElemArray = [];
-        var xmlDocElem = null;
-        if (document.all) {
-                var xmlStr = document.getElementById(xmlDivId).innerHTML;
-                var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-                xmlDoc.loadXML(xmlStr);    
-                xmlDocElem = xmlDoc.documentElement;
-          }
-          // Moz/compat can access elements directly
-          else {
-            xmlElemArray = 
-                window.document.body.getElementsByTagName(xmlNodeName);
-            xmlDocElem = xmlElemArray[0]; ;
-          }
-          return xmlDocElem;
-    };
-}
-fleegix.xml.constructor = null;
-
-fleegix.xhr = new function() {
-
-  // Properties
-  // ================================
-  this.req = null;
-  this.reqId = 0;
-  this.url = null;
-  this.status = null;
-  this.statusText = '';
-  this.method = 'GET';
-  this.async = true;
-  this.dataPayload = null;
-  this.readyState = null;
-  this.responseText = null;
-  this.responseXML = null;
-  this.handleResp = null;
-  this.responseFormat = 'text', // 'text', 'xml', 'object'
-  this.mimeType = null;
-  this.username = '';
-  this.password = '';
-  this.headers = [];
-  
-  var i = 0;
-  var reqTry = [ 
-    function() { return new XMLHttpRequest(); },
-    function() { return new ActiveXObject('Msxml2.XMLHTTP') },
-    function() { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
-  
-  while (!this.req && (i < reqTry.length)) {
-    try { this.req = reqTry[i++](); } 
-    catch(e) {}
-  }
-  if (this.req) {
-    this.reqId = 0;
-  }
-  else {
-    alert('Could not create XMLHttpRequest object.');
-  }
-  
-  // Methods
-  // ================================
-  this.doGet = function(hand, url, format) {
-    this.handleResp = hand;
-    this.url = url;
-    this.responseFormat = format || 'text';
-    return this.doReq();
-  };
-  this.doPost = function(hand, url, dataPayload, format) {
-    this.handleResp = hand;
-    this.url = url;
-    this.dataPayload = dataPayload;
-    this.responseFormat = format || 'text';
-    this.method = 'POST';
-    return this.doReq();
-  };
-  this.doReq = function() {
-    var self = null;
-    var req = null;
-    var id = null;
-    var headArr = [];
-     
-    req = this.req;
-    this.reqId++;
-    id = this.reqId;
-    // Set up the request
-    // ==========================
-    if (this.username && this.password) {
-      req.open(this.method, this.url, this.async, this.username, this.password);
-    }
-    else {
-      req.open(this.method, this.url, this.async);
-    }
-    // Override MIME type if necessary for Mozilla/Firefox & Safari
-    if (this.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
-      req.overrideMimeType(this.mimeType);
-    }
-    
-    // Add any custom headers that are defined
-    if (this.headers.length) {
-      // Set any custom headers
-      for (var i = 0; i < this.headers.length; i++) {
-        headArr = this.headers[i].split(': ');
-        req.setRequestHeader(headArr[i], headArr[1]);
-      }
-      this.headers = [];
-    }
-    // Otherwise set correct content-type for POST
-    else {
-      if (this.method == 'POST') {
-        req.setRequestHeader('Content-Type', 
-          'application/x-www-form-urlencoded');
-      }
-    }
-    
-    self = this; // Fix loss-of-scope in inner function
-    req.onreadystatechange = function() {
-      var resp = null;
-      self.readyState = req.readyState;
-      if (req.readyState == 4) {
-        
-        // Make these properties available to the Ajax object
-        self.status = req.status;
-        self.statusText = req.statusText;
-        self.responseText = req.responseText;
-        self.responseXML = req.responseXML;
-        
-        // Set the response according to the desired format
-        switch(self.responseFormat) {
-          // Text
-          case 'text':
-            resp = self.responseText;
-            break;
-          // XML
-          case 'xml':
-            resp = self.responseXML;
-            break;
-          // The object itself
-          case 'object':
-            resp = req;
-            break;
-        }
-        
-        // Request is successful -- pass off to response handler
-        if (self.status > 199 && self.status < 300) {
-          if (self.async) {
-              // Make sure handler is defined
-              if (!self.handleResp) {
-                alert('No response handler defined ' +
-                  'for this XMLHttpRequest object.');
-                return;
-              }
-              else {
-                self.handleResp(resp, id);
-              }
-          }
-        }
-        // Request fails -- pass to error handler
-        else {
-          self.handleErr(resp);
-        }
-      }
-    }
-    // Send the request, along with any data for POSTing
-    // ==========================
-    req.send(this.dataPayload);
-    if (this.async) {
-        return id;
-    }
-    else {
-        return req;
-    }
-  };
-  this.abort = function() {
-    if (this.req) {
-      this.req.onreadystatechange = function() { };
-      this.req.abort();
-      this.req = null;
-    }
-  };
-  this.handleErr = function() {
-    var errorWin;
-    // Create new window and display error
-    try {
-      errorWin = window.open('', 'errorWin');
-      errorWin.document.body.innerHTML = this.responseText;
-    }
-    // If pop-up gets blocked, inform user
-    catch(e) {
-      alert('An error occurred, but the error message cannot be' +
-      ' displayed because of your browser\'s pop-up blocker.\n' +
-      'Please allow pop-ups from this Web site.');
-    }
-  };
-  this.setMimeType = function(mimeType) {
-    this.mimeType = mimeType;
-  };
-  this.setHandlerResp = function(funcRef) {
-    this.handleResp = funcRef;
-  };
-  this.setHandlerErr = function(funcRef) {
-    this.handleErr = funcRef; 
-  };
-  this.setHandlerBoth = function(funcRef) {
-    this.handleResp = funcRef;
-    this.handleErr = funcRef;
-  };
-  this.setRequestHeader = function(headerName, headerValue) {
-    this.headers.push(headerName + ': ' + headerValue);
-  };
-}
-
-fleegix.xhr.constructor = null;
-
 fleegix.uri = new function() {
   var self = this;
   
@@ -1119,429 +1301,6 @@ fleegix.ui = new function() {
 };
 fleegix.ui.constructor = null;
 
-fleegix.popup = new function() {
-  
-  var self = this;
-  
-  this.win = null;
-  this.open = function(url, optParam) {
-    var opts = optParam || {}
-    var str = '';
-    var propList = {
-      'width':'', 
-      'height':'', 
-      'location':0, 
-      'menubar':0, 
-      'resizable':1, 
-      'scrollbars':0,
-      'status':0,
-      'titlebar':1,
-      'toolbar':0
-      };
-    for (var prop in propList) {
-      str += prop + '=';
-      str += opts[prop] ? opts[prop] : propList[prop];
-      str += ',';
-    }
-    var len = str.length;
-    if (len) {
-      str = str.substr(0, len-1);
-    }
-    if(!self.win || self.win.closed) {
-      self.win = null;  
-      self.win = window.open(url, 'thePopupWin', str);
-    }
-    else {	  
-      self.win.focus(); 
-      self.win.document.location = url;
-    }
-  };
-  this.close = function() {
-    if (self.win) {
-    self.win.window.close();
-    self.win = null;
-    }
-  };
-  this.goURLMainWin = function(url) {
-    location = url;
-    self.close();
-  };
-}
-fleegix.popup.constructor = null;
-
-
-
-/**
- * Serializes the data from all the inputs in a Web form
- * into a query-string style string.
- * @param docForm -- Reference to a DOM node of the form element
- * @param formatOpts -- JS object of options for how to format
- * the return string. Supported options:
- *    collapseMulti: (Boolean) take values from elements that
- *    can return multiple values (multi-select, checkbox groups)
- *    and collapse into a single, comman-delimited value
- *    (e.g., thisVar=asdf,qwer,zxcv)
- * @returns query-string style String of variable-value pairs
- */
-fleegix.form = {};
-fleegix.form.serialize = function(docForm, formatOpts) {
-  
-  var opts = formatOpts || {};
-  var s = '';
-  var str = '';
-  var formElem;
-  var lastElemName = '';
-  var pat = null;
-  if (opts.stripTags) { pat = /<[^>]*>/g };
-  
-  for (i = 0; i < docForm.elements.length; i++) {
-    formElem = docForm.elements[i];
-    
-    switch (formElem.type) {
-      // Text fields, hidden form elements
-      case 'text':
-      case 'hidden':
-      case 'password':
-      case 'textarea':
-      case 'select-one':
-        s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-        if (s) {
-          str += formElem.name + '=' + encodeURIComponent(s) + '&'
-        }
-        break;
-        
-      // Multi-option select
-      case 'select-multiple':
-        var isSet = false;
-        for(var j = 0; j < formElem.options.length; j++) {
-          var currOpt = formElem.options[j];
-          if(currOpt.selected) {
-            if (opts.collapseMulti) {
-              if (isSet) {
-                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-                str += ',' + encodeURIComponent(s);
-              }
-              else {
-                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-                str += formElem.name + '=' + encodeURIComponent(s);
-                isSet = true;
-              }
-            }
-            else {
-              s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-              str += formElem.name + '=' + encodeURIComponent(currOpt.value) + '&';
-            }
-          }
-        }
-        if (opts.collapseMulti) {
-          str += '&';
-        }
-        break;
-      
-      // Radio buttons
-      case 'radio':
-        if (formElem.checked) {
-          s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-          str += formElem.name + '=' + encodeURIComponent(formElem.value) + '&'
-        }
-        break;
-        
-      // Checkboxes
-      case 'checkbox':
-        if (formElem.checked) {
-          // Collapse multi-select into comma-separated list
-          if (opts.collapseMulti && (formElem.name == lastElemName)) {
-            // Strip off end ampersand if there is one
-            if (str.lastIndexOf('&') == str.length-1) {
-              str = str.substr(0, str.length - 1);
-            }
-            // Append value as comma-delimited string
-            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-            str += ',' + encodeURIComponent(s);
-          }
-          else {
-            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-            str += formElem.name + '=' + encodeURIComponent(s);
-          }
-          str += '&';
-          lastElemName = formElem.name;
-        }
-        break;
-        
-    }
-  }
-  // Remove trailing separator
-  str = str.substr(0, str.length - 1);
-  return str;
-};
-
-fleegix.form.restore = function(form, str) {
-  var arr = str.split('&');
-  var d = {};
-  for (var i = 0; i < arr.length; i++) {
-    var pair = arr[i].split('=');
-    var name = pair[0];
-    var val = pair[1];
-    if (typeof d[name] == 'undefined') {
-      d[name] = val;
-    }
-    else {
-      if (!(d[name] instanceof Array)) {
-        var t = d[name];
-        d[name] = [];
-        d[name].push(t);
-      }
-      d[name].push(val);
-    }
-  }
-  for (var i = 0; i < form.elements.length; i++) {
-    elem = form.elements[i];
-    if (typeof d[elem.name] != 'undefined') {
-      val = d[elem.name];
-      switch (elem.type) {
-        case 'text':
-          case 'hidden':
-          case 'password':
-          case 'textarea':
-          case 'select-one':
-          elem.value = decodeURIComponent(val);
-          break;
-        case 'radio':
-          if (encodeURIComponent(elem.value) == val) {
-            elem.checked = true; 
-          }
-          break;
-        case 'checkbox':
-          for (var j = 0; j < val.length; j++) {
-            if (encodeURIComponent(elem.value) == val[j]) {
-              elem.checked = true; 
-            }
-          }
-          break;
-        case 'select-multiple':
-          for (var h = 0; h < elem.options.length; h++) {
-            var opt = elem.options[h];
-            for (var j = 0; j < val.length; j++) {
-              if (encodeURIComponent(opt.value) == val[j]) {
-                opt.selected = true; 
-              }
-            }
-          }
-          break;
-      }
-    }
-  }
-  return form;
-}
-
-
-
-fleegix.event = new function() {
-  
-  // List of handlers for event listeners
-  var listenerCache = [];
-  // List of channels being published to
-  var channels = {};
-  
-  this.listen = function() {
-    var tgtObj = arguments[0]; // Target object for the new listener
-    var tgtMeth = arguments[1]; // Method to listen for
-    // Look to see if there's already a registry of listeners
-    var listenReg = tgtObj[tgtMeth] ? 
-      tgtObj[tgtMeth].listenReg : null;
-    
-    // Create the registry of listeners if need be
-    // -----------------
-    if (!listenReg) {
-      listenReg = {};
-      // The original obj and method name 
-      listenReg.orig = {}
-      listenReg.orig.obj = tgtObj, 
-      listenReg.orig.methName = tgtMeth;
-      // Clone existing method code if it exists
-      if (tgtObj[tgtMeth]) {
-        listenReg.orig.methCode = 
-          eval(tgtObj[tgtMeth].valueOf());
-      }
-      // Array of handlers to execute if the method fires
-      listenReg.after = [];
-      // Replace the original method with the exec proxy
-      tgtObj[tgtMeth] = function() {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-        fleegix.event.exec(
-          tgtObj[tgtMeth].listenReg, args);
-      }
-      tgtObj[tgtMeth].listenReg = listenReg;
-      // Add to global cache -- so we can remove listeners
-      // on unload to avoid memleak in IE6
-      listenerCache.push(tgtObj[tgtMeth].listenReg);
-    }
-    
-    // Add the new handler to the listener registry
-    // -----------------
-    // Simple function
-    if (typeof arguments[2] == 'function') {
-      listenReg.after.push(arguments[2]);
-    }
-    // Object and method
-    else {
-      listenReg.after.push([arguments[2], arguments[3]]);
-    }
-    
-    tgtObj[tgtMeth].listenReg = listenReg;
-  };
-  this.exec = function(reg, args) {
-    // Execute the original code for the trigger
-    // method if there is any -- apply arguments
-    // passed in the right execution context
-    if (reg.orig.methCode) {
-      reg.orig.methCode.apply(reg.orig.obj, args);
-    }
-    if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
-      args[0] = args[0] || window.event;
-    }
-    
-    // Execute all the handler functions registered
-    for (var i = 0; i < reg.after.length; i++) {
-      var ex = reg.after[i];
-      // Single functions
-      if (ex.length == 0) {
-        var execFunction = ex;
-        execFunction(args);
-      }
-      // Methods of objects
-      else {
-        execObj = ex[0];
-        execMethod = ex[1];
-        // Pass args and exec in correct scope
-        execObj[execMethod].apply(execObj, args);
-      }
-    }
-  };
-  this.unlisten = function() {
-    var tgtObj = arguments[0]; // Obj from which to remove
-    var tgtMeth = arguments[1]; // Trigger method
-    var listenReg = tgtObj[tgtMeth] ? 
-      tgtObj[tgtMeth].listenReg : null;
-    var remove = null;
-    
-    // Bail out if no handlers
-    if (!listenReg) {
-      return false;
-    }
-    
-    // Simple function
-    // Remove the handler if it's in the list
-    for (var i = 0; i < listenReg.after.length; i++) {
-      var ex = listenReg.after[i];
-      if (typeof arguments[2] == 'function') {
-        if (ex == arguments[2]) {
-          listenReg.after.splice(i, 1);
-        }
-      }
-      // Object and method
-      else {
-        if (ex[0] == arguments[2] && ex[1] == 
-          arguments[3]) {
-          listenReg.after.splice(i, 1);
-        }
-      }
-    }
-     tgtObj[tgtMeth].listenReg = listenReg;
-  };
-  this.flush = function() {
-    // Remove all the registered listeners to avoid
-    // IE6 memleak
-    for (var i = 0; i < listenerCache.length; i++) {
-      var reg = listenerCache[i];
-      removeObj = reg.orig.obj;
-      removeMethod = reg.orig.methName;
-      removeObj[removeMethod] = null;
-    }
-  };
-  this.subscribe = function(subscr, obj, method) {
-    // Make sure there's an obj param
-    if (!obj) { return };
-    // Create the channel if it doesn't exist
-    if (!channels[subscr]) {
-      channels[subscr] = {};
-      channels[subscr].audience = [];
-    }
-    else {
-      // Remove any previous listener method for the obj
-      this.unsubscribe(subscr, obj);
-    }
-    // Add the object and its handler to the array
-    // for the channel
-    channels[subscr].audience.push([obj, method]);
-  };
-  this.unsubscribe = function(unsubscr, obj) {
-    // If not listener obj specified, kill the
-    // entire channel
-    if (!obj) {
-      channels[unsubscr] = null;
-    }
-    // Otherwise remove the object and its handler
-    // from the array for the channel
-    else {
-      if (channels[unsubscr]) {
-        var aud = channels[unsubscr].audience;
-        for (var i = 0; i < aud.length; i++) {
-          if (aud[i][0] == obj) {
-             aud.splice(i, 1); 
-          }
-        }
-      }
-    }
-  };
-  this.publish = function(pub, data) {
-    // Make sure the channel exists
-    if (channels[pub]) {
-      aud = channels[pub].audience;
-      // Pass the published data to all the 
-      // obj/methods listening to the channel
-      for (var i = 0; i < aud.length; i++) {
-        var listenerObject = aud[i][0];
-        var handlerMethod = aud[i][1];
-        listenerObject[handlerMethod](data);
-      }
-    }
-  };
-  this.getSrcElementId = function(e) {
-    var ret = null;
-    if (e.srcElement) ret = e.srcElement;
-    else if (e.target) ret = e.target;
-    // Avoid trying to use fake obj from IE on disabled
-    // form elements
-    if (typeof ret.id == 'undefined') {
-      return null;
-    }
-    // Look up the id of the elem or its parent
-    else {
-      // Look for something with an id -- not a text node
-      while (!ret.id || ret.nodeType == 3) {
-        // Bail if we run out of parents
-        if (ret.parentNode) {
-          ret = ret.parentNode;
-        }
-        else {
-          return null;
-        }
-      }
-    }
-    return ret.id;
-  };
-}
-fleegix.event.constructor = null;
-// Prevent memleak in IE6
-fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
-
-
-
-
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
     var opts = optParam || {}
@@ -1590,4 +1349,302 @@ fleegix.cookie = new function() {
   };
 }
 fleegix.cookie.constructor = null; 
+
+
+if (typeof fleegix.date == 'undefined') { fleegix.date = {}; }
+fleegix.date.timezone = new function() {
+  
+  this.zoneAreas = { AFRICA: 'africa', ANTARCTICA: 'antarctica', 
+    ASIA: 'asia', AUSTRALASIA: 'australasia', BACKWARD: 'backward', 
+    ETCETERA: 'etcetera', EUROPE: 'europe', NORTHAMERICA: 'northamerica', 
+    PACIFICNEW: 'pacificnew', SOUTHAMERICA: 'southamerica', 
+    SYSTEMV: 'systemv' };
+  
+  var self = this;
+  var monthMap = { 'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3,'may': 4, 'jun': 5, 
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11 } 
+  var dayMap = {'sun': 0,'mon' :1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6 }
+  var zoneKeys = {
+    'Africa': this.zoneAreas.AFRICA,
+    'Indian': this.zoneAreas.AFRICA,
+    'Antarctica': this.zoneAreas.ANTARCTICA,
+    'Asia': this.zoneAreas.ASIA,
+    'Pacific': this.zoneAreas.AUSTRALASIA,
+    'Australia': this.zoneAreas.AUSTRALASIA,
+    'Etc': this.zoneAreas.ETCETERA,
+    'EST': this.zoneAreas.NORTHAMERICA,
+    'MST': this.zoneAreas.NORTHAMERICA,
+    'HST':this.zoneAreas.NORTHAMERICA,
+    'EST5EDT': this.zoneAreas.NORTHAMERICA,
+    'CST6CDT': this.zoneAreas.NORTHAMERICA,
+    'MST7MDT': this.zoneAreas.NORTHAMERICA,
+    'PST8PDT': this.zoneAreas.NORTHAMERICA,
+    'America': function() {
+      var ret = [];
+      if (!this.loadedZoneAreas[this.zoneAreas.NORTHAMERICA]) {
+        ret.push(this.zoneAreas.NORTHAMERICA);
+      }
+      if (!this.loadedZoneAreas[this.zoneAreas.SOUTHAMERICA]) {
+        ret.push(this.zoneAreas.SOUTHAMERICA);
+      u}
+      return ret;
+    },
+    'WET': this.zoneAreas.EUROPE,
+    'CET': this.zoneAreas.EUROPE,
+    'MET': this.zoneAreas.EUROPE,
+    'EET': this.zoneAreas.EUROPE,
+    'Europe': this.zoneAreas.EUROPE,
+    'SystemV': this.zoneAreas.SYSTEMV
+  };
+  var zoneExceptions = {
+    'Pacific/Honolulu': this.zoneAreas.NORTHAMERICA,
+    'Pacific/Easter': this.zoneAreas.SOUTHAMERICA,
+    'Pacific/Galapagos': this.zoneAreas.SOUTHAMERICA,
+    'America/Danmarkshavn': this.zoneAreas.EUROPE,
+    'America/Scoresbysund': this.zoneAreas.EUROPE,
+    'America/Godthab': this.zoneAreas.EUROPE,
+    'America/Thule': this.zoneAreas.EUROPE,
+    'Indian/Kerguelen': this.zoneAreas.ANTARCTICA,
+    'Indian/Chagos': this.zoneAreas.ASIA,
+    'Indian/Maldives': this.zoneAreas.ASIA,
+    'Indian/Christmas': this.zoneAreas.AUSTRALASIA,
+    'Indian/Cocos': this.zoneAreas.AUSTRALASIA,
+    'Europe/Nicosia': this.zoneAreas.ASIA,
+    'Pacific/Easter': this.zoneAreas.SOUTHAMERICA,
+    'Africa/Ceuta': this.zoneAreas.EUROPE,
+    'Asia/Yekaterinburg': this.zoneAreas.EUROPE,
+    'Asia/Omsk': this.zoneAreas.EUROPE,
+    'Asia/Novosibirsk': this.zoneAreas.EUROPE,
+    'Asia/Krasnoyarsk': this.zoneAreas.EUROPE,
+    'Asia/Irkutsk': this.zoneAreas.EUROPE,
+    'Asia/Yakutsk': this.zoneAreas.EUROPE,
+    'Asia/Vladivostok': this.zoneAreas.EUROPE,
+    'Asia/Sakhalin': this.zoneAreas.EUROPE,
+    'Asia/Magadan': this.zoneAreas.EUROPE,
+    'Asia/Kamchatka': this.zoneAreas.EUROPE,
+    'Asia/Anadyr': this.zoneAreas.EUROPE,
+    'Asia/Istanbul': this.zoneAreas.EUROPE
+  };
+  var loadedZoneAreas = {};
+  
+  function parseTimeString(str) {
+    var pat = /(\d+)(?::0*(\d*))?(?::0*(\d*))?([wsugz])?$/;
+    var hms = str.match(pat);
+    hms[1] = parseInt(hms[1]);
+    hms[2] = hms[2] ? parseInt(hms[2]) : 0;
+    hms[3] = hms[3] ? parseInt(hms[3]) : 0;
+    return hms;
+  }
+  function getZone(dt, tz) {
+    var timezone = tz;
+    var zones = self.zones[timezone];
+    while (typeof(zones) == "string") {
+      timezone = zones;
+      zones = self.zones[timezone];
+      if (!zones) {
+        alert('Cannot figure out the timezone ' + timezone);
+      }
+    }
+    for(var i = 0; i < zones.length; i++) {
+      var z = zones[i];
+      if (!z[3]) { break; }
+      var yea = parseInt(z[3]);
+      var mon = 11;
+      var dat = 31;
+      if (z[4]) {
+        mon = monthMap[z[4].substr(0, 3).toLowerCase()];
+        dat = parseInt(z[5]);
+      }
+      var t = z[6] ? z[6] : '23:59:59';
+      t = parseTimeString(t);
+      var d = Date.UTC(yea, mon, dat, t[1], t[2], t[3]);
+      if (dt.getTime() < d) { break; }
+    }
+    if (i == zones.length) {
+       alert('No DST for ' + timezone); 
+    }
+    // Get basic offset
+    else {
+      return zones[i]; 
+    }
+    
+  }
+  function getBasicOffset(z) {
+    var off = parseTimeString(z[0]);
+    var adj = z[0].indexOf('-') == 0 ? -1 : 1
+    off = adj * (((off[1] * 60 + off[2]) *60 + off[3]) * 1000);
+    return -off/60/1000;
+  }
+  function getRule(dt, str) {
+    var currRule = null;
+    var year = dt.getUTCFullYear();
+    var rules = self.rules[str];
+    var ruleHits = [];
+    if (!rules) { return null; }
+    for (var i = 0; i < rules.length; i++) {
+      r = rules[i];
+      if ((r[1] < (year - 1)) || 
+        (r[0] < (year - 1) && r[1] == 'only') ||
+        (r[0] > year)) { 
+        continue; 
+      };
+      var mon = monthMap[r[3].substr(0, 3).toLowerCase()];
+      var day = r[4];
+      
+      if (isNaN(day)) {
+        if (day.substr(0, 4) == 'last') {
+          var day = dayMap[day.substr(4,3).toLowerCase()];
+          var t = parseTimeString(r[5]);
+          // Last day of the month at the desired time of day
+          var d = new Date(Date.UTC(dt.getUTCFullYear(), mon+1, 1, t[1]-24, t[2], t[3]));
+          var dtDay = d.getUTCDay();
+          var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
+          // Set it to the final day of the correct weekday that month
+          d.setUTCDate(d.getUTCDate() + diff);
+          if (dt < d) {
+            // If no match found, check the previous year if rule allows
+            if (r[0] < year) {
+              d.setUTCFullYear(d.getUTCFullYear()-1);
+              if (dt >= d) {
+                ruleHits.push({ 'rule': r, 'date': d });
+              }
+            }
+          }
+          else {
+            ruleHits.push({ 'rule': r, 'date': d });
+          }
+        }
+        else {
+          day = dayMap[day.substr(0, 3).toLowerCase()];
+          if (day != 'undefined') {
+            if(r[4].substr(3, 2) == '>=') {
+              var t = parseTimeString(r[5]);
+              // The stated date of the month
+              var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, 
+                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
+              var dtDay = d.getUTCDay();
+              var diff = (day < dtDay) ? (day - dtDay + 7) : (day - dtDay);
+              // Set to the first correct weekday after the stated date
+              d.setUTCDate(d.getUTCDate() + diff);
+              if (dt < d) {
+                // If no match found, check the previous year if rule allows
+                if (r[0] < year) {
+                  d.setUTCFullYear(d.getUTCFullYear()-1);
+                  if (dt >= d) {
+                    ruleHits.push({ 'rule': r, 'date': d });
+                  }
+                }
+              }
+              else {
+                ruleHits.push({ 'rule': r, 'date': d });
+              }
+            }
+            else if (day.substr(3, 2) == '<=') {
+              var t = parseTimeString(r[5]);
+              // The stated date of the month
+              var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, 
+                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
+              var dtDay = d.getUTCDay();
+              var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
+              // Set to first correct weekday before the stated date
+              d.setUTCDate(d.getUTCDate() + diff);
+              if (dt < d) {
+                // If no match found, check the previous year if rule allows
+                if (r[0] < year) {
+                  d.setUTCFullYear(d.getUTCFullYear()-1);
+                  if (dt >= d) {
+                    ruleHits.push({ 'rule': r, 'date': d });
+                  }
+                }
+              }
+              else {
+                ruleHits.push({ 'rule': r, 'date': d });
+              }
+            }
+          }
+        }
+      }
+      else {
+        var t = parseTimeString(r[5]);
+        var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, day, t[1], t[2], t[3]));
+        d.setUTCHours(d.getUTCHours() - 24*((7 - day + d.getUTCDay()) % 7));
+        if (dt < d) { 
+          continue; 
+        }
+        else {
+          ruleHits.push({ 'rule': r, 'date': d });
+        }
+      }
+    }
+    f = function(a, b) { return (a.date.getTime() >= b.date.getTime()) ?  1 : -1; }
+    ruleHits.sort(f);
+    currRule = ruleHits.pop().rule;
+    return currRule;
+  }
+  function getAdjustedOffset(off, rule) {
+    var save = rule[6];
+    var t = parseTimeString(save);
+    var adj = save.indexOf('-') == 0 ? -1 : 1;
+    var ret = (adj*(((t[1] *60 + t[2]) * 60 + t[3]) * 1000));
+    ret = ret/60/1000;
+    ret -= off
+    ret = -Math.ceil(ret);
+    return ret;
+  }
+  
+  this.defaultZoneArea = this.zoneAreas.NORTHAMERICA;
+  this.zones = {};
+  this.rules = {};
+  this.parseZones = function(str) {
+    var s = '';
+    var lines = str.split('\n');
+    var arr = [];
+    var chunk = '';
+    var zone = null;
+    var rule = null;
+    for (var i = 0; i < lines.length; i++) {
+      l = lines[i];
+      if (l.match(/^\s/)) {
+        l = "Zone " + zone + l;
+      }
+      l = l.split("#")[0];
+      if (l.length > 3) {
+        arr = l.split(/\s+/);
+        chunk = arr.shift();
+        switch(chunk) {
+          case 'Zone':
+            zone = arr.shift();
+            if (!self.zones[zone]) { self.zones[zone] = [] }
+            self.zones[zone].push(arr);
+            break;
+          case 'Rule':
+            rule = arr.shift();
+            if (!self.rules[rule]) { self.rules[rule] = [] }
+            self.rules[rule].push(arr);
+            break;
+          case 'Link':
+            // Shouldn't exist
+            if (self.zones[arr[1]]) { alert('Error with Link ' + arr[1]); }
+            self.zones[arr[1]] = arr[0];
+            break;
+          case 'Leap':
+            break;
+          default:
+            // Fail silently
+            break;
+        }
+      }
+    }
+    return true;
+  };
+  this.getOffset = function(dt, tz) {
+    var zone = getZone(dt, tz);
+    var off = getBasicOffset(zone);
+    var rule = getRule(dt, zone[1]);
+    if (rule) {
+      off = getAdjustedOffset(off, rule);
+    }
+    return off;
+  }
+}
 

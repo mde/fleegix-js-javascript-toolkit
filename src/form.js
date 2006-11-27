@@ -33,98 +33,117 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form = {};
-fleegix.form.serialize = function(docForm, formatOpts) {
-  
-  var opts = formatOpts || {};
-  var s = '';
+fleegix.form.serialize = function (f, o) {
+  var h = fleegix.form.toHash(f);
+  var opts = o || {};
   var str = '';
-  var formElem;
-  var lastElemName = '';
   var pat = null;
-  if (opts.stripTags) { pat = /<[^>]*>/g };
+
+  if (opts.stripTags) { pat = /<[^>]*>/g; }
+  for (var n in h) {
+    var s = '';
+    var v = h[n];
+    if (v) {
+      // Single val -- string
+      if (typeof v == 'string') {
+        s = opts.stripTags ? v.replace(pat, '') : v;
+        str += n + '=' + encodeURIComponent(s);
+      }
+      // Multiple vals -- array
+      else {
+        var sep = ''; 
+        if (opts.collapseMulti) {
+          sep = ',';
+          str += n + '=';
+        }
+        else {
+          sep = '&';
+        }
+        for (var j = 0; j < v.length; j++) {
+          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) : 
+            encodeURIComponent(s);
+          str += s + sep;
+        }
+        str = str.substr(0, str.length - 1);
+      }
+      str += '&'
+    }
+    else {
+      if (opts.includeEmpty) { str += n + '=&'; }
+    }
+  }
+  str = str.substr(0, str.length - 1);
+  return str;
+};
+
+fleegix.form.toHash = function (f) { 
+  var h = {};
   
-  for (i = 0; i < docForm.elements.length; i++) {
-    formElem = docForm.elements[i];
+  function expandToArr(orig, val) {
+    if (orig) {
+      var r = null;
+      if (typeof orig == 'string') {
+        r = [];
+        r.push(orig);
+      }
+      else {
+        r = orig;
+      }
+      r.push(val);
+      return r;
+    }
+    else {
+      return val;
+    }
+  }
+  
+  for (i = 0; i < f.elements.length; i++) {
+    elem = f.elements[i];
     
-    switch (formElem.type) {
+    switch (elem.type) {
       // Text fields, hidden form elements
       case 'text':
       case 'hidden':
       case 'password':
       case 'textarea':
       case 'select-one':
-        s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-        if (s) {
-          str += formElem.name + '=' + encodeURIComponent(s) + '&'
-        }
+        h[elem.name] = elem.value;
         break;
         
       // Multi-option select
       case 'select-multiple':
-        var isSet = false;
-        for(var j = 0; j < formElem.options.length; j++) {
-          var currOpt = formElem.options[j];
-          if(currOpt.selected) {
-            if (opts.collapseMulti) {
-              if (isSet) {
-                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-                str += ',' + encodeURIComponent(s);
-              }
-              else {
-                s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-                str += formElem.name + '=' + encodeURIComponent(s);
-                isSet = true;
-              }
-            }
-            else {
-              s = opts.stripTags ? currOpt.value.replace(pat, '') : currOpt.value;
-              str += formElem.name + '=' + encodeURIComponent(currOpt.value) + '&';
-            }
+        h[elem.name] = null;
+        for(var j = 0; j < elem.options.length; j++) {
+          var o = elem.options[j];
+          if(o.selected) {
+            h[elem.name] = expandToArr(h[elem.name], o.value);
           }
-        }
-        if (opts.collapseMulti) {
-          str += '&';
         }
         break;
       
       // Radio buttons
       case 'radio':
-        if (formElem.checked) {
-          s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-          str += formElem.name + '=' + encodeURIComponent(formElem.value) + '&'
+        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (elem.checked) {
+          h[elem.name] = elem.value; 
         }
         break;
         
       // Checkboxes
       case 'checkbox':
-        if (formElem.checked) {
-          // Collapse multi-select into comma-separated list
-          if (opts.collapseMulti && (formElem.name == lastElemName)) {
-            // Strip off end ampersand if there is one
-            if (str.lastIndexOf('&') == str.length-1) {
-              str = str.substr(0, str.length - 1);
-            }
-            // Append value as comma-delimited string
-            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-            str += ',' + encodeURIComponent(s);
-          }
-          else {
-            s = opts.stripTags ? formElem.value.replace(pat, '') : formElem.value;
-            str += formElem.name + '=' + encodeURIComponent(s);
-          }
-          str += '&';
-          lastElemName = formElem.name;
+        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (elem.checked) {
+          h[elem.name] = expandToArr(h[elem.name], elem.value);
         }
         break;
         
     }
   }
-  // Remove trailing separator
-  str = str.substr(0, str.length - 1);
-  return str;
+  return h;
 };
 
-fleegix.form.restore = function(form, str) {
+fleegix.form.restore = function (form, str) {
   var arr = str.split('&');
   var d = {};
   for (var i = 0; i < arr.length; i++) {
@@ -181,5 +200,43 @@ fleegix.form.restore = function(form, str) {
     }
   }
   return form;
+};
+
+fleegix.form.diff = function (formA, formB) {
+  hA = fleegix.form.toHash(formA);
+  hB = fleegix.form.toHash(formB);
+  var diff = [];
+
+  for (n in hA) {
+    // Elem doesn't exist in B
+    if (typeof hB[n] == 'undefined') {
+      diff.push(n);
+    }
+    // Elem exists in both
+    else {
+      v = hA[n];
+      // Multi-value -- array
+      if (v instanceof Array) {
+        if (hB[n].toString() != v.toString()) {
+          diff.push(n);
+        }
+      }
+      // Single value -- null or string
+      else {
+        if (hB[n] != v) {
+          diff.push(n);
+        }
+      }
+    }
+  }
+  return diff;
 }
+
+
+
+
+
+
+
+
 
