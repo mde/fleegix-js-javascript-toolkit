@@ -203,8 +203,11 @@ fleegix.form.restore = function (form, str) {
 };
 
 fleegix.form.diff = function (formA, formB) {
-  hA = fleegix.form.toHash(formA);
-  hB = fleegix.form.toHash(formB);
+  // Accept either form or hash-conversion of form
+  hA = formA.toString() == '[object HTMLFormElement]' ? 
+    fleegix.form.toHash(formA) : formA;
+  hB = formB.toString() == '[object HTMLFormElement]' ? 
+    fleegix.form.toHash(formB) : formB;
   var diff = [];
 
   for (n in hA) {
