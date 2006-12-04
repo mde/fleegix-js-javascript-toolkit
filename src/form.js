@@ -204,16 +204,20 @@ fleegix.form.restore = function (form, str) {
 
 fleegix.form.diff = function (formA, formB) {
   // Accept either form or hash-conversion of form
-  hA = formA.toString() == '[object HTMLFormElement]' ? 
+  var hA = formA.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formA) : formA;
-  hB = formB.toString() == '[object HTMLFormElement]' ? 
+  var hB = formB.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formB) : formB;
-  var diff = [];
-
+  var diff = {};
+  
+  function addDiff(n) {
+    diff[n] = [hA[n], hB[n]];
+  }
+ 
   for (n in hA) {
     // Elem doesn't exist in B
     if (typeof hB[n] == 'undefined') {
-      diff.push(n);
+      addDiff(n);
     }
     // Elem exists in both
     else {
@@ -221,13 +225,13 @@ fleegix.form.diff = function (formA, formB) {
       // Multi-value -- array
       if (v instanceof Array) {
         if (hB[n].toString() != v.toString()) {
-          diff.push(n);
+          addDiff(n);
         }
       }
       // Single value -- null or string
       else {
         if (hB[n] != v) {
-          diff.push(n);
+          addDiff(n);
         }
       }
     }
