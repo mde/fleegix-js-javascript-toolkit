@@ -208,11 +208,14 @@ fleegix.form.diff = function (formA, formB) {
     fleegix.form.toHash(formA) : formA;
   var hB = formB.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formB) : formB;
-  var diff = null;
+  var ret = {};
+  
+  ret.count = 0;
+  ret.diffs = {};
   
   function addDiff(n) {
-    diff = diff || {};
-    diff[n] = [hA[n], hB[n]];
+    ret.count++;
+    ret.diffs[n] = [hA[n], hB[n]];
   }
  
   for (n in hA) {
@@ -237,7 +240,7 @@ fleegix.form.diff = function (formA, formB) {
       }
     }
   }
-  return diff;
+  return ret;
 }
 
 

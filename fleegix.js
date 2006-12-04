@@ -433,10 +433,12 @@ return _45;
 fleegix.form.diff=function(_51,_52){
 var hA=_51.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_51):_51;
 var hB=_52.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_52):_52;
-var _55=null;
+var ret={};
+ret.count=0;
+ret.diffs={};
 function addDiff(n){
-_55=_55||{};
-_55[n]=[hA[n],hB[n]];
+ret.count++;
+ret.diffs[n]=[hA[n],hB[n]];
 }
 for(n in hA){
 if(typeof hB[n]=="undefined"){
@@ -454,7 +456,7 @@ addDiff(n);
 }
 }
 }
-return _55;
+return ret;
 };
 fleegix.popup=new function(){
 var _57=this;
