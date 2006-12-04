@@ -208,9 +208,10 @@ fleegix.form.diff = function (formA, formB) {
     fleegix.form.toHash(formA) : formA;
   var hB = formB.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formB) : formB;
-  var diff = {};
+  var diff = null;
   
   function addDiff(n) {
+    diff = diff || {};
     diff[n] = [hA[n], hB[n]];
   }
  
@@ -222,9 +223,9 @@ fleegix.form.diff = function (formA, formB) {
     // Elem exists in both
     else {
       v = hA[n];
-      // Multi-value -- array
+      // Multi-value -- array, hA[n] actually has values
       if (v instanceof Array) {
-        if (hB[n].toString() != v.toString()) {
+        if (!hB[n] || (hB[n].toString() != v.toString())) {
           addDiff(n);
         }
       }
