@@ -202,16 +202,21 @@ fleegix.form.restore = function (form, str) {
   return form;
 };
 
+fleegix.form.Differ = function() {
+  this.count = 0;
+  this.diffs = {};
+}  
+fleegix.form.Differ.prototype.hasKey = function (k) {
+  return (typeof this.diffs[k] != 'undefined');
+};
+
 fleegix.form.diff = function (formA, formB) {
   // Accept either form or hash-conversion of form
   var hA = formA.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formA) : formA;
   var hB = formB.toString() == '[object HTMLFormElement]' ? 
     fleegix.form.toHash(formB) : formB;
-  var ret = {};
-  
-  ret.count = 0;
-  ret.diffs = {};
+  var ret = new fleegix.form.Differ();
   
   function addDiff(n) {
     ret.count++;
