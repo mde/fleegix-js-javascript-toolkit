@@ -215,11 +215,199 @@ fleegix.xml = new function(){
 }
 fleegix.xml.constructor = null;
 
-fleegix.xhr = new function() {
+fleegix.xhr = new function () {
 
+  var i = 0;
+  var t = [ // Array of XHR obj to try to invoke
+    function () { return new XMLHttpRequest(); },
+    function () { return new ActiveXObject('Msxml2.XMLHTTP') },
+    function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
+  
   // Properties
   // ================================
-  this.req = null;
+  this.trans = null;
+  this.lastReqId = 0;
+ 
+  // Try to instantiate an XHR obj
+  while (!this.trans && (i < t.length)) {
+    try { this.trans = t[i++](); } 
+    catch(e) {}
+  }
+  if (!this.trans) {
+    throw('Could not create XMLHttpRequest object.');
+  }
+  
+  // Methods
+  // ================================
+  this.doGet = function () {
+    var o = {};
+    var hand = null;
+    var args = Array.prototype.slice.apply(arguments);
+    if (typeof args[0] == 'function') {
+      o.async = true;
+      hand = args.shift();
+    }
+    else {
+      o.async = false;
+    }
+    var url = args.shift();
+    var format = args.shift() || 'text';
+    
+    o.handleResp = hand;
+    o.url = url;
+    o.responseFormat = format;
+    return this.doReq(o);
+  };
+  this.doPost = function () {
+    var o = {};
+    var hand = null;
+    var args = Array.prototype.slice.apply(arguments);
+    if (typeof args[0] == 'function') {
+      o.async = true;
+      hand = args.shift();
+    }
+    else {
+      o.async = false;
+    }
+    var url = args.shift();
+    var dataPayload = args.shift();
+    var format = args.shift() || 'text';
+    
+    o.handleResp = hand;
+    o.url = url;
+    o.dataPayload = dataPayload;
+    o.responseFormat = format;
+    o.method = 'POST';
+    return this.doReq(o);
+  };
+  this.doReq = function (o) {
+    var opts = o || {};
+    var req = new fleegix.xhr.Request();
+    var trans = this.trans; // XHR transport
+    var resp = null; // The response to return
+    
+    // Default err handler -- pop up full window with error
+    // if request has no handler specifically defined
+    function handleErrDefault(r) {
+        var errorWin;
+        // Create new window and display error
+        try {
+          errorWin = window.open('', 'errorWin');
+          errorWin.document.body.innerHTML = r.responseText;
+        }
+        // If pop-up gets blocked, inform user
+        catch(e) {
+          alert('An error occurred, but the error message cannot be' +
+          ' displayed because of your browser\'s pop-up blocker.\n' +
+          'Please allow pop-ups from this Web site.');
+        }
+    }
+    
+    // Override default request opts with any specified 
+    for (var p in opts) {
+      req[p] = opts[p];
+    }
+    
+    this.lastReqId++; // Increment req ID
+    req.id = this.lastReqId;
+    
+    // Set up the request
+    // ==========================
+    if (req.username && req.password) {
+      trans.open(req.method, req.url, req.async, req.username, req.password);
+    }
+    else {
+      trans.open(req.method, req.url, req.async);
+    }
+    // Override MIME type if necessary for Mozilla/Firefox & Safari
+    if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
+      trans.overrideMimeType(req.mimeType);
+    }
+    
+    // Add any custom headers that are defined
+    if (req.headers.length) {
+      // Set any custom headers
+      for (var i = 0; i < req.headers.length; i++) {
+        var headArr = req.headers[i].split(': ');
+        trans.setRequestHeader(headArr[i], headArr[1]);
+      }
+    }
+    // Otherwise set correct content-type for POST
+    else {
+      if (req.method == 'POST') {
+        trans.setRequestHeader('Content-Type', 
+          'application/x-www-form-urlencoded');
+      }
+    }
+    
+    trans.onreadystatechange = function () {
+      if (trans.readyState == 4) {
+        // Set the response according to the desired format
+        switch(req.responseFormat) {
+          // Text
+          case 'text':
+            resp = trans.responseText;
+            break;
+          // XML
+          case 'xml':
+            resp = trans.responseXML;
+            break;
+          // The object itself
+          case 'object':
+            resp = trans;
+            break;
+        }
+        // Request is successful -- pass off to response handler
+        if (trans.status > 199 && trans.status < 300) {
+          if (req.async) {
+              // Make sure handler is defined
+              if (!req.handleResp) {
+                throw('No response handler defined ' +
+                  'for this request');
+                return;
+              }
+              else {
+                req.handleResp(resp, req.id);
+              }
+          }
+        }
+        // Request fails -- pass to error handler
+        else {
+          if (req.handleErr) {
+            req.handleErr(resp);
+          }
+          else {
+            handleErrDefault(trans);
+          }
+        }
+      }
+    };
+
+    // Send the request, along with any data for POSTing
+    // ==========================
+    trans.send(req.dataPayload);
+
+    // Return request ID or response
+    if (req.async) {
+        return req.id;
+    }
+    else {
+        return resp;
+    }
+  };
+  this.abort = function () {
+    if (this.trans) {
+      this.trans.onreadystatechange = function () { };
+      this.trans.abort();
+    }
+  };
+  this.handleErrDefault = function (r) {
+  };
+}
+
+fleegix.xhr.constructor = null;
+
+fleegix.xhr.Request = function () {
   this.reqId = 0;
   this.url = null;
   this.status = null;
@@ -236,177 +424,11 @@ fleegix.xhr = new function() {
   this.username = '';
   this.password = '';
   this.headers = [];
-  
-  var i = 0;
-  var reqTry = [ 
-    function() { return new XMLHttpRequest(); },
-    function() { return new ActiveXObject('Msxml2.XMLHTTP') },
-    function() { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
-  
-  while (!this.req && (i < reqTry.length)) {
-    try { this.req = reqTry[i++](); } 
-    catch(e) {}
-  }
-  if (this.req) {
-    this.reqId = 0;
-  }
-  else {
-    alert('Could not create XMLHttpRequest object.');
-  }
-  
-  // Methods
-  // ================================
-  this.doGet = function(hand, url, format) {
-    this.handleResp = hand;
-    this.url = url;
-    this.responseFormat = format || 'text';
-    return this.doReq();
-  };
-  this.doPost = function(hand, url, dataPayload, format) {
-    this.handleResp = hand;
-    this.url = url;
-    this.dataPayload = dataPayload;
-    this.responseFormat = format || 'text';
-    this.method = 'POST';
-    return this.doReq();
-  };
-  this.doReq = function() {
-    var self = null;
-    var req = null;
-    var id = null;
-    var headArr = [];
-     
-    req = this.req;
-    this.reqId++;
-    id = this.reqId;
-    // Set up the request
-    // ==========================
-    if (this.username && this.password) {
-      req.open(this.method, this.url, this.async, this.username, this.password);
-    }
-    else {
-      req.open(this.method, this.url, this.async);
-    }
-    // Override MIME type if necessary for Mozilla/Firefox & Safari
-    if (this.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
-      req.overrideMimeType(this.mimeType);
-    }
-    
-    // Add any custom headers that are defined
-    if (this.headers.length) {
-      // Set any custom headers
-      for (var i = 0; i < this.headers.length; i++) {
-        headArr = this.headers[i].split(': ');
-        req.setRequestHeader(headArr[i], headArr[1]);
-      }
-      this.headers = [];
-    }
-    // Otherwise set correct content-type for POST
-    else {
-      if (this.method == 'POST') {
-        req.setRequestHeader('Content-Type', 
-          'application/x-www-form-urlencoded');
-      }
-    }
-    
-    self = this; // Fix loss-of-scope in inner function
-    req.onreadystatechange = function() {
-      var resp = null;
-      self.readyState = req.readyState;
-      if (req.readyState == 4) {
-        
-        // Make these properties available to the Ajax object
-        self.status = req.status;
-        self.statusText = req.statusText;
-        self.responseText = req.responseText;
-        self.responseXML = req.responseXML;
-        
-        // Set the response according to the desired format
-        switch(self.responseFormat) {
-          // Text
-          case 'text':
-            resp = self.responseText;
-            break;
-          // XML
-          case 'xml':
-            resp = self.responseXML;
-            break;
-          // The object itself
-          case 'object':
-            resp = req;
-            break;
-        }
-        
-        // Request is successful -- pass off to response handler
-        if (self.status > 199 && self.status < 300) {
-          if (self.async) {
-              // Make sure handler is defined
-              if (!self.handleResp) {
-                alert('No response handler defined ' +
-                  'for this XMLHttpRequest object.');
-                return;
-              }
-              else {
-                self.handleResp(resp, id);
-              }
-          }
-        }
-        // Request fails -- pass to error handler
-        else {
-          self.handleErr(resp);
-        }
-      }
-    }
-    // Send the request, along with any data for POSTing
-    // ==========================
-    req.send(this.dataPayload);
-    if (this.async) {
-        return id;
-    }
-    else {
-        return req;
-    }
-  };
-  this.abort = function() {
-    if (this.req) {
-      this.req.onreadystatechange = function() { };
-      this.req.abort();
-      this.req = null;
-    }
-  };
-  this.handleErr = function() {
-    var errorWin;
-    // Create new window and display error
-    try {
-      errorWin = window.open('', 'errorWin');
-      errorWin.document.body.innerHTML = this.responseText;
-    }
-    // If pop-up gets blocked, inform user
-    catch(e) {
-      alert('An error occurred, but the error message cannot be' +
-      ' displayed because of your browser\'s pop-up blocker.\n' +
-      'Please allow pop-ups from this Web site.');
-    }
-  };
-  this.setMimeType = function(mimeType) {
-    this.mimeType = mimeType;
-  };
-  this.setHandlerResp = function(funcRef) {
-    this.handleResp = funcRef;
-  };
-  this.setHandlerErr = function(funcRef) {
-    this.handleErr = funcRef; 
-  };
-  this.setHandlerBoth = function(funcRef) {
-    this.handleResp = funcRef;
-    this.handleErr = funcRef;
-  };
-  this.setRequestHeader = function(headerName, headerValue) {
-    this.headers.push(headerName + ': ' + headerValue);
-  };
 }
+fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
+  this.headers.push(headerName + ': ' + headerValue);
+};
 
-fleegix.xhr.constructor = null;
 
 
 
@@ -650,7 +672,6 @@ fleegix.form.diff = function (formA, formB) {
 fleegix.popup = new function() {
   
   var self = this;
-  
   this.win = null;
   this.open = function(url, optParam) {
     var opts = optParam || {}
@@ -676,7 +697,6 @@ fleegix.popup = new function() {
       str = str.substr(0, len-1);
     }
     if(!self.win || self.win.closed) {
-      self.win = null;  
       self.win = window.open(url, 'thePopupWin', str);
     }
     else {	  
@@ -686,8 +706,8 @@ fleegix.popup = new function() {
   };
   this.close = function() {
     if (self.win) {
-    self.win.window.close();
-    self.win = null;
+      self.win.window.close();
+      self.win = null;
     }
   };
   this.goURLMainWin = function(url) {
@@ -724,8 +744,7 @@ fleegix.event = new function() {
       listenReg.orig.methName = tgtMeth;
       // Clone existing method code if it exists
       if (tgtObj[tgtMeth]) {
-        listenReg.orig.methCode = 
-          eval(tgtObj[tgtMeth].valueOf());
+        listenReg.orig.methCode = tgtObj[tgtMeth];
       }
       // Array of handlers to execute if the method fires
       listenReg.after = [];
@@ -739,8 +758,7 @@ fleegix.event = new function() {
           tgtObj[tgtMeth].listenReg, args);
       }
       tgtObj[tgtMeth].listenReg = listenReg;
-      // Add to global cache -- so we can remove listeners
-      // on unload to avoid memleak in IE6
+      // Add to global cache -- so we can remove listeners on unload
       listenerCache.push(tgtObj[tgtMeth].listenReg);
     }
     

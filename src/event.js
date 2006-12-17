@@ -40,8 +40,7 @@ fleegix.event = new function() {
       listenReg.orig.methName = tgtMeth;
       // Clone existing method code if it exists
       if (tgtObj[tgtMeth]) {
-        listenReg.orig.methCode = 
-          eval(tgtObj[tgtMeth].valueOf());
+        listenReg.orig.methCode = tgtObj[tgtMeth];
       }
       // Array of handlers to execute if the method fires
       listenReg.after = [];
@@ -55,8 +54,7 @@ fleegix.event = new function() {
           tgtObj[tgtMeth].listenReg, args);
       }
       tgtObj[tgtMeth].listenReg = listenReg;
-      // Add to global cache -- so we can remove listeners
-      // on unload to avoid memleak in IE6
+      // Add to global cache -- so we can remove listeners on unload
       listenerCache.push(tgtObj[tgtMeth].listenReg);
     }
     
