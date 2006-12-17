@@ -18,7 +18,6 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.popup = new function() {
   
   var self = this;
-  
   this.win = null;
   this.open = function(url, optParam) {
     var opts = optParam || {}
@@ -44,7 +43,6 @@ fleegix.popup = new function() {
       str = str.substr(0, len-1);
     }
     if(!self.win || self.win.closed) {
-      self.win = null;  
       self.win = window.open(url, 'thePopupWin', str);
     }
     else {	  
@@ -54,8 +52,8 @@ fleegix.popup = new function() {
   };
   this.close = function() {
     if (self.win) {
-    self.win.window.close();
-    self.win = null;
+      self.win.window.close();
+      self.win = null;
     }
   };
   this.goURLMainWin = function(url) {
