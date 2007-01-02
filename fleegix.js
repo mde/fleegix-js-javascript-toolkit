@@ -650,353 +650,25 @@ return ret.id;
 };
 fleegix.event.constructor=null;
 fleegix.event.listen(window,"onunload",fleegix.event,"flush");
-if(typeof fleegix.date=="undefined"){
-fleegix.date={};
-}
-fleegix.date.XDate=function(){
-var a=[];
-var dt=null;
-if(!arguments.length){
-dt=new Date();
-}else{
-if(arguments.length==1){
-if(typeof arguments[0]=="string"){
-dt=new Date(arguments[0]);
-}else{
-dt=new Date(0);
-dt.setMilliseconds(arguments[0]+(dt.getTimezoneOffset()*60*1000));
-}
-}else{
-var _89=[];
-for(var i=0;i<3;i++){
-a[i]=arguments[i]||0;
-}
-dt=new Date(a[0],a[1],a[2]);
-}
-}
-this.year=0;
-this.month=0;
-this.date=0;
-this.isXDate=true;
-this.setFromDateObjProxy(dt);
-return this;
-};
-fleegix.date.XDate.prototype={getDate:function(){
-return this.date;
-},getDay:function(){
-},getFullYear:function(){
-return this.year;
-},getMonth:function(){
-return this.month;
-},getYear:function(){
-return this.year;
-},setDate:function(n){
-this.setAttribute("date",n);
-},setFullYear:function(n){
-this.setAttribute("year",n);
-},setMonth:function(n){
-this.setAttribute("month",n);
-},setYear:function(n){
-this.setUTCAttribute("year",n);
-},toGMTString:function(){
-},toLocaleString:function(){
-},toLocaleDateString:function(){
-},toLocaleTimeString:function(){
-},toSource:function(){
-},toString:function(){
-var str=this.getFullYear()+"-"+(this.getMonth()+1)+"-"+this.getDate();
-return str;
-},setFromDateObjProxy:function(dt,_91){
-this.year=_91?dt.getUTCFullYear():dt.getFullYear();
-this.month=_91?dt.getUTCMonth():dt.getMonth();
-this.date=_91?dt.getUTCDate():dt.getDate();
-},setAttribute:function(_92,n){
-if(isNaN(n)){
-throw ("Units must be a number.");
-}
-var dt=new Date(this.year,this.month,this.date);
-var _95=_92=="year"?"FullYear":_92.substr(0,1).toUpperCase()+_92.substr(1);
-dt["set"+_95](n);
-this.setFromDateObjProxy(dt);
-},clone:function(){
-return new fleegix.date.XDate(this.year,this.month,this.date);
-},civilToJulianDayNumber:function(y,m,d){
-m++;
-if(m>12){
-var a=parseInt(m/12);
-m=m%12;
-y+=a;
-}
-if(m<=2){
-y-=1;
-m+=12;
-}
-var a=Math.floor(y/100);
-var b=2-a+Math.floor(a/4);
-jDt=Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+b-1524;
-return jDt;
-}};
-fleegix.date.XDateTime=function(){
-var a=[];
-var dt=null;
-if(!arguments.length){
-dt=new Date();
-}else{
-if(arguments.length==1){
-if(typeof arguments[0]=="string"){
-dt=new Date(arguments[0]);
-}else{
-dt=new Date(0);
-dt.setMilliseconds(arguments[0]+(dt.getTimezoneOffset()*60*1000));
-}
-}else{
-if(arguments.length==2&&typeof arguments[1]=="string"){
-var tz=arguments[1];
-if(typeof arguments[0]=="number"){
-dt=new Date(0);
-dt.setMilliseconds(arguments[0]+(dt.getTimezoneOffset()*60*1000));
-dt=new Date(dt.getUTCFullYear(),dt.getUTCMonth(),dt.getUTCDate());
-var o=fleegix.date.timezone.getOffset(dt,arguments[1]);
-dt=new Date(0);
-dt.setMilliseconds(arguments[0]+(dt.getTimezoneOffset()*60*1000)-(o*60*1000));
-}else{
-dt=new Date(arguments[0]);
-}
-}else{
-var _9f=[];
-for(var i=0;i<arguments.length;i++){
-_9f.push(arguments[i]);
-}
-if(typeof _9f[_9f.length-1]=="string"){
-var tz=_9f.pop();
-}
-for(var i=0;i<8;i++){
-a[i]=_9f[i]||0;
-}
-dt=new Date(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
-}
-}
-}
-this.year=0;
-this.month=0;
-this.date=0;
-this.hours=0;
-this.minutes=0;
-this.seconds=0;
-this.milliseconds=0;
-this.timezone="";
-this.utc=false;
-this.isXDateTime=true;
-this.setFromDateObjProxy(dt);
-this.setTimezone(tz);
-return this;
-};
-fleegix.date.XDateTime.prototype=new fleegix.date.XDate();
-fleegix.date.XDateTime.prototype.getHours=function(){
-return this.hours;
-};
-fleegix.date.XDateTime.prototype.getMilliseconds=function(){
-return this.milliseconds;
-};
-fleegix.date.XDateTime.prototype.getMinutes=function(){
-return this.minutes;
-};
-fleegix.date.XDateTime.prototype.getSeconds=function(){
-return this.seconds;
-};
-fleegix.date.XDateTime.prototype.getTime=function(){
-var dt=Date.UTC(this.year,this.month,this.date,this.hours,this.minutes,this.seconds,this.milliseconds);
-return dt+(this.getTimezoneOffset()*60*1000);
-};
-fleegix.date.XDateTime.prototype.getTimezone=function(){
-return this.timezone;
-};
-fleegix.date.XDateTime.prototype.getTimezoneOffset=function(){
-if(this.utc){
-offset=0;
-}else{
-var dt=new Date(Date.UTC(this.year,this.month,this.date,this.hours,this.minutes,this.seconds,this.milliseconds));
-var tz=this.timezone;
-offset=fleegix.date.timezone.getOffset(dt,tz);
-}
-return offset;
-};
-fleegix.date.XDateTime.prototype.getUTCDate=function(){
-return this.getUTCDateProxy().getUTCDate();
-};
-fleegix.date.XDateTime.prototype.getUTCDay=function(){
-return this.getUTCDateProxy().getUTCDay();
-};
-fleegix.date.XDateTime.prototype.getUTCFullYear=function(){
-return this.getUTCDateProxy().getUTCFullYear();
-};
-fleegix.date.XDateTime.prototype.getUTCHours=function(){
-return this.getUTCDateProxy().getUTCHours();
-};
-fleegix.date.XDateTime.prototype.getUTCMilliseconds=function(){
-return this.getUTCDateProxy().getUTCMilliseconds();
-};
-fleegix.date.XDateTime.prototype.getUTCMinutes=function(){
-return this.getUTCDateProxy().getUTCMinutes();
-};
-fleegix.date.XDateTime.prototype.getUTCMonth=function(){
-return this.getUTCDateProxy().getUTCMonth();
-};
-fleegix.date.XDateTime.prototype.getUTCSeconds=function(){
-return this.getUTCDateProxy().getUTCSeconds();
-};
-fleegix.date.XDateTime.prototype.setHours=function(n){
-this.setAttribute("hours",n);
-};
-fleegix.date.XDateTime.prototype.setMilliseconds=function(n){
-this.setAttribute("milliseconds",n);
-};
-fleegix.date.XDateTime.prototype.setMinutes=function(n){
-this.setAttribute("minutes",n);
-};
-fleegix.date.XDateTime.prototype.setSeconds=function(n){
-this.setAttribute("seconds",n);
-};
-fleegix.date.XDateTime.prototype.setTime=function(n){
-if(isNaN(n)){
-throw ("Units must be a number.");
-}
-var dt=new Date(0);
-dt.setUTCMilliseconds(n-(this.getTimezoneOffset()*60*1000));
-this.setFromDateObjProxy(dt,true);
-};
-fleegix.date.XDateTime.prototype.setTimezone=function(str){
-this.timezone=str||"Etc/UTC";
-if(this.timezone=="Etc/UTC"||this.timezone=="Etc/GMT"){
-this.utc=true;
-}else{
-this.utc=false;
-}
-};
-fleegix.date.XDateTime.prototype.setUTCDate=function(n){
-this.setUTCAttribute("date",n);
-};
-fleegix.date.XDateTime.prototype.setUTCFullYear=function(n){
-this.setUTCAttribute("year",n);
-};
-fleegix.date.XDateTime.prototype.setUTCHours=function(n){
-this.setUTCAttribute("hours",n);
-};
-fleegix.date.XDateTime.prototype.setUTCMilliseconds=function(n){
-this.setUTCAttribute("milliseconds",n);
-};
-fleegix.date.XDateTime.prototype.setUTCMinutes=function(n){
-this.setUTCAttribute("minutes",n);
-};
-fleegix.date.XDateTime.prototype.setUTCMonth=function(n){
-this.setUTCAttribute("month",n);
-};
-fleegix.date.XDateTime.prototype.setUTCSeconds=function(n){
-this.setUTCAttribute("seconds",n);
-};
-fleegix.date.XDateTime.prototype.toGMTString=function(){
-};
-fleegix.date.XDateTime.prototype.toLocaleString=function(){
-};
-fleegix.date.XDateTime.prototype.toLocaleDateString=function(){
-};
-fleegix.date.XDateTime.prototype.toLocaleTimeString=function(){
-};
-fleegix.date.XDateTime.prototype.toSource=function(){
-};
-fleegix.date.XDateTime.prototype.toString=function(){
-var str=this.getFullYear()+"-"+(this.getMonth()+1)+"-"+this.getDate();
-var hou=this.getHours()||12;
-hou=String(hou);
-var min=String(this.getMinutes());
-if(min.length==1){
-min="0"+min;
-}
-var sec=String(this.getSeconds());
-if(sec.length==1){
-sec="0"+sec;
-}
-str+=" "+hou;
-str+=":"+min;
-str+=":"+min;
-return str;
-};
-fleegix.date.XDateTime.prototype.toUTCString=function(){
-};
-fleegix.date.XDateTime.prototype.valueOf=function(){
-return this.getTime();
-};
-fleegix.date.XDateTime.prototype.clone=function(){
-return new fleegix.date.XDateTime(this.year,this.month,this.date,this.hours,this.minutes,this.seconds,this.milliseconds,this.timezone);
-};
-fleegix.date.XDateTime.prototype.setFromDateObjProxy=function(dt,_b7){
-this.year=_b7?dt.getUTCFullYear():dt.getFullYear();
-this.month=_b7?dt.getUTCMonth():dt.getMonth();
-this.date=_b7?dt.getUTCDate():dt.getDate();
-this.hours=_b7?dt.getUTCHours():dt.getHours();
-this.minutes=_b7?dt.getUTCMinutes():dt.getMinutes();
-this.seconds=_b7?dt.getUTCSeconds():dt.getSeconds();
-this.milliseconds=_b7?dt.getUTCMilliseconds():dt.getMilliseconds();
-};
-fleegix.date.XDateTime.prototype.setAttribute=function(_b8,n){
-if(isNaN(n)){
-throw ("Units must be a number.");
-}
-var dt=new Date(this.year,this.month,this.date,this.hours,this.minutes,this.seconds,this.milliseconds);
-var _bb=_b8=="year"?"FullYear":_b8.substr(0,1).toUpperCase()+_b8.substr(1);
-dt["set"+_bb](n);
-this.setFromDateObjProxy(dt);
-};
-fleegix.date.XDateTime.prototype.getUTCDateProxy=function(){
-var dt=new Date(Date.UTC(this.year,this.month,this.date,this.hours,this.minutes,this.seconds,this.milliseconds));
-dt.setUTCMinutes(dt.getUTCMinutes()+this.getTimezoneOffset());
-return dt;
-};
-fleegix.date.XDateTime.prototype.setUTCAttribute=function(_bd,n){
-if(isNaN(n)){
-throw ("Units must be a number.");
-}
-var _bf=_bd=="year"?"FullYear":_bd.substr(0,1).toUpperCase()+_bd.substr(1);
-var dt=this.getUTCDateProxy();
-dt["setUTC"+_bf](n);
-dt.setUTCMinutes(dt.getUTCMinutes()-this.getTimezoneOffset());
-this.setFromDateObjProxy(dt,true);
-};
-fleegix.date.XDateTime.prototype.getAstronomicalJulianDate=function(){
-var jd=this.civilToJulianDayNumber(this.year,this.month,this.date);
-var fr=this.timeToDayFraction(this.hour,this.minutes,this.seconds);
-var of=this.offsetToDayFraction(this.offset);
-return this.jDNToAJD(jd,fr,of);
-};
-fleegix.date.XDateTime.prototype.timeToDayFraction=function(h,m,s){
-return (h/24)+(m/1440)+(s/86400);
-};
-fleegix.date.XDateTime.prototype.offsetToDayFraction=function(o){
-return (o/1440);
-};
-fleegix.date.XDateTime.prototype.jDNToAJD=function(jd,fr,of){
-var _cb=of||0;
-return jd+fr-_cb-(1/2);
-};
 fleegix.uri=new function(){
-var _cc=this;
+var _87=this;
 this.params={};
 this.getParamHash=function(){
-var _cd=_cc.getQuery();
+var _88=_87.getQuery();
 var arr=[];
-var _cf=[];
+var _8a=[];
 var ret=null;
 var pat=/(\S+?)=(\S+?)&/g;
-if(_cd){
-_cd+="&";
-while(arr=pat.exec(_cd)){
-_cf[arr[1]]=arr[2];
+if(_88){
+_88+="&";
+while(arr=pat.exec(_88)){
+_8a[arr[1]]=arr[2];
 }
 }
-return _cf;
+return _8a;
 };
-this.getParam=function(_d2){
-return _cc.params[_d2];
+this.getParam=function(_8d){
+return _87.params[_8d];
 };
 this.getQuery=function(){
 return location.href.split("?")[1];
@@ -1030,17 +702,17 @@ return window.innerWidth;
 };
 fleegix.ui.constructor=null;
 fleegix.cookie=new function(){
-this.set=function(_d3,_d4,_d5){
-var _d6=_d5||{};
+this.set=function(_8e,_8f,_90){
+var _91=_90||{};
 var exp="";
 var t=0;
-var _d9=_d6.path||"/";
-var _da=_d6.days||0;
-var _db=_d6.hours||0;
-var _dc=_d6.minutes||0;
-t+=_da?_da*24*60*60*1000:0;
-t+=_db?_db*60*60*1000:0;
-t+=_dc?_dc*60*1000:0;
+var _94=_91.path||"/";
+var _95=_91.days||0;
+var _96=_91.hours||0;
+var _97=_91.minutes||0;
+t+=_95?_95*24*60*60*1000:0;
+t+=_96?_96*60*60*1000:0;
+t+=_97?_97*60*1000:0;
 if(t){
 var dt=new Date();
 dt.setTime(dt.getTime()+t);
@@ -1048,261 +720,31 @@ exp="; expires="+dt.toGMTString();
 }else{
 exp="";
 }
-document.cookie=_d3+"="+_d4+exp+"; path="+_d9;
+document.cookie=_8e+"="+_8f+exp+"; path="+_94;
 };
-this.get=function(_de){
-var _df=_de+"=";
+this.get=function(_99){
+var _9a=_99+"=";
 var arr=document.cookie.split(";");
 for(var i=0;i<arr.length;i++){
 var c=arr[i];
 while(c.charAt(0)==" "){
 c=c.substring(1,c.length);
 }
-if(c.indexOf(_df)==0){
-return c.substring(_df.length,c.length);
+if(c.indexOf(_9a)==0){
+return c.substring(_9a.length,c.length);
 }
 }
 return null;
 };
 this.create=this.set;
-this.destroy=function(_e3,_e4){
-var _e5={};
-_e5.minutes=-1;
-if(_e4){
-_e5.path=_e4;
+this.destroy=function(_9e,_9f){
+var _a0={};
+_a0.minutes=-1;
+if(_9f){
+_a0.path=_9f;
 }
-this.set(_e3,"",_e5);
+this.set(_9e,"",_a0);
 };
 };
 fleegix.cookie.constructor=null;
-if(typeof fleegix.date=="undefined"){
-fleegix.date={};
-}
-fleegix.date.timezone=new function(){
-this.zoneAreas={AFRICA:"africa",ANTARCTICA:"antarctica",ASIA:"asia",AUSTRALASIA:"australasia",BACKWARD:"backward",ETCETERA:"etcetera",EUROPE:"europe",NORTHAMERICA:"northamerica",PACIFICNEW:"pacificnew",SOUTHAMERICA:"southamerica",SYSTEMV:"systemv"};
-var _e6=this;
-var _e7={"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
-var _e8={"sun":0,"mon":1,"tue":2,"wed":3,"thu":4,"fri":5,"sat":6};
-var _e9={"Africa":this.zoneAreas.AFRICA,"Indian":this.zoneAreas.AFRICA,"Antarctica":this.zoneAreas.ANTARCTICA,"Asia":this.zoneAreas.ASIA,"Pacific":this.zoneAreas.AUSTRALASIA,"Australia":this.zoneAreas.AUSTRALASIA,"Etc":this.zoneAreas.ETCETERA,"EST":this.zoneAreas.NORTHAMERICA,"MST":this.zoneAreas.NORTHAMERICA,"HST":this.zoneAreas.NORTHAMERICA,"EST5EDT":this.zoneAreas.NORTHAMERICA,"CST6CDT":this.zoneAreas.NORTHAMERICA,"MST7MDT":this.zoneAreas.NORTHAMERICA,"PST8PDT":this.zoneAreas.NORTHAMERICA,"America":function(){
-var ret=[];
-if(!this.loadedZoneAreas[this.zoneAreas.NORTHAMERICA]){
-ret.push(this.zoneAreas.NORTHAMERICA);
-}
-if(!this.loadedZoneAreas[this.zoneAreas.SOUTHAMERICA]){
-ret.push(this.zoneAreas.SOUTHAMERICA);
-u;
-}
-return ret;
-},"WET":this.zoneAreas.EUROPE,"CET":this.zoneAreas.EUROPE,"MET":this.zoneAreas.EUROPE,"EET":this.zoneAreas.EUROPE,"Europe":this.zoneAreas.EUROPE,"SystemV":this.zoneAreas.SYSTEMV};
-var _eb={"Pacific/Honolulu":this.zoneAreas.NORTHAMERICA,"Pacific/Easter":this.zoneAreas.SOUTHAMERICA,"Pacific/Galapagos":this.zoneAreas.SOUTHAMERICA,"America/Danmarkshavn":this.zoneAreas.EUROPE,"America/Scoresbysund":this.zoneAreas.EUROPE,"America/Godthab":this.zoneAreas.EUROPE,"America/Thule":this.zoneAreas.EUROPE,"Indian/Kerguelen":this.zoneAreas.ANTARCTICA,"Indian/Chagos":this.zoneAreas.ASIA,"Indian/Maldives":this.zoneAreas.ASIA,"Indian/Christmas":this.zoneAreas.AUSTRALASIA,"Indian/Cocos":this.zoneAreas.AUSTRALASIA,"Europe/Nicosia":this.zoneAreas.ASIA,"Pacific/Easter":this.zoneAreas.SOUTHAMERICA,"Africa/Ceuta":this.zoneAreas.EUROPE,"Asia/Yekaterinburg":this.zoneAreas.EUROPE,"Asia/Omsk":this.zoneAreas.EUROPE,"Asia/Novosibirsk":this.zoneAreas.EUROPE,"Asia/Krasnoyarsk":this.zoneAreas.EUROPE,"Asia/Irkutsk":this.zoneAreas.EUROPE,"Asia/Yakutsk":this.zoneAreas.EUROPE,"Asia/Vladivostok":this.zoneAreas.EUROPE,"Asia/Sakhalin":this.zoneAreas.EUROPE,"Asia/Magadan":this.zoneAreas.EUROPE,"Asia/Kamchatka":this.zoneAreas.EUROPE,"Asia/Anadyr":this.zoneAreas.EUROPE,"Asia/Istanbul":this.zoneAreas.EUROPE};
-var _ec={};
-function parseTimeString(str){
-var pat=/(\d+)(?::0*(\d*))?(?::0*(\d*))?([wsugz])?$/;
-var hms=str.match(pat);
-hms[1]=parseInt(hms[1]);
-hms[2]=hms[2]?parseInt(hms[2]):0;
-hms[3]=hms[3]?parseInt(hms[3]):0;
-return hms;
-}
-function getZone(dt,tz){
-var _f2=tz;
-var _f3=_e6.zones[_f2];
-while(typeof (_f3)=="string"){
-_f2=_f3;
-_f3=_e6.zones[_f2];
-if(!_f3){
-alert("Cannot figure out the timezone "+_f2);
-}
-}
-for(var i=0;i<_f3.length;i++){
-var z=_f3[i];
-if(!z[3]){
-break;
-}
-var yea=parseInt(z[3]);
-var mon=11;
-var dat=31;
-if(z[4]){
-mon=_e7[z[4].substr(0,3).toLowerCase()];
-dat=parseInt(z[5]);
-}
-var t=z[6]?z[6]:"23:59:59";
-t=parseTimeString(t);
-var d=Date.UTC(yea,mon,dat,t[1],t[2],t[3]);
-if(dt.getTime()<d){
-break;
-}
-}
-if(i==_f3.length){
-alert("No DST for "+_f2);
-}else{
-return _f3[i];
-}
-}
-function getBasicOffset(z){
-var off=parseTimeString(z[0]);
-var adj=z[0].indexOf("-")==0?-1:1;
-off=adj*(((off[1]*60+off[2])*60+off[3])*1000);
-return -off/60/1000;
-}
-function getRule(dt,str){
-var _100=null;
-var year=dt.getUTCFullYear();
-var _102=_e6.rules[str];
-var _103=[];
-if(!_102){
-return null;
-}
-for(var i=0;i<_102.length;i++){
-r=_102[i];
-if((r[1]<(year-1))||(r[0]<(year-1)&&r[1]=="only")||(r[0]>year)){
-continue;
-}
-var mon=_e7[r[3].substr(0,3).toLowerCase()];
-var day=r[4];
-if(isNaN(day)){
-if(day.substr(0,4)=="last"){
-var day=_e8[day.substr(4,3).toLowerCase()];
-var t=parseTimeString(r[5]);
-var d=new Date(Date.UTC(dt.getUTCFullYear(),mon+1,1,t[1]-24,t[2],t[3]));
-var _109=d.getUTCDay();
-var diff=(day>_109)?(day-_109-7):(day-_109);
-d.setUTCDate(d.getUTCDate()+diff);
-if(dt<d){
-if(r[0]<year){
-d.setUTCFullYear(d.getUTCFullYear()-1);
-if(dt>=d){
-_103.push({"rule":r,"date":d});
-}
-}
-}else{
-_103.push({"rule":r,"date":d});
-}
-}else{
-day=_e8[day.substr(0,3).toLowerCase()];
-if(day!="undefined"){
-if(r[4].substr(3,2)==">="){
-var t=parseTimeString(r[5]);
-var d=new Date(Date.UTC(dt.getUTCFullYear(),mon,parseInt(r[4].substr(5)),t[1],t[2],t[3]));
-var _109=d.getUTCDay();
-var diff=(day<_109)?(day-_109+7):(day-_109);
-d.setUTCDate(d.getUTCDate()+diff);
-if(dt<d){
-if(r[0]<year){
-d.setUTCFullYear(d.getUTCFullYear()-1);
-if(dt>=d){
-_103.push({"rule":r,"date":d});
-}
-}
-}else{
-_103.push({"rule":r,"date":d});
-}
-}else{
-if(day.substr(3,2)=="<="){
-var t=parseTimeString(r[5]);
-var d=new Date(Date.UTC(dt.getUTCFullYear(),mon,parseInt(r[4].substr(5)),t[1],t[2],t[3]));
-var _109=d.getUTCDay();
-var diff=(day>_109)?(day-_109-7):(day-_109);
-d.setUTCDate(d.getUTCDate()+diff);
-if(dt<d){
-if(r[0]<year){
-d.setUTCFullYear(d.getUTCFullYear()-1);
-if(dt>=d){
-_103.push({"rule":r,"date":d});
-}
-}
-}else{
-_103.push({"rule":r,"date":d});
-}
-}
-}
-}
-}
-}else{
-var t=parseTimeString(r[5]);
-var d=new Date(Date.UTC(dt.getUTCFullYear(),mon,day,t[1],t[2],t[3]));
-d.setUTCHours(d.getUTCHours()-24*((7-day+d.getUTCDay())%7));
-if(dt<d){
-continue;
-}else{
-_103.push({"rule":r,"date":d});
-}
-}
-}
-f=function(a,b){
-return (a.date.getTime()>=b.date.getTime())?1:-1;
-};
-_103.sort(f);
-_100=_103.pop().rule;
-return _100;
-}
-function getAdjustedOffset(off,rule){
-var save=rule[6];
-var t=parseTimeString(save);
-var adj=save.indexOf("-")==0?-1:1;
-var ret=(adj*(((t[1]*60+t[2])*60+t[3])*1000));
-ret=ret/60/1000;
-ret-=off;
-ret=-Math.ceil(ret);
-return ret;
-}
-this.defaultZoneArea=this.zoneAreas.NORTHAMERICA;
-this.zones={};
-this.rules={};
-this.parseZones=function(str){
-var s="";
-var _115=str.split("\n");
-var arr=[];
-var _117="";
-var zone=null;
-var rule=null;
-for(var i=0;i<_115.length;i++){
-l=_115[i];
-if(l.match(/^\s/)){
-l="Zone "+zone+l;
-}
-l=l.split("#")[0];
-if(l.length>3){
-arr=l.split(/\s+/);
-_117=arr.shift();
-switch(_117){
-case "Zone":
-zone=arr.shift();
-if(!_e6.zones[zone]){
-_e6.zones[zone]=[];
-}
-_e6.zones[zone].push(arr);
-break;
-case "Rule":
-rule=arr.shift();
-if(!_e6.rules[rule]){
-_e6.rules[rule]=[];
-}
-_e6.rules[rule].push(arr);
-break;
-case "Link":
-if(_e6.zones[arr[1]]){
-alert("Error with Link "+arr[1]);
-}
-_e6.zones[arr[1]]=arr[0];
-break;
-case "Leap":
-break;
-default:
-break;
-}
-}
-}
-return true;
-};
-this.getOffset=function(dt,tz){
-var zone=getZone(dt,tz);
-var off=getBasicOffset(zone);
-var rule=getRule(dt,zone[1]);
-if(rule){
-off=getAdjustedOffset(off,rule);
-}
-return off;
-};
-};
 
