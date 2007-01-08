@@ -15,29 +15,58 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.uri = new function() {
+fleegix.uri = new function () {
   var self = this;
   
   this.params = {};
   
-  this.getParamHash = function() {
-    var query = self.getQuery();
-    var arr = [];
-    var params = [];
-    var ret = null;
-    var pat = /(\S+?)=(\S+?)&/g;
-    if (query) {
-      query += '&';
-      while (arr = pat.exec(query)) {
-        params[arr[1]] = arr[2];
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
+        }
+        else {
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
+          }
+          d[name].push(val);
+        }
       }
     }
-    return params;
+    return d;
   };
-  this.getParam = function(name) {
-    return self.params[name];
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
+    }
+    else {
+      p = this.params[name];
+    }
+    return p;
   };
-  this.getQuery = function() {
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    if (str) { 
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+    }
+    return ret;
+  };
+  this.getQuery = function () {
     return location.href.split('?')[1];
   };
   this.params = this.getParamHash();

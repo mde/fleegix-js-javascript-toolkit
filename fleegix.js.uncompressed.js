@@ -430,6 +430,148 @@ fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerVal
 };
 
 
+fleegix.uri = new function () {
+  var self = this;
+  
+  this.params = {};
+  
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
+        }
+        else {
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
+          }
+          d[name].push(val);
+        }
+      }
+    }
+    return d;
+  };
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
+    }
+    else {
+      p = this.params[name];
+    }
+    return p;
+  };
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    if (str) { 
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+    }
+    return ret;
+  };
+  this.getQuery = function () {
+    return location.href.split('?')[1];
+  };
+  this.params = this.getParamHash();
+}
+fleegix.uri.constructor = null;
+
+fleegix.ui = new function() {
+  this.getWindowHeight = function() {
+    // IE
+    if (document.all) {
+      if (document.documentElement && 
+        document.documentElement.clientHeight) {
+        return document.documentElement.clientHeight;
+      }
+      else {
+        return document.body.clientHeight;
+      }
+    }
+    // Moz/compat
+    else {
+      return window.innerHeight;
+    }
+  };
+  this.getWindowWidth = function() {
+    // IE
+    if (document.all) {
+      if (document.documentElement && 
+        document.documentElement.clientWidth) {
+        return document.documentElement.clientWidth;
+      }
+      else {
+        return document.body.clientWidth;
+      }
+    }
+    // Moz/compat
+    else {
+      return window.innerWidth;
+    }
+  };
+};
+fleegix.ui.constructor = null;
+
+fleegix.popup = new function() {
+  
+  var self = this;
+  this.win = null;
+  this.open = function(url, optParam) {
+    var opts = optParam || {}
+    var str = '';
+    var propList = {
+      'width':'', 
+      'height':'', 
+      'location':0, 
+      'menubar':0, 
+      'resizable':1, 
+      'scrollbars':0,
+      'status':0,
+      'titlebar':1,
+      'toolbar':0
+      };
+    for (var prop in propList) {
+      str += prop + '=';
+      str += opts[prop] ? opts[prop] : propList[prop];
+      str += ',';
+    }
+    var len = str.length;
+    if (len) {
+      str = str.substr(0, len-1);
+    }
+    if(!self.win || self.win.closed) {
+      self.win = window.open(url, 'thePopupWin', str);
+    }
+    else {	  
+      self.win.focus(); 
+      self.win.document.location = url;
+    }
+  };
+  this.close = function() {
+    if (self.win) {
+      self.win.window.close();
+      self.win = null;
+    }
+  };
+  this.goURLMainWin = function(url) {
+    location = url;
+    self.close();
+  };
+}
+fleegix.popup.constructor = null;
+
 
 
 /**
@@ -669,56 +811,6 @@ fleegix.form.diff = function (formA, formB) {
 
 
 
-fleegix.popup = new function() {
-  
-  var self = this;
-  this.win = null;
-  this.open = function(url, optParam) {
-    var opts = optParam || {}
-    var str = '';
-    var propList = {
-      'width':'', 
-      'height':'', 
-      'location':0, 
-      'menubar':0, 
-      'resizable':1, 
-      'scrollbars':0,
-      'status':0,
-      'titlebar':1,
-      'toolbar':0
-      };
-    for (var prop in propList) {
-      str += prop + '=';
-      str += opts[prop] ? opts[prop] : propList[prop];
-      str += ',';
-    }
-    var len = str.length;
-    if (len) {
-      str = str.substr(0, len-1);
-    }
-    if(!self.win || self.win.closed) {
-      self.win = window.open(url, 'thePopupWin', str);
-    }
-    else {	  
-      self.win.focus(); 
-      self.win.document.location = url;
-    }
-  };
-  this.close = function() {
-    if (self.win) {
-      self.win.window.close();
-      self.win = null;
-    }
-  };
-  this.goURLMainWin = function(url) {
-    location = url;
-    self.close();
-  };
-}
-fleegix.popup.constructor = null;
-
-
-
 
 fleegix.event = new function() {
   
@@ -922,70 +1014,7 @@ fleegix.event.constructor = null;
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
-fleegix.uri = new function() {
-  var self = this;
-  
-  this.params = {};
-  
-  this.getParamHash = function() {
-    var query = self.getQuery();
-    var arr = [];
-    var params = [];
-    var ret = null;
-    var pat = /(\S+?)=(\S+?)&/g;
-    if (query) {
-      query += '&';
-      while (arr = pat.exec(query)) {
-        params[arr[1]] = arr[2];
-      }
-    }
-    return params;
-  };
-  this.getParam = function(name) {
-    return self.params[name];
-  };
-  this.getQuery = function() {
-    return location.href.split('?')[1];
-  };
-  this.params = this.getParamHash();
-}
-fleegix.uri.constructor = null;
 
-fleegix.ui = new function() {
-  this.getWindowHeight = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientHeight) {
-        return document.documentElement.clientHeight;
-      }
-      else {
-        return document.body.clientHeight;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerHeight;
-    }
-  };
-  this.getWindowWidth = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientWidth) {
-        return document.documentElement.clientWidth;
-      }
-      else {
-        return document.body.clientWidth;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerWidth;
-    }
-  };
-};
-fleegix.ui.constructor = null;
 
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
