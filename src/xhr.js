@@ -147,15 +147,23 @@ fleegix.xhr = new function () {
       return req.id;
     }
     else {
-        return resp;
+        return this.sendRequest(this.syncTransporter, req);
     }
   };
-  this.sendRequest = function (transporter, req) {
-    var trans = req.async ? this.transporters[transporter] :
-      transporter;
+  this.sendRequest = function (t, req) {
+    var transporterId = null;
+    var trans = null;
     var self = this;
-    this.processing[transporterId] = trans;
-
+    var resp = null;
+    
+    if (req.async) {
+      transporterId = t;
+      trans = this.transporters[transporterId];
+      this.processing[transporterId] = trans;
+    }
+    else {
+      trans = t;
+    }
     // Set up the request
     // ==========================
     if (req.username && req.password) {
@@ -184,6 +192,7 @@ fleegix.xhr = new function () {
           'application/x-www-form-urlencoded');
       }
     }
+    
     trans.onreadystatechange = function () {
       if (trans.readyState == 4) {
         // Set the response according to the desired format
@@ -227,7 +236,7 @@ fleegix.xhr = new function () {
         
         // Clean up, handle any waiting requests
         if (req.async) {
-          delete self.processing[transporter];
+          delete self.processing[transporterId];
           
           if (self.requestQueue.length) {
             var nextReq = self.requestQueue.pop();
@@ -243,6 +252,10 @@ fleegix.xhr = new function () {
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
+    
+    if (!req.async) {
+      return resp;
+    }
   }
   this.abort = function () {
     if (this.trans) {
