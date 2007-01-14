@@ -17,28 +17,45 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.xhr = new function () {
-
-  var i = 0;
-  var t = [ // Array of XHR obj to try to invoke
-    function () { return new XMLHttpRequest(); },
-    function () { return new ActiveXObject('Msxml2.XMLHTTP') },
-    function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
   
-  // Properties
+  function spawnTransporter(isSync) {
+    var i = 0;
+    var t = [ // Array of XHR obj to try to invoke
+      function () { return new XMLHttpRequest(); },
+      function () { return new ActiveXObject('Msxml2.XMLHTTP') },
+      function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
+    var trans = null;
+    // Instantiate XHR obj
+    while (!trans && (i < t.length)) {
+      try { trans = t[i++](); } 
+      catch(e) {}
+    }
+    if (trans) {
+      if (isSync) {
+        return trans;
+      }
+      else {
+        fleegix.xhr.transporters.push(trans);
+        var transporterId = fleegix.xhr.transporters.length - 1;
+        return transporterId;
+      }
+    }
+    else {
+      throw('Could not create XMLHttpRequest object.');
+    }
+  }
+  
+  // Public members 
   // ================================
-  this.trans = null;
+  this.transporters = [];
   this.lastReqId = 0;
- 
-  // Try to instantiate an XHR obj
-  while (!this.trans && (i < t.length)) {
-    try { this.trans = t[i++](); } 
-    catch(e) {}
-  }
-  if (!this.trans) {
-    throw('Could not create XMLHttpRequest object.');
-  }
+  this.maxTransporters = 10;
+  this.requestQueue = [];
+  this.idleTransporters = [];
+  this.processing = {};
+  this.syncTransporter = spawnTransporter(true);
   
-  // Methods
+  // Public methods
   // ================================
   this.doGet = function () {
     var o = {};
@@ -112,6 +129,33 @@ fleegix.xhr = new function () {
     this.lastReqId++; // Increment req ID
     req.id = this.lastReqId;
     
+    // Return request ID or response
+    if (req.async) {
+      if (this.idleTransporters.length) {
+        var transporterId = this.idleTransporters.pop();
+      }
+      else if (this.transporters.length < this.maxTransporters) {
+        var transporterId = spawnTransporter();
+      }
+      
+      if (typeof transporterId == 'number') {
+        this.sendRequest(transporterId, req);
+      }
+      else {
+        this.requestQueue.push(req);
+      }
+      return req.id;
+    }
+    else {
+        return resp;
+    }
+  };
+  this.sendRequest = function (transporter, req) {
+    var trans = req.async ? this.transporters[transporter] :
+      transporter;
+    var self = this;
+    this.processing[transporterId] = trans;
+
     // Set up the request
     // ==========================
     if (req.username && req.password) {
@@ -140,7 +184,6 @@ fleegix.xhr = new function () {
           'application/x-www-form-urlencoded');
       }
     }
-    
     trans.onreadystatechange = function () {
       if (trans.readyState == 4) {
         // Set the response according to the desired format
@@ -158,7 +201,7 @@ fleegix.xhr = new function () {
             resp = trans;
             break;
         }
-        // Request is successful -- pass off to response handler
+        // Request is successful -- execute response handler
         if (trans.status > 199 && trans.status < 300) {
           if (req.async) {
               // Make sure handler is defined
@@ -172,7 +215,7 @@ fleegix.xhr = new function () {
               }
           }
         }
-        // Request fails -- pass to error handler
+        // Request fails -- execute error handler
         else {
           if (req.handleErr) {
             req.handleErr(resp);
@@ -181,30 +224,33 @@ fleegix.xhr = new function () {
             handleErrDefault(trans);
           }
         }
+        
+        // Clean up, handle any waiting requests
+        if (req.async) {
+          delete self.processing[transporter];
+          
+          if (self.requestQueue.length) {
+            var nextReq = self.requestQueue.pop();
+            self.sendRequest(transporterId, nextReq);
+          }
+          else {
+            self.idleTransporters.push(transporterId);
+          }
+        }
       }
     };
 
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
-
-    // Return request ID or response
-    if (req.async) {
-        return req.id;
-    }
-    else {
-        return resp;
-    }
-  };
+  }
   this.abort = function () {
     if (this.trans) {
       this.trans.onreadystatechange = function () { };
       this.trans.abort();
     }
   };
-  this.handleErrDefault = function (r) {
-  };
-}
+};
 
 fleegix.xhr.constructor = null;
 
