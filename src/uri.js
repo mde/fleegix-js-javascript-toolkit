@@ -64,6 +64,9 @@ fleegix.uri = new function () {
         ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
       }
     }
+    else {
+      ret = name + '=' + val;
+    }
     return ret;
   };
   this.getQuery = function () {
