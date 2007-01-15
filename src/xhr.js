@@ -47,12 +47,32 @@ fleegix.xhr = new function () {
   
   // Public members 
   // ================================
+  // Array of XHR obj transporters, spawned as needed up to 
+  // maxTransporters ceiling
   this.transporters = [];
+  // Maximum number of XHR objects to spawn to handle requests
+  // IE6 and IE7 are shite for XHR re-use -- fortunately
+  // copious numbers of XHR objs don't seem to be a problem
+  // Moz/Safari perform significantly better with XHR re-use
+  this.maxTransporters = document.all ? 500 : 5;
+  // Used to increment request IDs -- these may be used for
+  // externally tracking or aborting specific requests
   this.lastReqId = 0;
-  this.maxTransporters = 10;
+  // Queued-up requests -- appended to when all XHR transporters
+  // are in use -- FIFO list, XHR objs respond to waiting
+  // requests immediately as then finish processing the current one
   this.requestQueue = [];
+  // List of free XHR objs -- transporters sit here when not 
+  // processing requests. If this is empty when a new request comes
+  // in, we try to spawn a request -- if we're already at max 
+  // transporter number, we queue the request
   this.idleTransporters = [];
+  // Hash of currently in-flight requests -- each string key is
+  // the index pos in this.transporters of the XHR obj that's in use
+  // Used to abort processing requests
   this.processing = {};
+  // The single XHR obj used for synchronous requests -- sync
+  // requests do not participate in the request pooling
   this.syncTransporter = spawnTransporter(true);
   
   // Public methods
@@ -101,8 +121,61 @@ fleegix.xhr = new function () {
   this.doReq = function (o) {
     var opts = o || {};
     var req = new fleegix.xhr.Request();
-    var trans = this.trans; // XHR transport
-    var resp = null; // The response to return
+    var transporterId = null;
+
+    // Override default request opts with any specified 
+    for (var p in opts) {
+      req[p] = opts[p];
+    }
+    
+    this.lastReqId++; // Increment req ID
+    req.id = this.lastReqId;
+    
+    // Return request ID or response
+    // Async -- handle request or queue it up
+    // -------
+    if (req.async) {
+      // If we have an instantiated XHR we can use, let him handle it
+      if (this.idleTransporters.length) {
+        transporterId = this.idleTransporters.shift();
+      }
+      // No available XHRs -- spawn a new one if we're still
+      // below the limit
+      else if (this.transporters.length < this.maxTransporters) {
+        transporterId = spawnTransporter();
+      }
+      
+      // If we have an XHR transporter to handle the request, do it
+      // transporterId should be a number (index of XHR obj in this.transporters)
+      if (transporterId != null) {
+        this.processReq(transporterId, req);
+      }
+      // No transporter available to handle the request -- queue it up
+      else {
+        // Uber-requests step to the front of the line, please
+        if (req.uber) {
+          this.requestQueue.unshift(req);
+        }
+        // Normal queued requests are FIFO
+        else {
+          this.requestQueue.push(req);
+        }
+      }
+      // Return request ID -- may be used for aborting, 
+      // external tracking, etc.
+      return req.id;
+    }
+    // Sync -- do request inlne and return actual result 
+    // -------
+    else {
+        return this.processReq(this.syncTransporter, req);
+    }
+  };
+  this.processReq = function (t, req) {
+    var transporterId = null;
+    var trans = null;
+    var self = this;
+    var resp = null;
     
     // Default err handler -- pop up full window with error
     // if request has no handler specifically defined
@@ -120,47 +193,35 @@ fleegix.xhr = new function () {
           'Please allow pop-ups from this Web site.');
         }
     }
-    
-    // Override default request opts with any specified 
-    for (var p in opts) {
-      req[p] = opts[p];
+    // Return desired type of response, text, xml, or raw obj.
+    // Used both in the anonymous function for onreadystatechange
+    // in async mode and in blocking mode
+    function getResponseByType() {
+        // Set the response according to the desired format
+        switch(req.responseFormat) {
+          // Text
+          case 'text':
+            r = trans.responseText;
+            break;
+          // XML
+          case 'xml':
+            r = trans.responseXML;
+            break;
+          // The object itself
+          case 'object':
+            r = trans;
+            break;
+        }
+        return r;
     }
-    
-    this.lastReqId++; // Increment req ID
-    req.id = this.lastReqId;
-    
-    // Return request ID or response
-    if (req.async) {
-      if (this.idleTransporters.length) {
-        var transporterId = this.idleTransporters.pop();
-      }
-      else if (this.transporters.length < this.maxTransporters) {
-        var transporterId = spawnTransporter();
-      }
-      
-      if (typeof transporterId == 'number') {
-        this.sendRequest(transporterId, req);
-      }
-      else {
-        this.requestQueue.push(req);
-      }
-      return req.id;
-    }
-    else {
-        return this.sendRequest(this.syncTransporter, req);
-    }
-  };
-  this.sendRequest = function (t, req) {
-    var transporterId = null;
-    var trans = null;
-    var self = this;
-    var resp = null;
-    
+   
+    // Async mode -- grab an XHR obj from the pool
     if (req.async) {
       transporterId = t;
       trans = this.transporters[transporterId];
       this.processing[transporterId] = trans;
     }
+    // Sync mode -- use XHR transporter passed in 
     else {
       trans = t;
     }
@@ -193,24 +254,15 @@ fleegix.xhr = new function () {
       }
     }
     
+    // Anonymous handler for async mode
     trans.onreadystatechange = function () {
+      // When request completes
       if (trans.readyState == 4) {
-        // Set the response according to the desired format
-        switch(req.responseFormat) {
-          // Text
-          case 'text':
-            resp = trans.responseText;
-            break;
-          // XML
-          case 'xml':
-            resp = trans.responseXML;
-            break;
-          // The object itself
-          case 'object':
-            resp = trans;
-            break;
-        }
-        // Request is successful -- execute response handler
+        
+        // Grab the desired response type
+        resp = getResponseByType();
+
+        // Request was successful -- execute response handler
         if (trans.status > 199 && trans.status < 300) {
           if (req.async) {
               // Make sure handler is defined
@@ -224,7 +276,7 @@ fleegix.xhr = new function () {
               }
           }
         }
-        // Request fails -- execute error handler
+        // Request failed -- execute error handler
         else {
           if (req.handleErr) {
             req.handleErr(resp);
@@ -234,14 +286,19 @@ fleegix.xhr = new function () {
           }
         }
         
-        // Clean up, handle any waiting requests
+        // Clean up, move immediately to respond to any
+        // queued up requests
         if (req.async) {
+          // Remove from list of transporters currently in use
+          // this XHR can't be aborted until it's processing again
           delete self.processing[transporterId];
           
+          // Requests queued up, grab one to respond to 
           if (self.requestQueue.length) {
-            var nextReq = self.requestQueue.pop();
-            self.sendRequest(transporterId, nextReq);
+            var nextReq = self.requestQueue.shift();
+            self.processReq(transporterId, nextReq);
           }
+          // Otherwise this transporter is idle, waiting to respond
           else {
             self.idleTransporters.push(transporterId);
           }
@@ -253,14 +310,22 @@ fleegix.xhr = new function () {
     // ==========================
     trans.send(req.dataPayload);
     
+    // Sync mode -- return actual result inline back to doReq
     if (!req.async) {
+      resp = getResponseByType();
       return resp;
     }
   }
-  this.abort = function () {
-    if (this.trans) {
-      this.trans.onreadystatechange = function () { };
-      this.trans.abort();
+  this.abort = function (reqId) {
+    // Abort the req if it's still processing
+    var t = this.processing[reqId];
+    if (t) {
+      t.onreadystatechange = function () { };
+      t.abort();
+      return true;
+    }
+    else {
+      return false;
     }
   };
 };
@@ -284,6 +349,7 @@ fleegix.xhr.Request = function () {
   this.username = '';
   this.password = '';
   this.headers = [];
+  this.uber = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
