@@ -330,6 +330,8 @@ var arr=str.match(pat);
 if(arr){
 ret=str.replace(arr[0],arr[1]+_45+"="+val+arr[3]);
 }
+}else{
+ret=_45+"="+val;
 }
 return ret;
 };
