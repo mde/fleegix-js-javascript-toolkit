@@ -216,28 +216,65 @@ fleegix.xml = new function(){
 fleegix.xml.constructor = null;
 
 fleegix.xhr = new function () {
-
-  var i = 0;
-  var t = [ // Array of XHR obj to try to invoke
-    function () { return new XMLHttpRequest(); },
-    function () { return new ActiveXObject('Msxml2.XMLHTTP') },
-    function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
   
-  // Properties
+  function spawnTransporter(isSync) {
+    var i = 0;
+    var t = [ // Array of XHR obj to try to invoke
+      function () { return new XMLHttpRequest(); },
+      function () { return new ActiveXObject('Msxml2.XMLHTTP') },
+      function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
+    var trans = null;
+    // Instantiate XHR obj
+    while (!trans && (i < t.length)) {
+      try { trans = t[i++](); } 
+      catch(e) {}
+    }
+    if (trans) {
+      if (isSync) {
+        return trans;
+      }
+      else {
+        fleegix.xhr.transporters.push(trans);
+        var transporterId = fleegix.xhr.transporters.length - 1;
+        return transporterId;
+      }
+    }
+    else {
+      throw('Could not create XMLHttpRequest object.');
+    }
+  }
+  
+  // Public members 
   // ================================
-  this.trans = null;
+  // Array of XHR obj transporters, spawned as needed up to 
+  // maxTransporters ceiling
+  this.transporters = [];
+  // Maximum number of XHR objects to spawn to handle requests
+  // IE6 and IE7 are shite for XHR re-use -- fortunately
+  // copious numbers of XHR objs don't seem to be a problem
+  // Moz/Safari perform significantly better with XHR re-use
+  this.maxTransporters = document.all ? 500 : 5;
+  // Used to increment request IDs -- these may be used for
+  // externally tracking or aborting specific requests
   this.lastReqId = 0;
- 
-  // Try to instantiate an XHR obj
-  while (!this.trans && (i < t.length)) {
-    try { this.trans = t[i++](); } 
-    catch(e) {}
-  }
-  if (!this.trans) {
-    throw('Could not create XMLHttpRequest object.');
-  }
+  // Queued-up requests -- appended to when all XHR transporters
+  // are in use -- FIFO list, XHR objs respond to waiting
+  // requests immediately as then finish processing the current one
+  this.requestQueue = [];
+  // List of free XHR objs -- transporters sit here when not 
+  // processing requests. If this is empty when a new request comes
+  // in, we try to spawn a request -- if we're already at max 
+  // transporter number, we queue the request
+  this.idleTransporters = [];
+  // Hash of currently in-flight requests -- each string key is
+  // the index pos in this.transporters of the XHR obj that's in use
+  // Used to abort processing requests
+  this.processing = {};
+  // The single XHR obj used for synchronous requests -- sync
+  // requests do not participate in the request pooling
+  this.syncTransporter = spawnTransporter(true);
   
-  // Methods
+  // Public methods
   // ================================
   this.doGet = function () {
     var o = {};
@@ -283,8 +320,61 @@ fleegix.xhr = new function () {
   this.doReq = function (o) {
     var opts = o || {};
     var req = new fleegix.xhr.Request();
-    var trans = this.trans; // XHR transport
-    var resp = null; // The response to return
+    var transporterId = null;
+
+    // Override default request opts with any specified 
+    for (var p in opts) {
+      req[p] = opts[p];
+    }
+    
+    this.lastReqId++; // Increment req ID
+    req.id = this.lastReqId;
+    
+    // Return request ID or response
+    // Async -- handle request or queue it up
+    // -------
+    if (req.async) {
+      // If we have an instantiated XHR we can use, let him handle it
+      if (this.idleTransporters.length) {
+        transporterId = this.idleTransporters.shift();
+      }
+      // No available XHRs -- spawn a new one if we're still
+      // below the limit
+      else if (this.transporters.length < this.maxTransporters) {
+        transporterId = spawnTransporter();
+      }
+      
+      // If we have an XHR transporter to handle the request, do it
+      // transporterId should be a number (index of XHR obj in this.transporters)
+      if (transporterId != null) {
+        this.processReq(transporterId, req);
+      }
+      // No transporter available to handle the request -- queue it up
+      else {
+        // Uber-requests step to the front of the line, please
+        if (req.uber) {
+          this.requestQueue.unshift(req);
+        }
+        // Normal queued requests are FIFO
+        else {
+          this.requestQueue.push(req);
+        }
+      }
+      // Return request ID -- may be used for aborting, 
+      // external tracking, etc.
+      return req.id;
+    }
+    // Sync -- do request inlne and return actual result 
+    // -------
+    else {
+        return this.processReq(this.syncTransporter, req);
+    }
+  };
+  this.processReq = function (t, req) {
+    var transporterId = null;
+    var trans = null;
+    var self = this;
+    var resp = null;
     
     // Default err handler -- pop up full window with error
     // if request has no handler specifically defined
@@ -302,15 +392,38 @@ fleegix.xhr = new function () {
           'Please allow pop-ups from this Web site.');
         }
     }
-    
-    // Override default request opts with any specified 
-    for (var p in opts) {
-      req[p] = opts[p];
+    // Return desired type of response, text, xml, or raw obj.
+    // Used both in the anonymous function for onreadystatechange
+    // in async mode and in blocking mode
+    function getResponseByType() {
+        // Set the response according to the desired format
+        switch(req.responseFormat) {
+          // Text
+          case 'text':
+            r = trans.responseText;
+            break;
+          // XML
+          case 'xml':
+            r = trans.responseXML;
+            break;
+          // The object itself
+          case 'object':
+            r = trans;
+            break;
+        }
+        return r;
     }
-    
-    this.lastReqId++; // Increment req ID
-    req.id = this.lastReqId;
-    
+   
+    // Async mode -- grab an XHR obj from the pool
+    if (req.async) {
+      transporterId = t;
+      trans = this.transporters[transporterId];
+      this.processing[transporterId] = trans;
+    }
+    // Sync mode -- use XHR transporter passed in 
+    else {
+      trans = t;
+    }
     // Set up the request
     // ==========================
     if (req.username && req.password) {
@@ -340,24 +453,15 @@ fleegix.xhr = new function () {
       }
     }
     
+    // Anonymous handler for async mode
     trans.onreadystatechange = function () {
+      // When request completes
       if (trans.readyState == 4) {
-        // Set the response according to the desired format
-        switch(req.responseFormat) {
-          // Text
-          case 'text':
-            resp = trans.responseText;
-            break;
-          // XML
-          case 'xml':
-            resp = trans.responseXML;
-            break;
-          // The object itself
-          case 'object':
-            resp = trans;
-            break;
-        }
-        // Request is successful -- pass off to response handler
+        
+        // Grab the desired response type
+        resp = getResponseByType();
+
+        // Request was successful -- execute response handler
         if (trans.status > 199 && trans.status < 300) {
           if (req.async) {
               // Make sure handler is defined
@@ -371,7 +475,7 @@ fleegix.xhr = new function () {
               }
           }
         }
-        // Request fails -- pass to error handler
+        // Request failed -- execute error handler
         else {
           if (req.handleErr) {
             req.handleErr(resp);
@@ -380,30 +484,50 @@ fleegix.xhr = new function () {
             handleErrDefault(trans);
           }
         }
+        
+        // Clean up, move immediately to respond to any
+        // queued up requests
+        if (req.async) {
+          // Remove from list of transporters currently in use
+          // this XHR can't be aborted until it's processing again
+          delete self.processing[transporterId];
+          
+          // Requests queued up, grab one to respond to 
+          if (self.requestQueue.length) {
+            var nextReq = self.requestQueue.shift();
+            self.processReq(transporterId, nextReq);
+          }
+          // Otherwise this transporter is idle, waiting to respond
+          else {
+            self.idleTransporters.push(transporterId);
+          }
+        }
       }
     };
 
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
-
-    // Return request ID or response
-    if (req.async) {
-        return req.id;
+    
+    // Sync mode -- return actual result inline back to doReq
+    if (!req.async) {
+      resp = getResponseByType();
+      return resp;
+    }
+  }
+  this.abort = function (reqId) {
+    // Abort the req if it's still processing
+    var t = this.processing[reqId];
+    if (t) {
+      t.onreadystatechange = function () { };
+      t.abort();
+      return true;
     }
     else {
-        return resp;
+      return false;
     }
   };
-  this.abort = function () {
-    if (this.trans) {
-      this.trans.onreadystatechange = function () { };
-      this.trans.abort();
-    }
-  };
-  this.handleErrDefault = function (r) {
-  };
-}
+};
 
 fleegix.xhr.constructor = null;
 
@@ -424,156 +548,12 @@ fleegix.xhr.Request = function () {
   this.username = '';
   this.password = '';
   this.headers = [];
+  this.uber = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
 
-
-fleegix.uri = new function () {
-  var self = this;
-  
-  this.params = {};
-  
-  this.getParamHash = function (str) {
-    var q = str || self.getQuery();
-    var d = {};
-    if (q) {
-      var arr = q.split('&');
-      for (var i = 0; i < arr.length; i++) {
-        var pair = arr[i].split('=');
-        var name = pair[0];
-        var val = pair[1];
-        if (typeof d[name] == 'undefined') {
-          d[name] = val;
-        }
-        else {
-          if (!(d[name] instanceof Array)) {
-            var t = d[name];
-            d[name] = [];
-            d[name].push(t);
-          }
-          d[name].push(val);
-        }
-      }
-    }
-    return d;
-  };
-  this.getParam = function (name, str) {
-    var p = null;
-    if (str) {
-      var h = this.getParamHash(str);
-      p = h[name];
-    }
-    else {
-      p = this.params[name];
-    }
-    return p;
-  };
-  this.setParam = function (name, val, str) {
-    var ret = null;
-    if (str) { 
-      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
-      var arr = str.match(pat);
-      if (arr) {
-        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
-      }
-    }
-    else {
-      ret = name + '=' + val;
-    }
-    return ret;
-  };
-  this.getQuery = function () {
-    return location.href.split('?')[1];
-  };
-  this.params = this.getParamHash();
-}
-fleegix.uri.constructor = null;
-
-fleegix.ui = new function() {
-  this.getWindowHeight = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientHeight) {
-        return document.documentElement.clientHeight;
-      }
-      else {
-        return document.body.clientHeight;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerHeight;
-    }
-  };
-  this.getWindowWidth = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientWidth) {
-        return document.documentElement.clientWidth;
-      }
-      else {
-        return document.body.clientWidth;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerWidth;
-    }
-  };
-};
-fleegix.ui.constructor = null;
-
-fleegix.popup = new function() {
-  
-  var self = this;
-  this.win = null;
-  this.open = function(url, optParam) {
-    var opts = optParam || {}
-    var str = '';
-    var propList = {
-      'width':'', 
-      'height':'', 
-      'location':0, 
-      'menubar':0, 
-      'resizable':1, 
-      'scrollbars':0,
-      'status':0,
-      'titlebar':1,
-      'toolbar':0
-      };
-    for (var prop in propList) {
-      str += prop + '=';
-      str += opts[prop] ? opts[prop] : propList[prop];
-      str += ',';
-    }
-    var len = str.length;
-    if (len) {
-      str = str.substr(0, len-1);
-    }
-    if(!self.win || self.win.closed) {
-      self.win = window.open(url, 'thePopupWin', str);
-    }
-    else {	  
-      self.win.focus(); 
-      self.win.document.location = url;
-    }
-  };
-  this.close = function() {
-    if (self.win) {
-      self.win.window.close();
-      self.win = null;
-    }
-  };
-  this.goURLMainWin = function(url) {
-    location = url;
-    self.close();
-  };
-}
-fleegix.popup.constructor = null;
 
 
 
@@ -814,6 +794,56 @@ fleegix.form.diff = function (formA, formB) {
 
 
 
+fleegix.popup = new function() {
+  
+  var self = this;
+  this.win = null;
+  this.open = function(url, optParam) {
+    var opts = optParam || {}
+    var str = '';
+    var propList = {
+      'width':'', 
+      'height':'', 
+      'location':0, 
+      'menubar':0, 
+      'resizable':1, 
+      'scrollbars':0,
+      'status':0,
+      'titlebar':1,
+      'toolbar':0
+      };
+    for (var prop in propList) {
+      str += prop + '=';
+      str += opts[prop] ? opts[prop] : propList[prop];
+      str += ',';
+    }
+    var len = str.length;
+    if (len) {
+      str = str.substr(0, len-1);
+    }
+    if(!self.win || self.win.closed) {
+      self.win = window.open(url, 'thePopupWin', str);
+    }
+    else {	  
+      self.win.focus(); 
+      self.win.document.location = url;
+    }
+  };
+  this.close = function() {
+    if (self.win) {
+      self.win.window.close();
+      self.win = null;
+    }
+  };
+  this.goURLMainWin = function(url) {
+    location = url;
+    self.close();
+  };
+}
+fleegix.popup.constructor = null;
+
+
+
 
 fleegix.event = new function() {
   
@@ -1017,7 +1047,102 @@ fleegix.event.constructor = null;
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
+fleegix.uri = new function () {
+  var self = this;
+  
+  this.params = {};
+  
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
+        }
+        else {
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
+          }
+          d[name].push(val);
+        }
+      }
+    }
+    return d;
+  };
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
+    }
+    else {
+      p = this.params[name];
+    }
+    return p;
+  };
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    if (str) { 
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+    }
+    else {
+      ret = name + '=' + val;
+    }
+    return ret;
+  };
+  this.getQuery = function () {
+    return location.href.split('?')[1];
+  };
+  this.params = this.getParamHash();
+}
+fleegix.uri.constructor = null;
 
+fleegix.ui = new function() {
+  this.getWindowHeight = function() {
+    // IE
+    if (document.all) {
+      if (document.documentElement && 
+        document.documentElement.clientHeight) {
+        return document.documentElement.clientHeight;
+      }
+      else {
+        return document.body.clientHeight;
+      }
+    }
+    // Moz/compat
+    else {
+      return window.innerHeight;
+    }
+  };
+  this.getWindowWidth = function() {
+    // IE
+    if (document.all) {
+      if (document.documentElement && 
+        document.documentElement.clientWidth) {
+        return document.documentElement.clientWidth;
+      }
+      else {
+        return document.body.clientWidth;
+      }
+    }
+    // Moz/compat
+    else {
+      return window.innerWidth;
+    }
+  };
+};
+fleegix.ui.constructor = null;
 
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
