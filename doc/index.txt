@@ -1,30 +1,209 @@
+Cookies
 
-fleegix.json.serialize
-fleegix.xml.parse
-fleegix.xhr.doGet
-fleegix.xhr.doPost
-fleegix.xhr.doReq
-fleegix.xhr.abort
-fleegix.uri.getParam
-fleegix.uri.setParam
-fleegix.ui.getWindowWidth
-fleegix.ui.getWindowHeight
-fleegix.popup.open
-fleegix.popup.close
-fleegix.popup.goURLMainWin
+fleegix.cookie.destroy
+fleegix.cookie.get
+fleegix.cookie.set
+
+Events
+
+fleegix.event.listen
+fleegix.event.publish
+fleegix.event.unlisten
+fleegix.event.unpublish
+
+Forms
+
+fleegix.form.diff
+fleegix.form.restore
 fleegix.form.serialize
 fleegix.form.toHash
-fleegix.form.restore
-fleegix.form.diff
-fleegix.event.listen
-fleegix.event.unlisten
-fleegix.event.publish
-fleegix.event.unpublish
-fleegix.cookie.set
-fleegix.cookie.get
-fleegix.cookie.destroy
 
+JSON
 
+fleegix.json.serialize
 
+Popup window module
 
+fleegix.popup.close
+fleegix.popup.goURLMainWin
+fleegix.popup.open
+
+UI
+
+fleegix.ui.getWindowHeight
+fleegix.ui.getWindowWidth
+
+URI
+
+fleegix.uri.getParam
+fleegix.uri.setParam
+
+XHR
+
+Has two convenient methods for doing the standard GET and POST
+requests, as well as the ability to do requests with more
+detailed control (such as using arbitrary HTTP methods such
+as PUT, setting authentication headers, or the format of the
+response). Implements XHR-object pooling and request queueing.
+
+fleegix.xhr.doGet
+
+* Syntax
+
+fleegix.xhr.doGet(handlerFunction, url, [responseFormat]); (async)
+fleegix.xhr.doGet(url, [responseFormat]); (sync)
+
+* Parameters
+
+handlerFunction (Function) -- function called when an
+asynchronous XHR request returns. If first argument
+is missing, doGet assumes a synchronous (blocking) request.
+When called by the response, it will be passed two parameters
+-- the response in the desired format, and the request ID.
+
+url (String) -- The URL to make the request to.
+
+responseFormat (String) -- Optional parameter, sets the format
+of the response passed to the handler function.  Possible values
+are 'text' (to pass the responseText of the XHR object), 'xml'
+(the responseXML), and 'object' (to get the XHR object itself)
+Defaults to 'text.'
+
+* Description
+
+Makes an XHR GET request, and passes the result to the specified
+handler function.
+
+* Examples
+
+function alertResponse(resp, id) {
+  alert(resp);
+  alert('Request ID was: ' + id);
+}
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt');
+
+var s = fleegix.xhr.doGet('random_textfile.txt');
+alert(s);
+
+function alertStatus(resp, id) {
+  alert(resp.status);
+}
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 'object');
+
+fleegix.xhr.doPost
+
+* Syntax
+
+fleegix.xhr.doPost(handlerFunction, url, dataPayload, [responseFormat]); (async)
+fleegix.xhr.doPost(url, dataPayload, [responseFormat]); (sync)
+
+* Parameters
+
+handlerFunction (Function) -- function called when an
+asynchronous XHR request returns. If first argument
+is missing, doPost assumes a synchronous (blocking) request.
+When called by the response, it will be passed two parameters
+-- the response in the desired format, and the request ID.
+
+url (String) -- The URL to make the request to.
+
+dataPayload (String) -- Data payload to send with the request.
+
+responseFormat (String) -- Optional parameter, sets the format
+of the response passed to the handler function.  Possible values
+are 'text' (to pass the responseText of the XHR object), 'xml'
+(the responseXML), and 'object' (to get the XHR object itself)
+Defaults to 'text.'
+
+* Description
+
+Makes an XHR POST request, and passes the result to the specified
+handler function.
+
+* Examples
+
+function alertResponse(resp, id) {
+  alert(resp);
+}
+fleegix.xhr.doPost(alertResponse, 'random_textfile.txt',
+  'foo=bar&baz=2112');
+
+var s = fleegix.xhr.doPost('random_textfile.txt', 
+  'foo=bar&baz=2112');
+alert(s);
+
+function alertStatus(resp, id) {
+  alert(resp.status);
+  alert('Request ID was: ' + id);
+}
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+  'foo=bar&baz=2112', 'object');
+
+fleegix.xhr.doReq
+
+* Syntax
+
+fleegix.xhr.doReq(requestOptions); (async)
+
+* Parameters
+
+requestOptions (Object) -- Options for the XHR request. Here
+is the list of possible properties to set, and the default
+values if they are not set:
+
+  * url: null -- The URL to make the request to
+  * method: 'GET' -- HTTP request method to use
+  * async: true -- If set to false, makes a blocking
+    request and returns the result inline
+  * dataPayload: null -- data to send with POST or
+    PUT requests
+  * handleSuccess: null -- Function to handle successful 
+    responses for asynchronous requests
+  * handleErr: null -- Function to handle error 
+    responses for asynchronous requests. If no error/all
+    handler exists, the error will be handled with the
+    built-in function fleegix.xhr.handleErrDefault, which
+    pops up the error page from the server in a new,
+    full-sized window
+  * handleAll: null -- Function to handle both errors
+    or successful responses. If you set this, don't set
+    handleSuccess or handleErr
+  * responseFormat: 'text' -- format to use when passing
+    the response to the handler function (valid values
+    are 'text,' 'xml,' 'object')
+  * mimeType: null -- Can be used to override the MIME
+    type of the response returned by the server. Sometimes
+    used to ensure tje browser handles response as XML, 
+    even if the server doesn't set the Content-type header
+    properly
+  * username: '' -- Set when using basic auth with the
+    request
+  * password: '' -- Set when using basic auth with the
+    request
+  * headers: [] -- Used to set arbitrary headers for
+    the request
+  * uber: false -- Give the request priority over any
+    existing queued requests. If uber property is set
+    to true, this request goes directly to the front 
+    of the queue
+
+* Description
+
+Makes an XHR request, and passes the result to the specified
+handler function (async) or returns the result inline (sync).
+
+* Examples
+
+fleegix.xhr.doReq({
+  url: 'some_page.rbx',
+  handleAll: function (s) { alert(s.status); },
+  responseFormat: 'object',
+  uber: true
+} );
+
+fleegix.xhr.abort
+
+XML
+
+fleegix.xml.parse
 
