@@ -1,11 +1,87 @@
 Cookies
 
 fleegix.cookie.destroy
+
+* Syntax
+
+fleegix.cookie.destroy(cookieName, [path]);
+
+* Parameters
+
+cookieName (String) -- Name of the cookie you want to remove.
+
+path (String) -- Path for the cookie you want to remove. If 
+omitted, assumes root ('/').
+
+* Description
+
+Removes the cookie with the specified name and path. 
+
+* Examples
+
+fleegix.cookie.remove('loginId');
+
 fleegix.cookie.get
+
+* Syntax
+
+fleegix.cookie.get(cookieName, [path]);
+
+* Parameters
+
+cookieName (String) -- Name of the cookie you want to get the
+value for.
+
+path (String) -- Path for the cookie you want to get the value
+for. If omitted, assumes root ('/').
+
+* Description
+
+Gets the value of the cookie with the specified name and path. 
+
+* Examples
+
+fleegix.cookie.get('loginId');
+
 fleegix.cookie.set
+
+* Syntax
+
+fleegix.cookie.set(cookieName, [path]);
+fleegix.cookie.set(cookieName, [opts]);
+
+* Parameters
+
+cookieName (String) -- Name of the cookie you want to set the
+value for.
+
+path (String) -- Path for the cookie you want to set the value
+for. If omitted, assumes root ('/').
+
+opts (Object) -- Object with keyword options for the cookie.
+Here is the list of possible properties to set, and the default
+values if they are not set:
+  * path: '/' -- Path for Web documents that can see this cookie
+  * days: (none) -- The number of days the cookie will last
+  * hours: (none) -- The number of hours the cookie will last
+  * minutes (none) -- The number of minutes the cookie will last
+
+* Description
+
+Sets the value of the cookie with the specified name and path. Days, 
+hours, and minutes for the duration of the cookie may be used in
+combination.
+
+* Examples
+
+fleegix.cookie.set('loginId');
+
+fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2, 
+  minutes: 30 });
 
 Events
 
+(Not done yet)
 fleegix.event.listen
 fleegix.event.publish
 fleegix.event.unlisten
@@ -13,6 +89,7 @@ fleegix.event.unpublish
 
 Forms
 
+(Not done yet)
 fleegix.form.diff
 fleegix.form.restore
 fleegix.form.serialize
@@ -20,21 +97,25 @@ fleegix.form.toHash
 
 JSON
 
+(Not done yet)
 fleegix.json.serialize
 
 Popup window module
 
+(Not done yet)
 fleegix.popup.close
 fleegix.popup.goURLMainWin
 fleegix.popup.open
 
 UI
 
+(Not done yet)
 fleegix.ui.getWindowHeight
 fleegix.ui.getWindowWidth
 
 URI
 
+(Not done yet)
 fleegix.uri.getParam
 fleegix.uri.setParam
 
@@ -182,6 +263,9 @@ values if they are not set:
     request
   * headers: [] -- Used to set arbitrary headers for
     the request
+  * preventCache: false -- Adds a dummy variable to the
+    end of the request URL to prevent caching in
+    retarded browsers like IE6
   * uber: false -- Give the request priority over any
     existing queued requests. If uber property is set
     to true, this request goes directly to the front 
@@ -203,7 +287,53 @@ fleegix.xhr.doReq({
 
 fleegix.xhr.abort
 
+* Syntax
+
+fleegix.xhr.abort(requestId);
+
+* Parameters
+
+requestId (Number) -- Request ID of a currently processing
+XHR request to abort.
+
+* Description
+
+If the request is still processing, will abort it and return
+true. If the request identified by requestId is not currently
+processing (i.e., it may have already completed), returns false.
+
+* Examples
+
+var id = fleegix.doGet(handlerFunction, 
+  '/some_file.rbx'); // Get a request ID number
+fleegix.xhr.abort(id); // Abort the request
+
 XML
 
 fleegix.xml.parse
+
+* Syntax
+
+fleegix.xml.parse(xml);
+
+* Parameters
+
+xml (XMLDocument) -- DOM-compatible Document object.
+
+* Description
+
+Parses a list of XML tags into an equivalent array of JavaScript
+objects. Tag names are converted to property names, and tag
+values are converted to property values (all Strings).
+
+* Examples
+
+function handleUserList(xml) {
+  var users = fleegix.xml.parse(xml);
+  var userCount = users.length;
+  var firstUserUsername = users[0].username;
+}
+
+fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');
+
 
