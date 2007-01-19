@@ -89,11 +89,19 @@ fleegix.xhr = new function () {
       o.async = false;
     }
     var url = args.shift();
-    var format = args.shift() || 'text';
-    
-    o.handleResp = hand;
+    // Passing in keyword/obj after URL
+    if (typeof args[0] == 'object') {
+      var opts = args.shift();
+      for (var p in opts) {
+        o[p] = opts[p];
+      }
+    }
+    // Normal order-based params of URL, [responseFormat]
+    else {
+      o.responseFormat = args.shift() || 'text';
+    }
+    o.handleSuccess = hand;
     o.url = url;
-    o.responseFormat = format;
     return this.doReq(o);
   };
   this.doPost = function () {
@@ -109,12 +117,20 @@ fleegix.xhr = new function () {
     }
     var url = args.shift();
     var dataPayload = args.shift();
-    var format = args.shift() || 'text';
-    
-    o.handleResp = hand;
+    // Passing in keyword/obj after URL
+    if (typeof args[0] == 'object') {
+      var opts = args.shift();
+      for (var p in opts) {
+        o[p] = opts[p];
+      }
+    }
+    // Normal order-based params of URL, [responseFormat]
+    else {
+      o.responseFormat = args.shift() || 'text';
+    }
+    o.handleSuccess = hand;
     o.url = url;
     o.dataPayload = dataPayload;
-    o.responseFormat = format;
     o.method = 'POST';
     return this.doReq(o);
   };
@@ -172,27 +188,12 @@ fleegix.xhr = new function () {
     }
   };
   this.processReq = function (t, req) {
+    var self = this;
     var transporterId = null;
     var trans = null;
-    var self = this;
+    var url = '';
     var resp = null;
     
-    // Default err handler -- pop up full window with error
-    // if request has no handler specifically defined
-    function handleErrDefault(r) {
-        var errorWin;
-        // Create new window and display error
-        try {
-          errorWin = window.open('', 'errorWin');
-          errorWin.document.body.innerHTML = r.responseText;
-        }
-        // If pop-up gets blocked, inform user
-        catch(e) {
-          alert('An error occurred, but the error message cannot be' +
-          ' displayed because of your browser\'s pop-up blocker.\n' +
-          'Please allow pop-ups from this Web site.');
-        }
-    }
     // Return desired type of response, text, xml, or raw obj.
     // Used both in the anonymous function for onreadystatechange
     // in async mode and in blocking mode
@@ -225,13 +226,23 @@ fleegix.xhr = new function () {
     else {
       trans = t;
     }
+    
+    if (req.preventCache) {
+      var dt = new Date.getTime();
+      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt : 
+        req.url + '?preventCache=' + dt;
+    }
+    else {
+      url = req.url;
+    }
+    
     // Set up the request
     // ==========================
     if (req.username && req.password) {
-      trans.open(req.method, req.url, req.async, req.username, req.password);
+      trans.open(req.method, url, req.async, req.username, req.password);
     }
     else {
-      trans.open(req.method, req.url, req.async);
+      trans.open(req.method, url, req.async);
     }
     // Override MIME type if necessary for Mozilla/Firefox & Safari
     if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
@@ -261,31 +272,36 @@ fleegix.xhr = new function () {
         
         // Grab the desired response type
         resp = getResponseByType();
-
-        // Request was successful -- execute response handler
-        if (trans.status > 199 && trans.status < 300) {
-          if (req.async) {
-              // Make sure handler is defined
-              if (!req.handleResp) {
-                throw('No response handler defined ' +
-                  'for this request');
-                return;
-              }
-              else {
-                req.handleResp(resp, req.id);
-              }
-          }
-        }
-        // Request failed -- execute error handler
-        else {
-          if (req.handleErr) {
-            req.handleErr(resp);
-          }
-          else {
-            handleErrDefault(trans);
-          }
-        }
         
+        // If we have a One True Event Handler, use that
+        if (req.handleAll) {
+          req.handleAll(resp, req.id);
+        }
+        // Otherwise it's split between success/failure
+        else {
+          // Request was successful -- execute response handler
+          if (trans.status > 199 && trans.status < 300) {
+            // Make sure handler is defined
+            if (!req.handleSuccess) {
+              throw('No response handler defined ' +
+                'for this request');
+              return;
+            }
+            else {
+              req.handleSuccess(resp, req.id);
+            }
+          }
+          // Request failed -- execute error handler
+          else {
+            if (req.handleErr) {
+              req.handleErr(resp, req.id);
+            }
+            else {
+              fleegix.xhr.handleErrDefault(trans);
+            }
+          }
+        }
+
         // Clean up, move immediately to respond to any
         // queued up requests
         if (req.async) {
@@ -343,15 +359,35 @@ fleegix.xhr.Request = function () {
   this.readyState = null;
   this.responseText = null;
   this.responseXML = null;
-  this.handleResp = null;
+  this.handleAll = null;
+  this.handleSuccess = null;
+  this.handleErr = null;
   this.responseFormat = 'text', // 'text', 'xml', 'object'
   this.mimeType = null;
   this.username = '';
   this.password = '';
   this.headers = [];
+  this.preventCache = false;
   this.uber = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
+};
+    
+// Default err handler -- pop up full window with error
+// if request has no handler specifically defined
+fleegix.xhr.handleErrDefault = function (r) {
+    var errorWin;
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = r.responseText;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
 };
 
