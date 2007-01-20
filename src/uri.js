@@ -57,20 +57,32 @@ fleegix.uri = new function () {
   };
   this.setParam = function (name, val, str) {
     var ret = null;
+    // If there's a query string, set the param
     if (str) { 
       var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
       var arr = str.match(pat);
+      // If it's there, replace it
       if (arr) {
         ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
       }
+      // Otherwise append it
+      else {
+        ret = str + '&' + name + '=' + val;
+      }
     }
+    // Otherwise create a query string with just that param
     else {
       ret = name + '=' + val;
     }
     return ret;
   };
-  this.getQuery = function () {
-    return location.href.split('?')[1];
+  this.getQuery = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[1];
+  };
+  this.getBase = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[0];
   };
   this.params = this.getParamHash();
 }
