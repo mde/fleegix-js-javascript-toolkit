@@ -288,11 +288,19 @@ fleegix.xhr = new function () {
       o.async = false;
     }
     var url = args.shift();
-    var format = args.shift() || 'text';
-    
-    o.handleResp = hand;
+    // Passing in keyword/obj after URL
+    if (typeof args[0] == 'object') {
+      var opts = args.shift();
+      for (var p in opts) {
+        o[p] = opts[p];
+      }
+    }
+    // Normal order-based params of URL, [responseFormat]
+    else {
+      o.responseFormat = args.shift() || 'text';
+    }
+    o.handleSuccess = hand;
     o.url = url;
-    o.responseFormat = format;
     return this.doReq(o);
   };
   this.doPost = function () {
@@ -308,12 +316,20 @@ fleegix.xhr = new function () {
     }
     var url = args.shift();
     var dataPayload = args.shift();
-    var format = args.shift() || 'text';
-    
-    o.handleResp = hand;
+    // Passing in keyword/obj after URL
+    if (typeof args[0] == 'object') {
+      var opts = args.shift();
+      for (var p in opts) {
+        o[p] = opts[p];
+      }
+    }
+    // Normal order-based params of URL, [responseFormat]
+    else {
+      o.responseFormat = args.shift() || 'text';
+    }
+    o.handleSuccess = hand;
     o.url = url;
     o.dataPayload = dataPayload;
-    o.responseFormat = format;
     o.method = 'POST';
     return this.doReq(o);
   };
@@ -371,27 +387,12 @@ fleegix.xhr = new function () {
     }
   };
   this.processReq = function (t, req) {
+    var self = this;
     var transporterId = null;
     var trans = null;
-    var self = this;
+    var url = '';
     var resp = null;
     
-    // Default err handler -- pop up full window with error
-    // if request has no handler specifically defined
-    function handleErrDefault(r) {
-        var errorWin;
-        // Create new window and display error
-        try {
-          errorWin = window.open('', 'errorWin');
-          errorWin.document.body.innerHTML = r.responseText;
-        }
-        // If pop-up gets blocked, inform user
-        catch(e) {
-          alert('An error occurred, but the error message cannot be' +
-          ' displayed because of your browser\'s pop-up blocker.\n' +
-          'Please allow pop-ups from this Web site.');
-        }
-    }
     // Return desired type of response, text, xml, or raw obj.
     // Used both in the anonymous function for onreadystatechange
     // in async mode and in blocking mode
@@ -424,13 +425,23 @@ fleegix.xhr = new function () {
     else {
       trans = t;
     }
+    
+    if (req.preventCache) {
+      var dt = new Date.getTime();
+      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt : 
+        req.url + '?preventCache=' + dt;
+    }
+    else {
+      url = req.url;
+    }
+    
     // Set up the request
     // ==========================
     if (req.username && req.password) {
-      trans.open(req.method, req.url, req.async, req.username, req.password);
+      trans.open(req.method, url, req.async, req.username, req.password);
     }
     else {
-      trans.open(req.method, req.url, req.async);
+      trans.open(req.method, url, req.async);
     }
     // Override MIME type if necessary for Mozilla/Firefox & Safari
     if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
@@ -460,31 +471,36 @@ fleegix.xhr = new function () {
         
         // Grab the desired response type
         resp = getResponseByType();
-
-        // Request was successful -- execute response handler
-        if (trans.status > 199 && trans.status < 300) {
-          if (req.async) {
-              // Make sure handler is defined
-              if (!req.handleResp) {
-                throw('No response handler defined ' +
-                  'for this request');
-                return;
-              }
-              else {
-                req.handleResp(resp, req.id);
-              }
-          }
-        }
-        // Request failed -- execute error handler
-        else {
-          if (req.handleErr) {
-            req.handleErr(resp);
-          }
-          else {
-            handleErrDefault(trans);
-          }
-        }
         
+        // If we have a One True Event Handler, use that
+        if (req.handleAll) {
+          req.handleAll(resp, req.id);
+        }
+        // Otherwise it's split between success/failure
+        else {
+          // Request was successful -- execute response handler
+          if (trans.status > 199 && trans.status < 300) {
+            // Make sure handler is defined
+            if (!req.handleSuccess) {
+              throw('No response handler defined ' +
+                'for this request');
+              return;
+            }
+            else {
+              req.handleSuccess(resp, req.id);
+            }
+          }
+          // Request failed -- execute error handler
+          else {
+            if (req.handleErr) {
+              req.handleErr(resp, req.id);
+            }
+            else {
+              fleegix.xhr.handleErrDefault(trans);
+            }
+          }
+        }
+
         // Clean up, move immediately to respond to any
         // queued up requests
         if (req.async) {
@@ -542,16 +558,36 @@ fleegix.xhr.Request = function () {
   this.readyState = null;
   this.responseText = null;
   this.responseXML = null;
-  this.handleResp = null;
+  this.handleAll = null;
+  this.handleSuccess = null;
+  this.handleErr = null;
   this.responseFormat = 'text', // 'text', 'xml', 'object'
   this.mimeType = null;
   this.username = '';
   this.password = '';
   this.headers = [];
+  this.preventCache = false;
   this.uber = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
+};
+    
+// Default err handler -- pop up full window with error
+// if request has no handler specifically defined
+fleegix.xhr.handleErrDefault = function (r) {
+    var errorWin;
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = r.responseText;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
 };
 
 
@@ -1089,43 +1125,39 @@ fleegix.uri = new function () {
   };
   this.setParam = function (name, val, str) {
     var ret = null;
+    // If there's a query string, set the param
     if (str) { 
       var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
       var arr = str.match(pat);
+      // If it's there, replace it
       if (arr) {
         ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
       }
+      // Otherwise append it
+      else {
+        ret = str + '&' + name + '=' + val;
+      }
     }
+    // Otherwise create a query string with just that param
     else {
       ret = name + '=' + val;
     }
     return ret;
   };
-  this.getQuery = function () {
-    return location.href.split('?')[1];
+  this.getQuery = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[1];
+  };
+  this.getBase = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[0];
   };
   this.params = this.getParamHash();
 }
 fleegix.uri.constructor = null;
 
-fleegix.ui = new function() {
-  this.getWindowHeight = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientHeight) {
-        return document.documentElement.clientHeight;
-      }
-      else {
-        return document.body.clientHeight;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerHeight;
-    }
-  };
-  this.getWindowWidth = function() {
+fleegix.ui = new function () {
+  this.getViewportWidth = function () {
     // IE
     if (document.all) {
       if (document.documentElement && 
@@ -1141,19 +1173,129 @@ fleegix.ui = new function() {
       return window.innerWidth;
     }
   };
+  this.getWindowWidth = this.getViewportWidth;
+  this.getViewportHeight = function () {
+    // IE
+    if (document.all) {
+      if (document.documentElement && 
+        document.documentElement.clientHeight) {
+        return document.documentElement.clientHeight;
+      }
+      else {
+        return document.body.clientHeight;
+      }
+    }
+    // Moz/compat
+    else {
+      return window.innerHeight;
+    }
+  };
+  this.getWindowHeight = this.getViewportHeight;
+  this.setCSSProp = function (elem, p, v) {
+  if (p == 'opacity') {
+    // IE uses a whole number as a percent
+    if (document.all) {
+      elem.style.filter = 'alpha(opacity=' + v + ')';
+    }
+    // Moz/compat uses a decimal value 
+    else {
+      var d = v / 100;
+      elem.style.opacity = d;
+    }
+  }
+  else {
+    elem.style[p] = document.all ? 
+      parseInt(v) + 'px' : v + 'px';
+  }
+  return true;
 };
-fleegix.ui.constructor = null;
+  this.fadeOut = function (elem, opts) {
+    var o = {
+      startVal: 100, 
+      endVal: 0,
+      prop: 'opacity' };
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    var f = new fleegix.ui.Fx(elem, o);
+  };
+  this.fadeIn = function (elem, opts) {
+    var o = {
+      startVal: 0, 
+      endVal: 100,
+      prop: 'opacity' };
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    var f = new fleegix.ui.Fx(elem, o);
+  };
+};
+
+fleegix.ui.Fx = function (elem, opts) {
+  var self = this;
+  this.prop = opts.prop;
+  this.duration = opts.duration || 500;
+  this.fps = 30;
+  this.startVal = opts.startVal;
+  this.endVal = opts.endVal;
+  this.currVal = this.startVal;
+  this.startTime = new Date().getTime();
+  this.timeSpent = 0;
+  this.doAfter = opts.doAfter || null;
+  // Fire it up
+  this.id = setInterval( function () { 
+    self.doStep.apply(self, [elem]) }, 
+    Math.round(1000/this.fps));
+  // Run the pre-execution func if any
+  if (typeof opts.doOnStart == 'function') {
+    opts.doOnStart();
+  }
+}
+
+fleegix.ui.Fx.prototype.doStep = function (elem) {
+  var t = new Date().getTime();
+  // Still going ...
+  if (t < (this.startTime + this.duration)) {
+    this.timeSpent = t - this.startTime;
+    this.currVal = this.calcCurrVal();
+    fleegix.ui.setCSSProp(elem, this.prop, this.currVal);
+  }
+  // All done, ya-hoo
+  else {
+    clearInterval(this.id);
+    // Run the post-execution func if any
+    if (typeof this.doAfterFinished == 'function') {
+      this.doAfterFinished();
+    }
+  }
+};
+
+fleegix.ui.Fx.prototype.calcCurrVal = function () {
+  return this.trans(this.timeSpent, this.startVal, 
+    (this.endVal - this.startVal), this.duration); 
+};
+
+fleegix.ui.Fx.prototype.trans = function(timeSpent, 
+  fromVal, valDiff, duration) {
+ // Simple linear
+ return valDiff * (timeSpent / duration) + fromVal;
+}
+
 
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
     var opts = optParam || {}
     var exp = '';
     var t = 0;
-    var path = opts.path || '/';
-    var days = opts.days || 0;
-    var hours = opts.hours || 0;
-    var minutes = opts.minutes || 0;
-    
+    if (typeof optParam == 'object') {
+      var path = opts.path || '/';
+      var days = opts.days || 0;
+      var hours = opts.hours || 0;
+      var minutes = opts.minutes || 0;
+    }
+    else {
+      var path = optsParam || '/';
+    }
     t += days ? days*24*60*60*1000 : 0;
     t += hours ? hours*60*60*1000 : 0;
     t += minutes ? minutes*60*1000 : 0;
