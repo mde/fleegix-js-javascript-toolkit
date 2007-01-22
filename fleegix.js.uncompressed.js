@@ -1083,6 +1083,170 @@ fleegix.event.constructor = null;
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
+fleegix.fx = new function () {
+  this.fadeOut = function (elem, opts) {
+    return this.doFade(elem, opts, 'out');
+  };
+  this.fadeIn = function (elem, opts) {
+    return this.doFade(elem, opts, 'in');
+  };
+  this.doFade = function (elem, opts, dir) {
+    var s = dir == 'in' ? 0 : 100;
+    var e = dir == 'in' ? 100 : 0;
+    var o = {
+      startVal: s, 
+      endVal: e,
+      props: { opacity: [s, e] },
+      trans: 'lightEaseIn' };
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    return new fleegix.fx.Effecter(elem, o);
+  };
+  this.setCSSProp = function (elem, p, v) {
+    if (p == 'opacity') {
+      // IE uses a whole number as a percent
+      if (document.all) {
+        elem.style.filter = 'alpha(opacity=' + v + ')';
+      }
+      // Moz/compat uses a decimal value 
+      else {
+        var d = v / 100;
+        elem.style.opacity = d;
+      }
+    }
+    else if (p.toLowerCase().indexOf('color') > -1) {
+      elem.style[p] = v;
+    }
+    else {
+      elem.style[p] = document.all ? 
+        parseInt(v) + 'px' : v + 'px';
+    }
+    return true;
+  };
+  this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
+  this.hexToRGB = function (str, returnArray) {
+    var rgb = [];
+    var h = str.match(this.hexPat);
+    if (h) {
+      for (var i = 1; i < h.length; i++) {
+        var s = h[i];
+        s = s.length == 1 ? s + s : s;
+        rgb.push(parseInt(s, 16));
+      }
+      s = 'rgb(' + rgb.join() + ')';
+      return returnArray ? rgb : s;
+    }
+    else {
+      throw('"' + str + '" not a valid hex value.');
+    }
+  };
+};
+
+fleegix.fx.Effecter = function (elem, opts) {
+  var self = this;
+  this.props = opts.props;
+  this.trans = opts.trans || 'linear';
+  this.duration = opts.duration || 500;
+  this.fps = 30;
+  this.startTime = new Date().getTime();
+  this.timeSpent = 0;
+  this.doAfter = opts.doAfter || null;
+  this.autoStart = opts.autoStart == false ? false : true;
+  
+  if (typeof this.transitions[this.trans] != 'function') {
+    throw('"' + this.trans + '" is not a valid transition.');
+  }
+  
+  this.start = function () {
+    self.id = setInterval( function () { 
+      self.doStep.apply(self, [elem]) }, 
+      Math.round(1000/self.fps));
+    // Run the pre-execution func if any
+    if (typeof opts.doOnStart == 'function') {
+      opts.doOnStart();
+    }
+  };
+  // Fire it up unless auto-start turned off
+  if (this.autoStart) {
+    this.start();
+  }
+  return this;
+};
+
+fleegix.fx.Effecter.prototype.doStep = function (elem) {
+  var t = new Date().getTime();
+  // Still going ...
+  if (t < (this.startTime + this.duration)) {
+    this.timeSpent = t - this.startTime;
+    var p = this.props;
+    for (var i in p) {
+      fleegix.fx.setCSSProp(elem, i, this.calcCurrVal(i));
+    }
+  }
+  // All done, ya-hoo
+  else {
+    clearInterval(this.id);
+    // Run the post-execution func if any
+    if (typeof this.doAfterFinished == 'function') {
+      this.doAfterFinished();
+    }
+  }
+};
+
+fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
+  var startVal = this.props[key][0];
+  var endVal = this.props[key][1];
+  var trans = this.transitions[this.trans];
+  if (key.toLowerCase().indexOf('color') > -1) {
+    var arrStart = fleegix.fx.hexToRGB(startVal, true);
+    var arrEnd = fleegix.fx.hexToRGB(endVal, true);
+    var arrCurr = [];
+    for (var i = 0; i < arrStart.length; i++) {
+      var s = arrStart[i];
+      var e = arrEnd[i];
+      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
+    }
+    return 'rgb(' + arrCurr.join() + ')';
+  }
+  else {
+    return trans(this.timeSpent, startVal, (endVal - startVal), 
+      this.duration);
+  }
+};
+
+// Credits: Easing Equations, (c) 2003 Robert Penner (http://www.robertpenner.com/easing/), Open Source BSD License.
+fleegix.fx.Effecter.prototype.transitions = {
+  // For all, t: current time, b: beginning value, c: change in value, d: duration
+  // Simple linear, no easing
+  linear: function (t, b, c, d) {
+    return c*(t/d)+b;
+  },
+  // 'Light' is quadratic
+  lightEaseIn: function (t, b, c, d) {
+    return c*(t/=d)*t + b;
+  },
+  lightEaseOut: function (t, b, c, d) {
+    return -c *(t/=d)*(t-2) + b;
+  },
+  lightEaseInOut: function (t, b, c, d) {
+    if ((t/=d/2) < 1) return c/2*t*t + b;
+    return -c/2 * ((--t)*(t-2) - 1) + b;
+  },
+  // 'Heavy' is cubic 
+  heavyEaseIn: function (t, b, c, d) {
+    return c*(t/=d)*t*t + b;
+  },
+  heavyEaseOut: function (t, b, c, d) {
+    return c*((t=t/d-1)*t*t + 1) + b;
+  },
+  heavyEaseInOut: function (t, b, c, d) {
+    if ((t/=d/2) < 1) return c/2*t*t*t + b;
+    return c/2*((t-=2)*t*t + 2) + b;
+  }
+};
+
+
 fleegix.uri = new function () {
   var self = this;
   
@@ -1155,132 +1319,6 @@ fleegix.uri = new function () {
   this.params = this.getParamHash();
 }
 fleegix.uri.constructor = null;
-
-fleegix.ui = new function () {
-  this.getViewportWidth = function () {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientWidth) {
-        return document.documentElement.clientWidth;
-      }
-      else {
-        return document.body.clientWidth;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerWidth;
-    }
-  };
-  this.getWindowWidth = this.getViewportWidth;
-  this.getViewportHeight = function () {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientHeight) {
-        return document.documentElement.clientHeight;
-      }
-      else {
-        return document.body.clientHeight;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerHeight;
-    }
-  };
-  this.getWindowHeight = this.getViewportHeight;
-  this.setCSSProp = function (elem, p, v) {
-  if (p == 'opacity') {
-    // IE uses a whole number as a percent
-    if (document.all) {
-      elem.style.filter = 'alpha(opacity=' + v + ')';
-    }
-    // Moz/compat uses a decimal value 
-    else {
-      var d = v / 100;
-      elem.style.opacity = d;
-    }
-  }
-  else {
-    elem.style[p] = document.all ? 
-      parseInt(v) + 'px' : v + 'px';
-  }
-  return true;
-};
-  this.fadeOut = function (elem, opts) {
-    var o = {
-      startVal: 100, 
-      endVal: 0,
-      prop: 'opacity' };
-    for (p in opts) {
-      o[p] = opts[p];
-    }
-    var f = new fleegix.ui.Fx(elem, o);
-  };
-  this.fadeIn = function (elem, opts) {
-    var o = {
-      startVal: 0, 
-      endVal: 100,
-      prop: 'opacity' };
-    for (p in opts) {
-      o[p] = opts[p];
-    }
-    var f = new fleegix.ui.Fx(elem, o);
-  };
-};
-
-fleegix.ui.Fx = function (elem, opts) {
-  var self = this;
-  this.prop = opts.prop;
-  this.duration = opts.duration || 500;
-  this.fps = 30;
-  this.startVal = opts.startVal;
-  this.endVal = opts.endVal;
-  this.currVal = this.startVal;
-  this.startTime = new Date().getTime();
-  this.timeSpent = 0;
-  this.doAfter = opts.doAfter || null;
-  // Fire it up
-  this.id = setInterval( function () { 
-    self.doStep.apply(self, [elem]) }, 
-    Math.round(1000/this.fps));
-  // Run the pre-execution func if any
-  if (typeof opts.doOnStart == 'function') {
-    opts.doOnStart();
-  }
-}
-
-fleegix.ui.Fx.prototype.doStep = function (elem) {
-  var t = new Date().getTime();
-  // Still going ...
-  if (t < (this.startTime + this.duration)) {
-    this.timeSpent = t - this.startTime;
-    this.currVal = this.calcCurrVal();
-    fleegix.ui.setCSSProp(elem, this.prop, this.currVal);
-  }
-  // All done, ya-hoo
-  else {
-    clearInterval(this.id);
-    // Run the post-execution func if any
-    if (typeof this.doAfterFinished == 'function') {
-      this.doAfterFinished();
-    }
-  }
-};
-
-fleegix.ui.Fx.prototype.calcCurrVal = function () {
-  return this.trans(this.timeSpent, this.startVal, 
-    (this.endVal - this.startVal), this.duration); 
-};
-
-fleegix.ui.Fx.prototype.trans = function(timeSpent, 
-  fromVal, valDiff, duration) {
- // Simple linear
- return valDiff * (timeSpent / duration) + fromVal;
-}
-
 
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
