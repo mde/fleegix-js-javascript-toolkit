@@ -277,7 +277,7 @@ fleegix.xhr = new function () {
         if (req.handleAll) {
           req.handleAll(resp, req.id);
         }
-        // Otherwise it's split between success/failure
+        // Otherwise hand to either success/failure
         else {
           // Request was successful -- execute response handler
           if (trans.status > 199 && trans.status < 300) {
@@ -305,6 +305,9 @@ fleegix.xhr = new function () {
         // Clean up, move immediately to respond to any
         // queued up requests
         if (req.async) {
+          // Cancel timeout timer 
+          clearTimeout(req.timeoutId);
+          
           // Remove from list of transporters currently in use
           // this XHR can't be aborted until it's processing again
           delete self.processing[transporterId];
@@ -326,8 +329,23 @@ fleegix.xhr = new function () {
     // ==========================
     trans.send(req.dataPayload);
     
+    // Async -- setup timeout timer to wait designated time
+    // before aborting request
+    if (req.async) {
+      var f = function () {
+        if (fleegix.xhr.abort(req.id)) {
+          if (typeof req.handleTimeout == 'function') {
+            req.handleTimeout();
+          }
+          else {
+            alert('XMLHttpRequest to ' + req.url + ' timed out.');
+          }
+        }
+      };
+      req.timeoutId = setTimeout(f, req.timeoutPeriod);
+    }
     // Sync mode -- return actual result inline back to doReq
-    if (!req.async) {
+    else {
       resp = getResponseByType();
       return resp;
     }
@@ -336,6 +354,7 @@ fleegix.xhr = new function () {
     // Abort the req if it's still processing
     var t = this.processing[reqId];
     if (t) {
+      // onreadystatechange can still fire as abort is executed
       t.onreadystatechange = function () { };
       t.abort();
       return true;
@@ -349,7 +368,7 @@ fleegix.xhr = new function () {
 fleegix.xhr.constructor = null;
 
 fleegix.xhr.Request = function () {
-  this.reqId = 0;
+  this.id = 0;
   this.url = null;
   this.status = null;
   this.statusText = '';
@@ -362,12 +381,15 @@ fleegix.xhr.Request = function () {
   this.handleAll = null;
   this.handleSuccess = null;
   this.handleErr = null;
+  this.handleTimeout = null;
   this.responseFormat = 'text', // 'text', 'xml', 'object'
   this.mimeType = null;
   this.username = '';
   this.password = '';
   this.headers = [];
   this.preventCache = false;
+  this.timeoutId = null;
+  this.timeoutPeriod = 30000; // Default to 30-sec timeout
   this.uber = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
