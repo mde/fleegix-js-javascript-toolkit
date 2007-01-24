@@ -74,6 +74,8 @@ fleegix.xhr = new function () {
   // The single XHR obj used for synchronous requests -- sync
   // requests do not participate in the request pooling
   this.syncTransporter = spawnTransporter(true);
+  // Show exceptions for connection failures
+  this.debug = false;
   
   // Public methods
   // ================================
@@ -274,31 +276,40 @@ fleegix.xhr = new function () {
         resp = getResponseByType();
         
         // If we have a One True Event Handler, use that
+        // Best for odd cases such as Safari's 'undefined' status
         if (req.handleAll) {
           req.handleAll(resp, req.id);
         }
         // Otherwise hand to either success/failure
         else {
-          // Request was successful -- execute response handler
-          if (trans.status > 199 && trans.status < 300) {
-            // Make sure handler is defined
-            if (!req.handleSuccess) {
-              throw('No response handler defined ' +
-                'for this request');
-              return;
+          // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE 
+          // err in Firefox for broken connections or hitting ESC
+          try {
+            // Request was successful -- execute response handler
+            if (trans.status > 199 && trans.status < 300) {
+              // Make sure handler is defined
+              if (!req.handleSuccess) {
+                throw('No response handler defined ' +
+                  'for this request');
+                return;
+              }
+              else {
+                req.handleSuccess(resp, req.id);
+              }
             }
+            // Request failed -- execute error handler
             else {
-              req.handleSuccess(resp, req.id);
+              if (req.handleErr) {
+                req.handleErr(resp, req.id);
+              }
+              else {
+                fleegix.xhr.handleErrDefault(trans);
+              }
             }
           }
-          // Request failed -- execute error handler
-          else {
-            if (req.handleErr) {
-              req.handleErr(resp, req.id);
-            }
-            else {
-              fleegix.xhr.handleErrDefault(trans);
-            }
+          // Squelch
+          catch (e) { 
+            if (self.debug) { throw(e); }
           }
         }
 
