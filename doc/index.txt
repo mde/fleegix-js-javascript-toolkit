@@ -83,8 +83,122 @@ Events
 
 (Not done yet)
 fleegix.event.listen
-fleegix.event.publish
+
+* Syntax
+
+fleegix.event.listen(listenerObj, triggerEventName, someFunction);
+(simple function)
+fleegix.event.listen(listenerObj, triggerEventName, someObject, 
+    someMethodName);
+(method of an object)
+
+* Parameters
+
+listenerObj (Object) -- Object to add the listener to.
+
+triggerEventName (String) -- Name of method or event which
+will trigger execution of a function or method of an object.
+
+someFunction (Function) -- Function to execute when the
+trigger event is run.
+
+someObject (Object) -- Object with the method you want
+to execute when the trigger event is run.
+
+someMethodName (String) -- Name of the method you want
+to execute when the trigger event is run.
+
+* Description
+
+Attaches a method of an object or a simple function to the
+triggering of an event or calling of a method of some other 
+object. Whenever the trigger event or method is fired, the
+attached method or function will run. Multiple functions or 
+methods can be attached to the same trigger.
+
+* Examples
+
+function simpleAlert() {
+  alert('simple');
+}
+
+var zardoz = new function () {
+  this.foo = function () {
+    alert('ABC');
+  };
+}
+
+var logansRun = new function () {
+  this.bar = function () {
+    alert('123');
+  };
+}
+
+fleegix.event.listen(zardoz, 'foo', simpleAlert);
+zardoz.foo(); => two alerts, 'ABC,' then 'simple.'
+
+fleegix.event.listen(zardoz, 'foo', logansRun, 'bar');
+zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'
+
 fleegix.event.unlisten
+
+* Syntax
+
+fleegix.event.unlisten(listenerObj, triggerEventName, someFunction);
+(simple function)
+fleegix.event.unlisten(listenerObj, triggerEventName, someObject, 
+    someMethodName);
+(method of an object)
+
+* Parameters
+
+listenerObj (Object) -- Object to remove the listener from.
+
+triggerEventName (String) -- Name of method or event which you
+want to stop triggering a certain function or method of an 
+object.
+
+someFunction (Function) -- Function to stop triggering when 
+the trigger event is run.
+
+someObject (Object) -- Object with the method you want
+to stop from executing when the trigger event is run.
+
+someMethodName (String) -- Name of the method you want
+to stop from executing when the trigger event is run.
+
+* Description
+
+Removes an attached listener so it will no longer trigger
+the function or method specified. Use 'unlisten' with the
+exact same parameters you passed to 'listen' to remove
+that specific listener.
+
+* Examples
+
+function simpleAlert() {
+  alert('simple');
+}
+
+var zardoz = new function () {
+  this.foo = function () {
+    alert('ABC');
+  };
+}
+
+var logansRun = new function () {
+  this.bar = function () {
+    alert('123');
+  };
+}
+
+fleegix.event.listen(zardoz, 'foo', logansRun, 'bar');
+zardoz.foo(); => two alerts, 'ABC,' then '123.'
+
+fleegix.event.unlisten(zardoz, 'foo', logansRun, 'bar');
+zardoz.foo(); => now just one alert, 'ABC.'
+
+fleegix.event.publish
 fleegix.event.unpublish
 
 Forms
@@ -94,6 +208,12 @@ fleegix.form.diff
 fleegix.form.restore
 fleegix.form.serialize
 fleegix.form.toHash
+
+FX
+
+fleegix.fx.fadeOut
+fleegix.fx.fadeIn
+fleegix.fx.setCSSProp
 
 JSON
 
@@ -106,12 +226,6 @@ Popup window module
 fleegix.popup.close
 fleegix.popup.goURLMainWin
 fleegix.popup.open
-
-UI
-
-(Not done yet)
-fleegix.ui.getWindowHeight
-fleegix.ui.getWindowWidth
 
 URI
 
@@ -238,38 +352,41 @@ values if they are not set:
     request and returns the result inline
   * dataPayload: null -- data to send with POST or
     PUT requests
-  * handleSuccess: null -- Function to handle successful 
+  * handleSuccess: null -- Function to handle successful
     responses for asynchronous requests
-  * handleErr: null -- Function to handle error 
-    responses for asynchronous requests. If no error/all
-    handler exists, the error will be handled with the
-    built-in function fleegix.xhr.handleErrDefault, which
-    pops up the error page from the server in a new,
-    full-sized window
+  * handleErr: null -- Function to handle error
+    responses for asynchronous requests. If no error/all handler
+    exists, the error will be handled with the built-in function
+    fleegix.xhr.handleErrDefault, which pops up the error page
+    from the server in a new, full-sized window
   * handleAll: null -- Function to handle both errors
     or successful responses. If you set this, don't set
     handleSuccess or handleErr
+  * handleTimeout: null -- Function to handle cases where
+    the request is processing for longer than timeoutSeconds
   * responseFormat: 'text' -- format to use when passing
-    the response to the handler function (valid values
-    are 'text,' 'xml,' 'object')
+    the response to the handler function (valid values are
+    'text,' 'xml,' 'object')
   * mimeType: null -- Can be used to override the MIME
     type of the response returned by the server. Sometimes
-    used to ensure tje browser handles response as XML, 
-    even if the server doesn't set the Content-type header
-    properly
+    used to ensure tje browser handles response as XML, even
+    if the server doesn't set the Content-type header properly
   * username: '' -- Set when using basic auth with the
     request
   * password: '' -- Set when using basic auth with the
     request
-  * headers: [] -- Used to set arbitrary headers for
-    the request
+  * headers: [] -- Used to set any special headers you might
+    want on the request
   * preventCache: false -- Adds a dummy variable to the
-    end of the request URL to prevent caching in
-    retarded browsers like IE6
+    end of the request URL to prevent caching in retarded
+    browsers like IE6
+  * timeoutSeconds: 30 -- The number of seconds until the
+    request times out. (Note this doesn't include time
+    spent in the request queue -- the clock starts when 
+    the request is picked up and sent by the XHR object.)
   * uber: false -- Give the request priority over any
-    existing queued requests. If uber property is set
-    to true, this request goes directly to the front 
-    of the queue
+    existing queued async requests. If uber property is set to
+    true, this request goes directly to the front of the queue
 
 * Description
 

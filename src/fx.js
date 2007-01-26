@@ -16,13 +16,8 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.fx = new function () {
-  this.fadeOut = function (elem, opts) {
-    return this.doFade(elem, opts, 'out');
-  };
-  this.fadeIn = function (elem, opts) {
-    return this.doFade(elem, opts, 'in');
-  };
-  this.doFade = function (elem, opts, dir) {
+  
+  function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
     var e = dir == 'in' ? 100 : 0;
     var o = {
@@ -34,6 +29,13 @@ fleegix.fx = new function () {
       o[p] = opts[p];
     }
     return new fleegix.fx.Effecter(elem, o);
+  }
+  
+  this.fadeOut = function (elem, opts) {
+    return doFade(elem, opts, 'out');
+  };
+  this.fadeIn = function (elem, opts) {
+    return doFade(elem, opts, 'in');
   };
   this.setCSSProp = function (elem, p, v) {
     if (p == 'opacity') {
@@ -108,16 +110,20 @@ fleegix.fx.Effecter = function (elem, opts) {
 
 fleegix.fx.Effecter.prototype.doStep = function (elem) {
   var t = new Date().getTime();
+  var p = this.props;
   // Still going ...
   if (t < (this.startTime + this.duration)) {
     this.timeSpent = t - this.startTime;
-    var p = this.props;
     for (var i in p) {
       fleegix.fx.setCSSProp(elem, i, this.calcCurrVal(i));
     }
   }
   // All done, ya-hoo
   else {
+    // Make sure to end up on the final values
+    for (var i in p) {
+      fleegix.fx.setCSSProp(elem, i, p[i][1]);
+    }
     clearInterval(this.id);
     // Run the post-execution func if any
     if (typeof this.doAfterFinished == 'function') {
