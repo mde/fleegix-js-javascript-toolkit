@@ -15,6 +15,7 @@
  * limitations under the License.
  *
 */
+
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.xhr = new function () {
   
@@ -54,7 +55,7 @@ fleegix.xhr = new function () {
   // IE6 and IE7 are shite for XHR re-use -- fortunately
   // copious numbers of XHR objs don't seem to be a problem
   // Moz/Safari perform significantly better with XHR re-use
-  this.maxTransporters = document.all ? 500 : 5;
+  this.maxTransporters = 5;
   // Used to increment request IDs -- these may be used for
   // externally tracking or aborting specific requests
   this.lastReqId = 0;
@@ -68,14 +69,17 @@ fleegix.xhr = new function () {
   // transporter number, we queue the request
   this.idleTransporters = [];
   // Hash of currently in-flight requests -- each string key is
-  // the index pos in this.transporters of the XHR obj that's in use
+  // the request id of the request
   // Used to abort processing requests
-  this.processing = {};
+  this.processingMap = {};
+  this.processingArray = [];
   // The single XHR obj used for synchronous requests -- sync
   // requests do not participate in the request pooling
   this.syncTransporter = spawnTransporter(true);
+  this.syncRequest = null;
   // Show exceptions for connection failures
   this.debug = false;
+  this.processingWatcherId = null;
   
   // Public methods
   // ================================
@@ -146,8 +150,8 @@ fleegix.xhr = new function () {
       req[p] = opts[p];
     }
     
-    this.lastReqId++; // Increment req ID
     req.id = this.lastReqId;
+    this.lastReqId++; // Increment req ID
     
     // Return request ID or response
     // Async -- handle request or queue it up
@@ -166,7 +170,7 @@ fleegix.xhr = new function () {
       // If we have an XHR transporter to handle the request, do it
       // transporterId should be a number (index of XHR obj in this.transporters)
       if (transporterId != null) {
-        this.processReq(transporterId, req);
+        this.processReq(req, transporterId);
       }
       // No transporter available to handle the request -- queue it up
       else {
@@ -186,56 +190,43 @@ fleegix.xhr = new function () {
     // Sync -- do request inlne and return actual result 
     // -------
     else {
-        return this.processReq(this.syncTransporter, req);
+        return this.processReq(req);
     }
   };
-  this.processReq = function (t, req) {
+  this.processReq = function (req, t) {
     var self = this;
     var transporterId = null;
     var trans = null;
     var url = '';
     var resp = null;
-    
-    // Return desired type of response, text, xml, or raw obj.
-    // Used both in the anonymous function for onreadystatechange
-    // in async mode and in blocking mode
-    function getResponseByType() {
-        // Set the response according to the desired format
-        switch(req.responseFormat) {
-          // Text
-          case 'text':
-            r = trans.responseText;
-            break;
-          // XML
-          case 'xml':
-            r = trans.responseXML;
-            break;
-          // The object itself
-          case 'object':
-            r = trans;
-            break;
-        }
-        return r;
-    }
    
     // Async mode -- grab an XHR obj from the pool
     if (req.async) {
       transporterId = t;
       trans = this.transporters[transporterId];
-      this.processing[transporterId] = trans;
+      this.processingMap[req.id] = req;
+      this.processingArray.unshift(req);
+      req.transporterId = transporterId;
     }
-    // Sync mode -- use XHR transporter passed in 
+    // Sync mode -- use single sync XHR 
     else {
-      trans = t;
+      trans = this.syncTransporter;
+      this.syncRequest = req;
     }
-    
+
+    // Defeat the evil power of the IE caching mechanism
     if (req.preventCache) {
-      var dt = new Date.getTime();
+      var dt = new Date().getTime();
       url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt : 
         req.url + '?preventCache=' + dt;
     }
     else {
       url = req.url;
+    }
+    
+    // Call 'abort' method in IE to allow reuse of the obj
+    if (document.all) {
+      trans.abort();
     }
     
     // Set up the request
@@ -267,111 +258,194 @@ fleegix.xhr = new function () {
       }
     }
     
-    // Anonymous handler for async mode
-    trans.onreadystatechange = function () {
-      // When request completes
-      if (trans.readyState == 4) {
-        
-        // Grab the desired response type
-        resp = getResponseByType();
-        
-        // If we have a One True Event Handler, use that
-        // Best for odd cases such as Safari's 'undefined' status
-        if (req.handleAll) {
-          req.handleAll(resp, req.id);
-        }
-        // Otherwise hand to either success/failure
-        else {
-          // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE 
-          // err in Firefox for broken connections or hitting ESC
-          try {
-            // Request was successful -- execute response handler
-            if (trans.status > 199 && trans.status < 300) {
-              // Make sure handler is defined
-              if (!req.handleSuccess) {
-                throw('No response handler defined ' +
-                  'for this request');
-                return;
-              }
-              else {
-                req.handleSuccess(resp, req.id);
-              }
-            }
-            // Request failed -- execute error handler
-            else {
-              if (req.handleErr) {
-                req.handleErr(resp, req.id);
-              }
-              else {
-                fleegix.xhr.handleErrDefault(trans);
-              }
-            }
-          }
-          // Squelch
-          catch (e) { 
-            if (self.debug) { throw(e); }
-          }
-        }
-
-        // Clean up, move immediately to respond to any
-        // queued up requests
-        if (req.async) {
-          // Cancel timeout timer 
-          clearTimeout(req.timeoutId);
-          
-          // Remove from list of transporters currently in use
-          // this XHR can't be aborted until it's processing again
-          delete self.processing[transporterId];
-          
-          // Requests queued up, grab one to respond to 
-          if (self.requestQueue.length) {
-            var nextReq = self.requestQueue.shift();
-            self.processReq(transporterId, nextReq);
-          }
-          // Otherwise this transporter is idle, waiting to respond
-          else {
-            self.idleTransporters.push(transporterId);
-          }
-        }
-      }
-    };
-
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
     
-    // Async -- setup timeout timer to wait designated time
-    // before aborting request
-    if (req.async) {
-      var f = function () {
-        if (fleegix.xhr.abort(req.id)) {
-          if (typeof req.handleTimeout == 'function') {
-            req.handleTimeout();
-          }
-          else {
-            alert('XMLHttpRequest to ' + req.url + ' timed out.');
-          }
-        }
-      };
-      req.timeoutId = setTimeout(f, req.timeoutPeriod);
+    if (this.processingWatcherId == null) {
+      this.processingWatcherId = setTimeout(fleegix.xhr.watchProcessing, 10);
     }
     // Sync mode -- return actual result inline back to doReq
-    else {
-      resp = getResponseByType();
-      return resp;
+    if (!req.async) {
+      // Blocks here
+      var ret = this.handleResponse(trans, req);
+      this.syncRequest = null;
+      // Start the watcher loop back up again if need be
+      if (self.processingArray.length) {
+        self.processingWatcherId = setTimeout(
+          fleegix.xhr.watchProcessing, 10);
+      }
+      return ret;
     }
-  }
+  };
+  this.getResponseByType = function (trans, req) {
+    // Set the response according to the desired format
+    switch(req.responseFormat) {
+      // Text
+      case 'text':
+        r = trans.responseText;
+        break;
+      // XML
+      case 'xml':
+        r = trans.responseXML;
+        break;
+      // The object itself
+      case 'object':
+        r = trans;
+        break;
+    }
+    return r;
+  };
+  this.watchProcessing = function () {
+    var self = fleegix.xhr;
+    var proc = self.processingArray;
+    var d = new Date().getTime();
+    
+    // Stop looping while processing sync requests
+    // after req returns, it will start the loop back up
+    if (self.syncRequest != null) {
+      return;
+    }
+    else {
+      for (var i = 0; i < proc.length; i++) {
+        var req = proc[i];
+        var trans = self.transporters[req.transporterId];
+        var isTimedOut = ((d - req.startTime) > (req.timeoutSeconds*1000));
+        switch (true) {
+          // Aborted requests
+          case (req.aborted || !trans.readyState):
+            self.processingArray.splice(i, 1);
+          // Timeouts
+          case isTimedOut:
+            self.processingArray.splice(i, 1);
+            self.timeout(req);
+            break;
+          // Actual responses
+          case (trans.readyState == 4):
+            self.processingArray.splice(i, 1);
+            self.handleResponse.apply(self, [trans, req]);
+            break;
+        }
+      }
+    }
+    clearTimeout(self.processingWatcherId);
+    if (self.processingArray.length) {
+      self.processingWatcherId = setTimeout(
+        fleegix.xhr.watchProcessing, 10);
+    }
+    else {
+      self.processingWatcherId = null;
+    }
+  };
   this.abort = function (reqId) {
+    var r = this.processingMap[reqId];
+    var t = this.transporters[r.transporterId];
     // Abort the req if it's still processing
-    var t = this.processing[reqId];
     if (t) {
       // onreadystatechange can still fire as abort is executed
       t.onreadystatechange = function () { };
       t.abort();
+      r.aborted = true;
+      this.cleanupAfterReq(r);
       return true;
     }
     else {
       return false;
+    }
+  };
+  this.timeout = function (req) {
+    if (fleegix.xhr.abort.apply(fleegix.xhr, [req.id])) {
+      if (typeof req.handleTimeout == 'function') {
+        req.handleTimeout();
+      }
+      else {
+        alert('XMLHttpRequest to ' + req.url + ' timed out.');
+      }
+    }
+  };
+  this.handleResponse = function (trans, req) {
+    // Grab the desired response type
+    var resp = this.getResponseByType(trans, req);
+    
+    // If we have a One True Event Handler, use that
+    // Best for odd cases such as Safari's 'undefined' status
+    if (req.handleAll) {
+      req.handleAll(resp, req.id);
+    }
+    // Otherwise hand to either success/failure
+    else {
+      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE 
+      // err in Firefox for broken connections or hitting ESC
+      try {
+        // Request was successful -- execute response handler
+        if (trans.status > 199 && trans.status < 300) {
+          if (req.async) {
+            // Make sure handler is defined
+            if (!req.handleSuccess) {
+              throw('No response handler defined ' +
+                'for this request');
+              return;
+            }
+            else {
+              req.handleSuccess(resp, req.id);
+            }
+          }
+          // Blocking requests return the result inline on success
+          else {
+            return resp;
+          }
+        }
+        // Request failed -- execute error handler
+        else {
+          if (req.handleErr) {
+            req.handleErr(resp, req.id);
+          }
+          else {
+            this.handleErrDefault(trans);
+          }
+        }
+      }
+      // Squelch
+      catch (e) { 
+        if (this.debug) { throw(e); }
+      }
+    }
+    // Clean up, move immediately to respond to any
+    // queued up requests
+    if (req.async) {
+      this.cleanupAfterReq(req);
+    }
+    return true;
+  };
+  this.cleanupAfterReq = function (req) {
+    // Remove from list of transporters currently in use
+    // this XHR can't be aborted until it's processing again
+    delete this.processingMap[req.id];
+    
+    // Requests queued up, grab one to respond to 
+    if (this.requestQueue.length) {
+      var nextReq = this.requestQueue.shift();
+      // Reset the start time for the request for timeout purposes
+      nextReq.startTime = new Date().getTime();
+      this.processReq(nextReq, req.transporterId);
+    }
+    // Otherwise this transporter is idle, waiting to respond
+    else {
+      this.idleTransporters.push(req.transporterId);
+    }
+  };
+  this.handleErrDefault = function (r) {
+    var errorWin;
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = r.responseText;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
     }
   };
 };
@@ -380,6 +454,7 @@ fleegix.xhr.constructor = null;
 
 fleegix.xhr.Request = function () {
   this.id = 0;
+  this.transporterId = null;
   this.url = null;
   this.status = null;
   this.statusText = '';
@@ -399,28 +474,13 @@ fleegix.xhr.Request = function () {
   this.password = '';
   this.headers = [];
   this.preventCache = false;
-  this.timeoutId = null;
-  this.timeoutPeriod = 30000; // Default to 30-sec timeout
+  this.startTime = new Date().getTime();
+  this.timeoutSeconds = 30; // Default to 30-sec timeout
   this.uber = false;
+  this.aborted = false;
 }
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
     
-// Default err handler -- pop up full window with error
-// if request has no handler specifically defined
-fleegix.xhr.handleErrDefault = function (r) {
-    var errorWin;
-    // Create new window and display error
-    try {
-      errorWin = window.open('', 'errorWin');
-      errorWin.document.body.innerHTML = r.responseText;
-    }
-    // If pop-up gets blocked, inform user
-    catch(e) {
-      alert('An error occurred, but the error message cannot be' +
-      ' displayed because of your browser\'s pop-up blocker.\n' +
-      'Please allow pop-ups from this Web site.');
-    }
-};
 
