@@ -37,7 +37,7 @@ for. If omitted, assumes root ('/').
 
 * Description
 
-Gets the value of the cookie with the specified name and path. 
+Gets the value of the cookie with the specified name and path.
 
 * Examples
 
@@ -68,9 +68,9 @@ values if they are not set:
 
 * Description
 
-Sets the value of the cookie with the specified name and path. Days, 
-hours, and minutes for the duration of the cookie may be used in
-combination.
+Sets the value of the cookie with the specified name and
+path. Days, hours, and minutes for the duration of the cookie
+may be used in combination.
 
 * Examples
 
@@ -86,9 +86,11 @@ fleegix.event.listen
 
 * Syntax
 
-fleegix.event.listen(listenerObj, triggerEventName, someFunction);
+fleegix.event.listen(listenerObj, triggerEventName,
+    someFunction);
 (simple function)
-fleegix.event.listen(listenerObj, triggerEventName, someObject, 
+
+fleegix.event.listen(listenerObj, triggerEventName, someObject,
     someMethodName);
 (method of an object)
 
@@ -99,21 +101,21 @@ listenerObj (Object) -- Object to add the listener to.
 triggerEventName (String) -- Name of method or event which
 will trigger execution of a function or method of an object.
 
-someFunction (Function) -- Function to execute when the
-trigger event is run.
+someFunction (Function) -- Function to execute when the trigger
+event is run.
 
-someObject (Object) -- Object with the method you want
-to execute when the trigger event is run.
+someObject (Object) -- Object with the method you want to
+execute when the trigger event is run.
 
-someMethodName (String) -- Name of the method you want
-to execute when the trigger event is run.
+someMethodName (String) -- Name of the method you want to
+execute when the trigger event is run.
 
 * Description
 
 Attaches a method of an object or a simple function to the
-triggering of an event or calling of a method of some other 
+triggering of an event or calling of a method of some other
 object. Whenever the trigger event or method is fired, the
-attached method or function will run. Multiple functions or 
+attached method or function will run. Multiple functions or
 methods can be attached to the same trigger.
 
 * Examples
@@ -144,35 +146,37 @@ fleegix.event.unlisten
 
 * Syntax
 
-fleegix.event.unlisten(listenerObj, triggerEventName, someFunction);
+fleegix.event.unlisten(listenerObj, triggerEventName,
+    someFunction); 
 (simple function)
-fleegix.event.unlisten(listenerObj, triggerEventName, someObject, 
-    someMethodName);
+
+fleegix.event.unlisten(listenerObj, triggerEventName,
+    someObject, someMethodName);
 (method of an object)
 
 * Parameters
 
 listenerObj (Object) -- Object to remove the listener from.
 
-triggerEventName (String) -- Name of method or event which you
-want to stop triggering a certain function or method of an 
-object.
+triggerEventName (String) -- Name of method or event which
+you want to stop triggering a certain function or method of
+an object.
 
-someFunction (Function) -- Function to stop triggering when 
+someFunction (Function) -- Function to stop triggering when
 the trigger event is run.
 
-someObject (Object) -- Object with the method you want
-to stop from executing when the trigger event is run.
+someObject (Object) -- Object with the method you want to stop
+from executing when the trigger event is run.
 
-someMethodName (String) -- Name of the method you want
-to stop from executing when the trigger event is run.
+someMethodName (String) -- Name of the method you want to stop
+from executing when the trigger event is run.
 
 * Description
 
 Removes an attached listener so it will no longer trigger
 the function or method specified. Use 'unlisten' with the
-exact same parameters you passed to 'listen' to remove
-that specific listener.
+exact same parameters you passed to 'listen' to remove that
+specific listener.
 
 * Examples
 
@@ -199,7 +203,98 @@ fleegix.event.unlisten(zardoz, 'foo', logansRun, 'bar');
 zardoz.foo(); => now just one alert, 'ABC.'
 
 fleegix.event.publish
-fleegix.event.unpublish
+
+* Syntax
+
+fleegix.event.publish(channelName, publishPayload);
+
+* Parameters
+
+channelName (String) -- Name of the channel to publish on.
+
+publishPayload (Object) -- Object to send to anyone listening
+on the specified channel.
+
+* Description
+
+Allows an object to publish to a specific channel (simply
+named with a string), and pass a JavaScript object to anyone
+listening as a payload of the publish-event.
+
+* Examples
+
+var pubObj = {
+    thisProp: 'foo',
+    thatProp: function () {},
+    theOtherProp: 2112 };
+
+fleegix.event.publish('sciFi' pubObj); 
+
+fleegix.event.subscribe
+
+* Syntax
+
+fleegix.event.subscribe(channelName, subscriberObj, 
+    handlerMethod);
+
+* Parameters
+
+channelName (String) -- Name of the channel to listen for
+publish-events on.
+
+subscriberObj (Object) -- Object that is listening for
+publish-events on that channel.
+
+handlerMethod (Function) -- Method to invoke when the
+publish-event occurs. The publish event will pass this method
+a JavaScript Object as a parameter.
+
+* Description
+
+Allows an object to listen for published events on a specific
+channel (simply named with a string), and specify a handler
+method that will be fired on each publish-event, and be handed
+a JavaScript object as the publish-event payload.
+
+* Examples
+
+var zardoz = new function () {
+  this.handlePublish = function (pubObj) {
+    alert(pubObj.thisProp);
+  };
+}
+
+fleegix.event.subscribe('sciFi', zardoz, 'handlePublish'); 
+
+var pubObj = {
+    thisProp: 'foo',
+    thatProp: function () {},
+    theOtherProp: 2112 };
+
+fleegix.event.publish('sciFi' pubObj); => passes pubObj to
+handlePublish method of zardoz, which alerts 'foo.'
+
+fleegix.event.unsubscribe
+
+* Syntax
+
+fleegix.event.unsubscribe(channelName, unsubscribeObj);
+
+* Parameters
+
+channelName (String) -- Name of the channel to unsubscribe from.
+
+unsubscribeObj (Object) -- Object that should stop listening
+to that channel.
+
+* Description
+
+Allows an object that's subscribed to a particular publishing
+channel to stop listening.
+
+* Examples
+
+fleegix.event.unsubscribe('sciFi', zardoz'); 
 
 Forms
 
@@ -245,8 +340,12 @@ fleegix.xhr.doGet
 
 * Syntax
 
-fleegix.xhr.doGet(handlerFunction, url, [responseFormat]); (async)
-fleegix.xhr.doGet(url, [responseFormat]); (sync)
+fleegix.xhr.doGet(handlerFunction, url, 
+    [responseFormat]); 
+(async)
+
+fleegix.xhr.doGet(url, [responseFormat]); 
+(sync)
 
 * Parameters
 
@@ -283,14 +382,19 @@ alert(s);
 function alertStatus(resp, id) {
   alert(resp.status);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 'object');
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+    'object');
 
 fleegix.xhr.doPost
 
 * Syntax
 
-fleegix.xhr.doPost(handlerFunction, url, dataPayload, [responseFormat]); (async)
-fleegix.xhr.doPost(url, dataPayload, [responseFormat]); (sync)
+fleegix.xhr.doPost(handlerFunction, url, dataPayload, 
+    [responseFormat]); 
+(async)
+
+fleegix.xhr.doPost(url, dataPayload, [responseFormat]); 
+(sync)
 
 * Parameters
 
