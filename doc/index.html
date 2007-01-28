@@ -30,6 +30,10 @@ p {margin: 0 0 10px; line-height:20px; }
 
 code { font-size:13px;  }
 
+.dataType {
+ font-style: italic; 
+}
+
 </style>
 
 </head>
@@ -46,9 +50,9 @@ code { font-size:13px;  }
 
 <h3>Parameters</h3>
 
-<p>cookieName (String) -- Name of the cookie you want to remove.</p>
+<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
 
-<p>path (String) -- Path for the cookie you want to remove. If 
+<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If 
 omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
@@ -67,10 +71,10 @@ omitted, assumes root ('/').</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName (String) -- Name of the cookie you want to get the
+<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to get the
 value for.</p>
 
-<p>path (String) -- Path for the cookie you want to get the value
+<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to get the value
 for. If omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
@@ -93,13 +97,13 @@ for. If omitted, assumes root ('/').</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName (String) -- Name of the cookie you want to set the
+<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to set the
 value for.</p>
 
-<p>path (String) -- Path for the cookie you want to set the value
+<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to set the value
 for. If omitted, assumes root ('/').</p>
 
-<p>opts (Object) -- Object with keyword options for the cookie.
+<p>opts <span class="dataType">(Object)</span> -- Object with keyword options for the cookie.
 Here is the list of possible properties to set, and the default
 values if they are not set:</p>
 
@@ -139,18 +143,18 @@ fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2,
 
 <h3>Parameters</h3>
 
-<p>listenerObj (Object) -- Object to add the listener to.</p>
+<p>listenerObj <span class="dataType">(Object)</span> -- Object to add the listener to.</p>
 
-<p>triggerEventName (String) -- Name of method or event which
+<p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
 will trigger execution of a function or method of an object.</p>
 
-<p>someFunction (Function) -- Function to execute when the trigger
+<p>someFunction <span class="dataType">(Function)</span> -- Function to execute when the trigger
 event is run.</p>
 
-<p>someObject (Object) -- Object with the method you want to
+<p>someObject <span class="dataType">(Object)</span> -- Object with the method you want to
 execute when the trigger event is run.</p>
 
-<p>someMethodName (String) -- Name of the method you want to
+<p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to
 execute when the trigger event is run.</p>
 
 <h3>Description</h3>
@@ -199,19 +203,19 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>listenerObj (Object) -- Object to remove the listener from.</p>
+<p>listenerObj <span class="dataType">(Object)</span> -- Object to remove the listener from.</p>
 
-<p>triggerEventName (String) -- Name of method or event which
+<p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
 you want to stop triggering a certain function or method of
 an object.</p>
 
-<p>psomeFunction (Function) -- Function to stop triggering when
+<p>psomeFunction <span class="dataType">(Function)</span> -- Function to stop triggering when
 the trigger event is run.</p>
 
-someObject (Object) -- Object with the method you want to stop
+someObject <span class="dataType">(Object)</span> -- Object with the method you want to stop
 from executing when the trigger event is run.
 
-someMethodName (String) -- Name of the method you want to stop
+someMethodName <span class="dataType">(String)</span> -- Name of the method you want to stop
 from executing when the trigger event is run.
 
 <h3>Description</h3>
@@ -253,9 +257,9 @@ zardoz.foo(); => now just one alert, 'ABC.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName (String) -- Name of the channel to publish on.</p>
+<p>channelName <span class="dataType">(String)</span> -- Name of the channel to publish on.</p>
 
-<p>publishPayload (Object) -- Object to send to anyone listening
+<p>publishPayload <span class="dataType">(Object)</span> -- Object to send to anyone listening
 on the specified channel.</p>
 
 <h3>Description</h3>
@@ -282,13 +286,13 @@ fleegix.event.publish('sciFi' pubObj);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName (String) -- Name of the channel to listen for
+<p>channelName <span class="dataType">(String)</span> -- Name of the channel to listen for
 publish-events on.</p>
 
-<p>subscriberObj (Object) -- Object that is listening for
+<p>subscriberObj <span class="dataType">(Object)</span> -- Object that is listening for
 publish-events on that channel.</p>
 
-<p>handlerMethod (Function) -- Method to invoke when the
+<p>handlerMethod <span class="dataType">(Function)</span> -- Method to invoke when the
 publish-event occurs. The publish event will pass this method
 a JavaScript Object as a parameter.</p>
 
@@ -325,9 +329,9 @@ handlePublish method of zardoz, which alerts 'foo.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName (String) -- Name of the channel to unsubscribe from.</p>
+<p>channelName <span class="dataType">(String)</span> -- Name of the channel to unsubscribe from.</p>
 
-<p>unsubscribeObj (Object) -- Object that should stop listening
+<p>unsubscribeObj <span class="dataType">(Object)</span> -- Object that should stop listening
 to that channel.</p>
 
 <h3>Description</h3>
@@ -349,10 +353,10 @@ fleegix.form.serialize(formElement, [serializeOptions]);
 
 <h3>Parameters</h3>
 
-<p>formElement (HTMLFormElement) -- The HTML form you want to 
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
 serialize.</p>
 
-<p>serializeOptions (Object) -- Options for how to serialize
+<p>serializeOptions <span class="dataType">(Object)</span> -- Options for how to serialize
 the form. Here is the list of possible properties to set,
 and the default values if they are not set:</p>
 <ul>
@@ -395,7 +399,7 @@ fleegix.xhr.doGet(handlerFunc, url);
 
 <h3>Parameters</h3>
 
-<p>formElement (HTMLFormElement) -- The HTML form you want to 
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
 convert to a keyword/value object.</p>
 
 <h3>Description</h3>
@@ -424,10 +428,10 @@ alert(obj.firstTextBox); => alerts 'foo.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>formElement (HTMLFormElement) -- The HTML form you want to
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
 restore from a string.</p>
 
-<p>serializedString (String) -- The query-string-style string of
+<p>serializedString <span class="dataType">(String)</span> -- The query-string-style string of
 serialized form data you want to use to restore the form-element
 values.</p>
 
@@ -462,15 +466,15 @@ user settings, and uses them to pre-fill the form</code></pre>
 
 <h3>Parameters</h3>
 
-<p>updatedForm (HTMLFormElement or hash) -- Form (or form
+<p>updatedForm <span class="dataType">(Object)</span> -- Form (or form
 converted to keyword/value object with fleegix.form.toHash)
 that you want to compare to another form.</p>
 
-<p>originalForm (HTMLFormElement or hash) -- Another form (or
+<p>originalForm <span class="dataType">(Object)</span> -- Another form (or
 converted to keyword/value object with fleegix.form.toHash)
 that you want to compare to the first one.</p>
 
-<p>diffOptions (Object) -- Currently only one option:</p>
+<p>diffOptions <span class="dataType">(Object)</span> -- Currently only one option:</p>
 <dl>
   <dd>intersectionOnly: false -- If this flag is set to true,
     will only return fields that are in both forms. The
@@ -531,10 +535,10 @@ alert(changes.diffs.firstTextField[1]); => alerts 'foo.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement (Object, DOM node) -- DOM node (such as div or span)
+<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
 that you wish to apply a fadeout animation effect to.</p>
 
-<p>fadeOptions (Object) -- Options for the fadeout animation. Here
+<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 <ul>
@@ -565,10 +569,10 @@ fleegix.fx.fadeOut(fadeDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement (Object, DOM node) -- DOM node (such as div or span)
+<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
 that you wish to apply a fadein animation effect to.</p>
 
-<p>fadeOptions (Object) -- Options for the fadein animation. Here
+<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 <ul>
@@ -601,7 +605,7 @@ fleegix.fx.fadein(fadeDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>serializeObj (Object) -- Object to serialize as a JSON string. </p>
+<p>serializeObj <span class="dataType">(Object)</span> -- Object to serialize as a JSON string. </p>
 
 <h3>Description</h3>
 
@@ -624,9 +628,9 @@ var str = fleegix.json.serialize(obj);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>url (String) -- URL for the location of the popup window</p>
+<p>url <span class="dataType">(String)</span> -- URL for the location of the popup window</p>
 
-<p>popupOptions (Object) -- Options for the window to be
+<p>popupOptions <span class="dataType">(Object)</span> -- Options for the window to be
 opened. Here is the list of possible properties to set, and
 the default values if they are not set:</p>
 <ul> 
@@ -687,7 +691,7 @@ fleegix.popup.close();</code></pre>
 
 <h3>Parameters</h3>
 
-<p>urlString (String) -- The URL you want to get the query string
+<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the query string
 from.</p>
 
 <h3>Description</h3>
@@ -707,7 +711,7 @@ mark) on a URL.</p>
 
 <h3>Parameters</h3>
 
-<p>urlString (String) -- The URL you want to get the base URL from.</p>
+<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the base URL from.</p>
 
 <h3>Description</h3>
 
@@ -726,10 +730,10 @@ mark, if there's a query string) on a URL.</p>
 
 <h3>Parameters</h3>
 
-<p>paramName (String) -- The name of the parameter you want to get
+<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to get
 the value of.</p>
 
-<p>querystring (String) -- The query string you want to get a value
+<p>querystring <span class="dataType">(String)</span> -- The query string you want to get a value
 from.</p>
 
 <h3>Description</h3>
@@ -753,12 +757,12 @@ alert(foo); => alerts '2112,1001.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>paramName (String) -- The name of the parameter you want to set
+<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to set
 the value of.</p>
 
-<p>value (String) -- The value you want to set the parameter to.</p>
+<p>value <span class="dataType">(String)</span> -- The value you want to set the parameter to.</p>
 
-<p>querystring (String) -- The query string you want to set a value
+<p>querystring <span class="dataType">(String)</span> -- The query string you want to set a value
 for a param on.</p>
 
 <h3>Description</h3>
@@ -799,15 +803,15 @@ response). Implements XHR-object pooling and request queueing.</p>
 
 <h3>Parameters</h3>
 
-<p>handlerFunction (Function) -- function called when an
+<p>handlerFunction <span class="dataType">(Function)</span> -- function called when an
 asynchronous XHR request returns. If first argument
 is missing, doGet assumes a synchronous (blocking) request.
 When called by the response, it will be passed two parameters
 -- the response in the desired format, and the request ID.</p>
 
-<p>url (String) -- The URL to make the request to.</p>
+<p>url <span class="dataType">(String)</span> -- The URL to make the request to.</p>
 
-<p>responseFormat (String) -- Optional parameter, sets the format
+<p>responseFormat <span class="dataType">(String)</span> -- Optional parameter, sets the format
 of the response passed to the handler function.  Possible values
 are 'text' (to pass the responseText of the XHR object), 'xml'
 (the responseXML), and 'object' (to get the XHR object itself)
@@ -848,17 +852,17 @@ fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
 
 <h3>Parameters</h3>
 
-<p>handlerFunction (Function) -- function called when an
+<p>handlerFunction <span class="dataType">(Function)</span> -- function called when an
 asynchronous XHR request returns. If first argument
 is missing, doPost assumes a synchronous (blocking) request.
 When called by the response, it will be passed two parameters
 -- the response in the desired format, and the request ID.</p>
 
-<p>url (String) -- The URL to make the request to.</p>
+<p>url <span class="dataType">(String)</span> -- The URL to make the request to.</p>
 
-<p>dataPayload (String) -- Data payload to send with the request.</p>
+<p>dataPayload <span class="dataType">(String)</span> -- Data payload to send with the request.</p>
 
-<p>responseFormat (String) -- Optional parameter, sets the format
+<p>responseFormat <span class="dataType">(String)</span> -- Optional parameter, sets the format
 of the response passed to the handler function.  Possible values
 are 'text' (to pass the responseText of the XHR object), 'xml'
 (the responseXML), and 'object' (to get the XHR object itself)
@@ -892,11 +896,11 @@ fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
 
 <h3>Syntax</h3>
 
-fleegix.xhr.doReq(requestOptions); (async)
+<p>fleegix.xhr.doReq(requestOptions); <em>(Either asynchronous or synchronous)</em></p>
 
 <h3>Parameters</h3>
 
-<p>requestOptions (Object) -- Options for the XHR request. Here
+<p>requestOptions <span class="dataType">(Object)</span> -- Options for the XHR request. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 
@@ -966,7 +970,7 @@ handler function (async) or returns the result inline (sync).</p>
 
 <h3>Parameters</h3>
 
-<p>requestId (Number) -- Request ID of a currently processing
+<p>requestId <span class="dataType">(Number)</span> -- Request ID of a currently processing
 XHR request to abort.</p>
 
 <h3>Description</h3>
@@ -991,7 +995,7 @@ fleegix.xhr.abort(id); // Abort the request</code></pre>
 
 <h3>Parameters</h3>
 
-<p>xml (XMLDocument) -- DOM-compatible Document object.</p>
+<p>xml <span class="dataType">(Object)</span> -- DOM-compatible Document object.</p>
 
 <h3>Description</h3>
 
