@@ -1,4 +1,5 @@
 Cookies
+=====================================
 
 fleegix.cookie.destroy
 
@@ -48,7 +49,10 @@ fleegix.cookie.set
 * Syntax
 
 fleegix.cookie.set(cookieName, [path]);
+(Just setting a path for the cookie)
+
 fleegix.cookie.set(cookieName, [opts]);
+(Set the path and other options)
 
 * Parameters
 
@@ -80,8 +84,8 @@ fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2,
   minutes: 30 });
 
 Events
+=====================================
 
-(Not done yet)
 fleegix.event.listen
 
 * Syntax
@@ -297,38 +301,442 @@ channel to stop listening.
 fleegix.event.unsubscribe('sciFi', zardoz'); 
 
 Forms
+=====================================
 
-(Not done yet)
-fleegix.form.diff
-fleegix.form.restore
 fleegix.form.serialize
+
+* Syntax
+
+fleegix.form.serialize(formElement, [serializeOptions]);
+
+* Parameters
+
+formElement (HTMLFormElement) -- The HTML form you want to 
+serialize.
+
+serializeOptions (Object) -- Options for how to serialize
+the form. Here is the list of possible properties to set,
+and the default values if they are not set:
+
+  * stripTags: false -- Strip HTML markup tags from the
+    values.
+  * includeEmpty: false -- Include variables in the string
+    for all the form elements, even if they have
+    no value set (e.g., even if elemB is empty stil set
+    string to elemA=foo&elemB=&elemC=bar)
+  * collapseMulti: false -- take values from elements that
+    can return multiple values (multi-select, checkbox groups)
+    and collapse into a single, comman-delimited value
+    (e.g., foo=asdf,qwer,zxcv)
+
+* Description
+
+Transforms all the values of form elements in an HTML form
+into a query-string-style string, usually to be submitted as
+the payload in an XMLHttpRequest POST request.
+
+* Examples
+
+var someForm = document.getElementById('someFormId');
+var str = fleegix.form.serialize(someForm);
+fleegix.xhr.doPost(handlerFunc, '/post_page.rbx', str);
+=> Posts contents of someForm to post_page.rbx
+
+var someForm = document.getElementById('someFormId');
+var str = fleegix.form.serialize(someForm, { includeEmpty: true });
+var url = 'get_page.rbx?' + str;
+fleegix.xhr.doGet(handlerFunc, url);
+=> Use the serialized form as a query string in a GET
+
 fleegix.form.toHash
 
-FX
+* Syntax
+
+fleegix.form.toHash(formElement);
+
+* Parameters
+
+formElement (HTMLFormElement) -- The HTML form you want to 
+convert to a keyword/value object.
+
+* Description
+
+Transforms all the values of form elements in a form into a
+keyword/value object (hash). When a form element has multiple
+values (like with sets of checkboxes, or multi-select select
+boxes), the values will be put into an array.
+
+All form elements will have a key in the hash. Empty form
+elements (e.g., a blank text box) will have a value of null
+in the hash.
+
+* Examples
+
+var someForm = document.getElementById('someFormId');
+someForm.firstTextBox.value = 'foo';
+var obj = fleegix.form.toHash(someForm);
+alert(obj.firstTextBox); => alerts 'foo.'
+
+fleegix.form.restore
+
+* Syntax
+
+fleegix.form.restore(formElement, serializedString);
+
+* Parameters
+
+formElement (HTMLFormElement) -- The HTML form you want to
+restore from a string.
+
+serializedString (String) -- The query-string-style string of
+serialized form data you want to use to restore the form-element
+values.
+
+* Description
+
+Allows you to restore a blank form to the state it was in when
+it was serialized to a string. This can be nice if you don't
+want to fill your server-side code with a bunch of conditionals
+to pre-fill a form from values in the database.
+
+* Examples
+
+function getDataAndRestore(userId) {
+  fleegix.xhr.doGet(doRestore,
+        '/get_user_settings.rbx?userId=' + userId);
+}
+
+function doRestore(str) {
+  var settingsForm = document.getElementById('settingsForm');
+  fleegix.form.restore(settingsForm, str);
+}
+
+getDataAndRestore();
+=> Pulls the original serialized form data used to save the
+user settings, and uses them to pre-fill the form
+
+fleegix.form.diff
+
+* Syntax
+
+fleegix.form.diff(updatedForm, originalForm, [diffOptions]);
+
+* Parameters
+
+updatedForm (HTMLFormElement or hash) -- Form (or form
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to another form.
+
+originalForm (HTMLFormElement or hash) -- Another form (or
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to the first one.
+
+diffOptions (Object) -- Currently only one option:
+  intersectionOnly: false -- If this flag is set to true,
+    will only return fields that are in both forms. The
+    default behavior is to return fields as 'different'
+    if they are only in one form and not the other (i.e.,
+    a union).
+
+* Description
+
+Allows you to tell how many fields and which fields are
+different between two forms, as well as what the values are
+for each differing field for both forms.  changed field.
+
+One practical use for this method is figuring what has changed
+in a form since it initially loaded. The easy way to do this is
+to make a backup of the form values with fleegix.form.toHash,
+and then compare the updated form to the original form data
+in the backed-up object.
+
+This method returns an object with two properties:
+  1. count: The number of changed fields
+  2. diffs: a keyword/value object containing an item for each field
+     that has changed. The value of the item is an array where the
+     first item is the changed value, and the second is the original
+     value.
+
+* Examples
+
+// Get a ref to the form
+var someForm = document.getElementById('someFormId');
+
+// Set the value of a text box to 'foo'
+someForm.firstTextField.value = 'foo';
+
+// Make a copy of the data in the form
+var backupOfForm = fleegix.form.toHash(someForm);
+
+// Change the text box value to something else
+someForm.firstTextField.value = 'bar';
+
+// Let's see what changed
+var changes = fleegix.form.diff(someForm, backupOfForm);
+
+alert(changes.count); => alerts '1.'
+alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
+alert(changes.diffs.firstTextField[1]); => alerts 'foo.'
+
+Effects
+=====================================
 
 fleegix.fx.fadeOut
+
+* Syntax
+
+fleegix.fx.fadeOut(domElement, [fadeOptions]);
+
+* Parameters
+
+domElement (Object, DOM node) -- DOM node (such as div or span)
+that you wish to apply a fadeout animation effect to.
+
+fadeOptions (Object) -- Options for the fadeout animation. Here
+is the list of possible properties to set, and the default
+values if they are not set:
+  * duration: 500 -- Number of milliseconds to do the fadeout
+    animatinon in.
+  * trans: 'lightEaseIn' -- easing transition to use in the fade 
+  * doOnStart: null -- Function to execute as the animation starts
+  * doAfter: null -- Function to exectute after the animation
+    completes
+
+* Description
+
+Does a basic opacity fadeout animation effect on the desired
+DOM element. The element should be set to 100% opacity before
+applying the effect.
+
+* Examples
+
+var fadeDiv = document.getElementById('someDiv');
+fleegix.fx.fadeOut(fadeDiv);
+
 fleegix.fx.fadeIn
-fleegix.fx.setCSSProp
+
+* Syntax
+
+fleegix.fx.fadeIn(domElement, [fadeOptions]);
+
+* Parameters
+
+domElement (Object, DOM node) -- DOM node (such as div or span)
+that you wish to apply a fadein animation effect to.
+
+fadeOptions (Object) -- Options for the fadein animation. Here
+is the list of possible properties to set, and the default
+values if they are not set:
+
+  * duration: 500 -- Number of milliseconds to do the fadein
+    animatinon in.
+  * trans: 'lightEaseIn' -- easing transition to use in the fade 
+  * doOnStart: null -- Function to execute as the animation starts
+  * doAfter: null -- Function to exectute after the animation
+    completes
+
+* Description
+
+Does a basic opacity fadein animation effect on the desired
+DOM element. The element should be set to zero opacity before
+applying the effect.
+
+* Examples
+
+var fadeDiv = document.getElementById('someDiv');
+fleegix.fx.fadein(fadeDiv);
 
 JSON
+=====================================
 
-(Not done yet)
 fleegix.json.serialize
 
-Popup window module
+* Syntax
 
-(Not done yet)
-fleegix.popup.close
-fleegix.popup.goURLMainWin
+fleegix.json.serialize(serializeObj);
+
+* Parameters
+
+serializeObj (Object) -- Object to serialize as a JSON string. 
+
+* Description
+
+Serializes a JavaScript object into a JSON
+(http://www.json.org/) string.
+
+* Examples
+
+var obj = { name: 'Rush', 
+    members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
+var str = fleegix.json.serialize(obj);
+
+Popups
+=====================================
+
 fleegix.popup.open
 
-URI
+* Syntax
 
-(Not done yet)
+fleegix.popup.open(url, [popupOptions]);
+
+* Parameters
+
+url (String) -- URL for the location of the popup window
+
+popupOptions (Object) -- Options for the window to be
+opened. Here is the list of possible properties to set, and
+the default values if they are not set:
+  
+  * width: null -- Width of the window to open. If unset,
+    the window is a full-sized window
+  * height: null -- Height of the window to open. If unset,
+    the window is a full-sized window
+  * location: false -- Display the location bar or not
+  * menubar: false -- Display a menubar or not
+  * resizable: true -- Make the window resizable or not
+  * scrollbars: false -- Include scrollbars or not
+  * status: false -- Add a statusbar at the bottom or not
+  * titlebar: true -- Add a titlebar at the top or not
+  * toolbar: false -- Include a toolbar at the top or not
+
+* Description
+
+Opens a popup window with the desired set of options. If no
+options are passed, it simply opens a normal new browser window.
+
+This implementation allows only a single popup window at a
+time, to keep things simple for end-users. Calling the open
+method again will simply open the new URL in the same window.
+
+* Examples
+
+fleegix.popup.open('/search_window.rbx', 
+  { width: 480, height: 300 });
+
+fleegix.popup.close
+
+* Syntax
+
+fleegix.popup.close();
+
+* Parameters
+
+(None)
+
+* Description
+
+Closes the popup window opened with fleegix.popup.open.
+
+* Examples
+
+fleegix.popup.open('/search_window.rbx', 
+  { width: 480, height: 300 });
+fleegix.popup.close();
+
+URI
+=====================================
+
+fleegix.uri.getQuery
+
+* Syntax
+
+fleegix.uri.getQuery(urlString);
+
+* Parameters
+
+urlString (String) -- The URL you want to get the query string
+from.
+
+* Description
+
+Returns the query string (i.e, the portion after the question
+mark) on a URL.
+
+* Examples
+
+var query = fleegix.uri.getQuery(location.href);
+
+fleegix.uri.getBase
+
+* Syntax
+
+fleegix.uri.getBase(urlString);
+
+* Parameters
+
+urlString (String) -- The URL you want to get the base URL from.
+
+* Description
+
+Returns the base URL (i.e, the portion before the question
+mark, if there's a query string) on a URL.
+
+* Examples
+
+var base = fleegix.uri.getBase(location.href);
+
 fleegix.uri.getParam
+
+* Syntax
+
+fleegix.uri.getParam(paramName, querystring);
+
+* Parameters
+
+paramName (String) -- The name of the parameter you want to get
+the value of.
+
+querystring (String) -- The query string you want to get a value
+from.
+
+* Description
+
+Returns the value of a parameter on a query string. If the same
+parameter name appears multiple times in the query string, the
+function will return an array of all the values.
+
+* Examples
+
+var query = 'foo=2112&bar=howdy&foo=1001';
+var foo = fleegix.uri.getParam('foo', query);
+foo = foo.join();
+alert(foo); => alerts '2112,1001.'
+
 fleegix.uri.setParam
 
+* Syntax
+
+fleegix.uri.setParam(paramName, value, querystring);
+
+* Parameters
+
+paramName (String) -- The name of the parameter you want to set
+the value of.
+
+value (String) -- The value you want to set the parameter to.
+
+querystring (String) -- The query string you want to set a value
+for a param on.
+
+* Description
+
+Sets the value of a parameter in a query string. If the param is
+not in the string, it appends it with the desired value at the
+end of the string. If the entire string is empty, it creates a
+query string with the single param and value in it.
+
+If the parameter is in the query string multiple times, the
+function will set the value of the first instance of the param
+that it finds in the string.
+
+* Examples
+
+var query = 'foo=2112&bar=howdy&foo=1001';
+var foo = fleegix.uri.setParam('bar', 'wowzers', query);
+alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'
+
 XHR
+=====================================
 
 Has two convenient methods for doing the standard GET and POST
 requests, as well as the ability to do requests with more
@@ -530,6 +938,7 @@ var id = fleegix.doGet(handlerFunction,
 fleegix.xhr.abort(id); // Abort the request
 
 XML
+=====================================
 
 fleegix.xml.parse
 

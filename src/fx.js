@@ -80,11 +80,12 @@ fleegix.fx = new function () {
 fleegix.fx.Effecter = function (elem, opts) {
   var self = this;
   this.props = opts.props;
-  this.trans = opts.trans || 'linear';
+  this.trans = opts.trans || 'lightEaseIn';
   this.duration = opts.duration || 500;
   this.fps = 30;
   this.startTime = new Date().getTime();
   this.timeSpent = 0;
+  this.doOnStart = opts.doOnStart || null;
   this.doAfter = opts.doAfter || null;
   this.autoStart = opts.autoStart == false ? false : true;
   
@@ -98,7 +99,7 @@ fleegix.fx.Effecter = function (elem, opts) {
       Math.round(1000/self.fps));
     // Run the pre-execution func if any
     if (typeof opts.doOnStart == 'function') {
-      opts.doOnStart();
+      self.doOnStart();
     }
   };
   // Fire it up unless auto-start turned off
