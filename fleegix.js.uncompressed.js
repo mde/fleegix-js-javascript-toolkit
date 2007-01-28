@@ -662,9 +662,9 @@ fleegix.xhr.Request = function () {
   this.readyState = null;
   this.responseText = null;
   this.responseXML = null;
-  this.handleAll = null;
   this.handleSuccess = null;
   this.handleErr = null;
+  this.handleAll = null;
   this.handleTimeout = null;
   this.responseFormat = 'text', // 'text', 'xml', 'object'
   this.mimeType = null;
@@ -691,10 +691,14 @@ fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerVal
  * @param docForm -- Reference to a DOM node of the form element
  * @param formatOpts -- JS object of options for how to format
  * the return string. Supported options:
- *    collapseMulti: (Boolean) take values from elements that
- *    can return multiple values (multi-select, checkbox groups)
- *    and collapse into a single, comman-delimited value
- *    (e.g., thisVar=asdf,qwer,zxcv)
+ *   collapseMulti: (Boolean) take values from elements that
+ *      can return multiple values (multi-select, checkbox groups)
+ *      and collapse into a single, comman-delimited value
+ *      (e.g., thisVar=asdf,qwer,zxcv)
+ *   stripTags: (Boolean) strip markup tags from any values
+ *   includeEmpty: (Boolean) include keys in the string for
+ *     all elements, even if they have no value set (e.g.,
+ *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form = {};
@@ -773,7 +777,7 @@ fleegix.form.toHash = function (f) {
       case 'password':
       case 'textarea':
       case 'select-one':
-        h[elem.name] = elem.value;
+        h[elem.name] = elem.value || null;
         break;
         
       // Multi-option select
@@ -789,7 +793,8 @@ fleegix.form.toHash = function (f) {
       
       // Radio buttons
       case 'radio':
-        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (typeof h[elem.name] == 'undefined') { 
+          h[elem.name] = null; }
         if (elem.checked) {
           h[elem.name] = elem.value; 
         }
@@ -797,7 +802,8 @@ fleegix.form.toHash = function (f) {
         
       // Checkboxes
       case 'checkbox':
-        if (typeof h[elem.name] == 'undefined') { h[elem.name] = null; }
+        if (typeof h[elem.name] == 'undefined') { 
+          h[elem.name] = null; }
         if (elem.checked) {
           h[elem.name] = expandToArr(h[elem.name], elem.value);
         }
@@ -867,59 +873,63 @@ fleegix.form.restore = function (form, str) {
   return form;
 };
 
-fleegix.form.Differ = function() {
-  this.count = 0;
-  this.diffs = {};
-}  
-fleegix.form.Differ.prototype.hasKey = function (k) {
-  return (typeof this.diffs[k] != 'undefined');
-};
-
-fleegix.form.diff = function (formA, formB) {
+fleegix.form.diff = function (formUpdated, formOrig, opts) {
+  var o = opts || {};
   // Accept either form or hash-conversion of form
-  var hA = formA.toString() == '[object HTMLFormElement]' ? 
-    fleegix.form.toHash(formA) : formA;
-  var hB = formB.toString() == '[object HTMLFormElement]' ? 
-    fleegix.form.toHash(formB) : formB;
-  var ret = new fleegix.form.Differ();
+  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ? 
+    fleegix.form.toHash(formUpdated) : formUpdated;
+  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ? 
+    fleegix.form.toHash(formOrig) : formOrig;
+  var diffs = [];
+  var count = 0;
   
-  function addDiff(n) {
-    ret.count++;
-    ret.diffs[n] = [hA[n], hB[n]];
-  }
- 
-  for (n in hA) {
-    // Elem doesn't exist in B
-    if (typeof hB[n] == 'undefined') {
-      addDiff(n);
+  function addDiff(n, hA, hB, secondPass) {
+    if (!diffs[n]) {
+      count++;
+      diffs[n] = secondPass? [hB[n], hA[n]] : 
+        [hA[n], hB[n]];
     }
-    // Elem exists in both
-    else {
-      v = hA[n];
-      // Multi-value -- array, hA[n] actually has values
-      if (v instanceof Array) {
-        if (!hB[n] || (hB[n].toString() != v.toString())) {
-          addDiff(n);
-        }
+  }
+  
+  function diffSweep(hA, hB, secondPass) {
+    for (n in hA) {
+      // Elem doesn't exist in B
+      if (typeof hB[n] == 'undefined') {
+        // If intersectionOnly flag set, ignore stuff that's
+        // not in both sets
+        if (o.intersectionOnly) { continue; };
+        // Otherwise we want the union, note the diff
+        addDiff(n, hA, hB, secondPass);
       }
-      // Single value -- null or string
+      // Elem exists in both
       else {
-        if (hB[n] != v) {
-          addDiff(n);
+        v = hA[n];
+        // Multi-value -- array, hA[n] actually has values
+        if (v instanceof Array) {
+          if (!hB[n] || (hB[n].toString() != v.toString())) {
+            addDiff(n, hA, hB, secondPass);
+          }
+        }
+        // Single value -- null or string
+        else {
+          if (hB[n] != v) {
+            addDiff(n, hA, hB, secondPass);
+          }
         }
       }
     }
   }
-  return ret;
+  // First sweep check all items in updated
+  diffSweep(hUpdated, hOrig, false);
+  // Second sweep, check all items in orig
+  diffSweep(hOrig, hUpdated, true);
+  
+  // Return an obj with the count and the hash of diffs
+  return { 
+    count: count,
+    diffs: diffs
+  };
 }
-
-
-
-
-
-
-
-
 
 
 fleegix.popup = new function() {
@@ -1176,13 +1186,8 @@ fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
 fleegix.fx = new function () {
-  this.fadeOut = function (elem, opts) {
-    return this.doFade(elem, opts, 'out');
-  };
-  this.fadeIn = function (elem, opts) {
-    return this.doFade(elem, opts, 'in');
-  };
-  this.doFade = function (elem, opts, dir) {
+  
+  function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
     var e = dir == 'in' ? 100 : 0;
     var o = {
@@ -1194,6 +1199,13 @@ fleegix.fx = new function () {
       o[p] = opts[p];
     }
     return new fleegix.fx.Effecter(elem, o);
+  }
+  
+  this.fadeOut = function (elem, opts) {
+    return doFade(elem, opts, 'out');
+  };
+  this.fadeIn = function (elem, opts) {
+    return doFade(elem, opts, 'in');
   };
   this.setCSSProp = function (elem, p, v) {
     if (p == 'opacity') {
@@ -1238,11 +1250,12 @@ fleegix.fx = new function () {
 fleegix.fx.Effecter = function (elem, opts) {
   var self = this;
   this.props = opts.props;
-  this.trans = opts.trans || 'linear';
+  this.trans = opts.trans || 'lightEaseIn';
   this.duration = opts.duration || 500;
   this.fps = 30;
   this.startTime = new Date().getTime();
   this.timeSpent = 0;
+  this.doOnStart = opts.doOnStart || null;
   this.doAfter = opts.doAfter || null;
   this.autoStart = opts.autoStart == false ? false : true;
   
@@ -1256,7 +1269,7 @@ fleegix.fx.Effecter = function (elem, opts) {
       Math.round(1000/self.fps));
     // Run the pre-execution func if any
     if (typeof opts.doOnStart == 'function') {
-      opts.doOnStart();
+      self.doOnStart();
     }
   };
   // Fire it up unless auto-start turned off
@@ -1268,16 +1281,20 @@ fleegix.fx.Effecter = function (elem, opts) {
 
 fleegix.fx.Effecter.prototype.doStep = function (elem) {
   var t = new Date().getTime();
+  var p = this.props;
   // Still going ...
   if (t < (this.startTime + this.duration)) {
     this.timeSpent = t - this.startTime;
-    var p = this.props;
     for (var i in p) {
       fleegix.fx.setCSSProp(elem, i, this.calcCurrVal(i));
     }
   }
   // All done, ya-hoo
   else {
+    // Make sure to end up on the final values
+    for (var i in p) {
+      fleegix.fx.setCSSProp(elem, i, p[i][1]);
+    }
     clearInterval(this.id);
     // Run the post-execution func if any
     if (typeof this.doAfterFinished == 'function') {
