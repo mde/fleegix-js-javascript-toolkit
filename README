@@ -1,0 +1,67 @@
+Fleegix.js JavaScript Toolkit
+------------------------------------------------------------
+
+Intro
+------------------------
+
+Fleegix.js is a JavaScript toolkit that provides a lightweight,
+cross-browser set of tools for building dynamic JavaScript
+UIs for Web applications.
+
+Getting started
+------------------------
+
+Using Fleegix.js in your applications is easy. Download a
+release and include the code in your Web page with a JavaScript
+<script> tag.
+
+In development, you may want to use the uncompressed version
+to make debugging easy. In that case, you'd use a script block
+like this:
+
+<script type="text/javascript" 
+    src="/path/to/webapp/fleegix.js.uncompressed.js">
+
+In a production environment, you'll likely want to use the
+compressed version of the file to make downloads faster. The
+script block for that would look like this:
+
+<script type="text/javascript" src="path/to/webapp/fleegix.js">
+
+The file is compressed with the excellent ShrinkSafe utility
+by Alex Russell (http://alex.dojotoolkit.org/shrinksafe/).
+
+You can also use the pieces of the libarary separately. The
+individual pieces are in the /src directory of the release. To
+use just the XHR (XMLHttpRequest) library, you'd do a script
+tag like this:
+
+<script type="text/javascript" src="path/to/webapp/xhr.js">
+
+Compatibility
+------------------------
+
+Fleegix.js works on all modern, mainstream browsers. It is
+known to work on the following:
+
+  * Mozilla 1.5+, Firefox 1.0+
+  * Internet Explorer 6+
+  * Safari 2
+
+It is likely to work on other standards-conformant browsers 
+(e.g., Opera, OmniWeb), but has not been tested with these.
+
+Documentation
+------------------------
+
+Extensive API documentation can be found in /docs/index.txt.
+
+The author
+------------------------
+
+Please feel free to send comments or bug reports to
+mde@fleegix.org.
+
+------------------------------------------------------------
+Code and docs, copyright 2002-2007, Matthew Eernisse.
+
