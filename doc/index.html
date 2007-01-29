@@ -10,25 +10,57 @@
 
 <style type="text/css">
 
-body {font: 12px verdana; margin: 12; padding: 0; background:#ffffff; width:580px; }
-
-div,form,input {margin: 0;padding: 0;}
-h1,h2,h3,h4,h5,h6 {font-family: arial; }
-
-a {color: #06C; text-decoration: none;}
-a:hover {text-decoration: underline;}
-
-a img {border: 0;}
-
-h3 {
-margin: 0 0 5px;
-color: #6B0;
-font: normal 16px arial;
+body {
+  font: 12px "Verdana", "Arial", sans-serif; 
+  margin: 12; 
+  padding: 0; 
+  background:#ffffff; 
+  width:480px; 
 }
 
-p {margin: 0 0 10px; line-height:20px; }
+div,form,input { 
+  margin: 0;
+  padding: 0;
+}
 
-code { font-size:13px;  }
+h1,h2,h3,h4,h5,h6 {
+  font-family: arial; 
+}
+
+a img {
+  border: 0;
+}
+
+h1 {
+  color:#333;
+  margin: 16px 0 0;
+}
+
+h3 {
+  font-weight: normal;
+  font-size: 15px;
+  margin: 0 0 3px;
+  color: #555;
+}
+
+p {
+  margin: 0 0 10px; 
+  line-height:20px; 
+}
+
+code { 
+  font-size:13px; 
+}
+
+hr {
+  border: 0px;
+  height: 1px;
+  background: #ccc;
+  color: #ccc;
+  font-size: 0px;
+  line-height: 1px;
+  margin: 2px 0 0;
+}
 
 .dataType {
  font-style: italic; 
@@ -40,28 +72,53 @@ code { font-size:13px;  }
 
 <body>
 
+<a name="fleegix.cookie">
+
 <h1>Cookies</h1>
 
-<h2>fleegix.cookie.destroy</h2>
+<hr/>
+
+<a name="fleegix.cookie.set">
+
+<h2>fleegix.cookie.set</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.cookie.destroy(cookieName, [path]);</p>
+<p>fleegix.cookie.set(cookieName, [opts]);</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
+<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to set the
+value for.</p>
 
-<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If 
-omitted, assumes root ('/').</p>
+<p>opts <span class="dataType">(Object)</span> -- Object with keyword options for the cookie.
+Here is the list of possible properties to set, and the default
+values if they are not set:</p>
+
+<ul>
+  <li>path: '/' -- Path for the cookie -- documents in this path
+    on the server will be able to use it.</li>
+  <li>days: (none) -- The number of days the cookie will last</li>
+  <li>hours: (none) -- The number of hours the cookie will last</li>
+  <li>minutes (none) -- The number of minutes the cookie will last</li>
+</ul>
 
 <h3>Description</h3>
 
-<p>Removes the cookie with the specified name and path.</p>
+<p>Sets the value of the cookie with the specified name and
+path. Days, hours, and minutes for the duration of the cookie
+may be used in combination. If no opts are passed, assumes '/'
+for path, and the cookie will expire when the user closes
+the browser,</p>
 
 <h3>Examples</h3>
 
-<pre><code>fleegix.cookie.remove('loginId');</code></pre>
+<pre><code>fleegix.cookie.set('loginId');
+
+fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2, 
+  minutes: 30 });</code></pre>
+
+<a name="fleegix.cookie.get">
 
 <h2>fleegix.cookie.get</h2>
 
@@ -85,49 +142,36 @@ for. If omitted, assumes root ('/').</p>
 
 <pre><code>fleegix.cookie.get('loginId');</code></pre>
 
-<h2>fleegix.cookie.set</h2>
+<a name="fleegix.cookie.destroy">
+
+<h2>fleegix.cookie.destroy</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.cookie.set(cookieName, [path]);
-<em>(Just setting a path for the cookie)</em></p>
-
-<p>fleegix.cookie.set(cookieName, [opts]);
-<em>(Set the path and other options)</em></p>
+<p>fleegix.cookie.destroy(cookieName, [path]);</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to set the
-value for.</p>
+<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
 
-<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to set the value
-for. If omitted, assumes root ('/').</p>
-
-<p>opts <span class="dataType">(Object)</span> -- Object with keyword options for the cookie.
-Here is the list of possible properties to set, and the default
-values if they are not set:</p>
-
-<ul>
-  <li>path: '/' -- Path for Web documents that can see this cookie</li>
-  <li>days: (none) -- The number of days the cookie will last</li>
-  <li>hours: (none) -- The number of hours the cookie will last</li>
-  <li>minutes (none) -- The number of minutes the cookie will last</li>
-</ul>
+<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If 
+omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
 
-<p>Sets the value of the cookie with the specified name and
-path. Days, hours, and minutes for the duration of the cookie
-may be used in combination.</p>
+<p>Removes the cookie with the specified name and path.</p>
 
 <h3>Examples</h3>
 
-<pre><code>fleegix.cookie.set('loginId');
+<pre><code>fleegix.cookie.remove('loginId');</code></pre>
 
-fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2, 
-  minutes: 30 });</code></pre>
+<a name="fleegix.event">
 
 <h1>Events</h1>
+
+<hr/>
+
+<a name="fleegix.event.listen">
 
 <h2>fleegix.event.listen</h2>
 
@@ -189,6 +233,8 @@ zardoz.foo(); => two alerts, 'ABC,' then 'simple.'
 fleegix.event.listen(zardoz, 'foo', logansRun, 'bar');
 zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 
+<a name="fleegix.event.unlisten">
+
 <h2>fleegix.event.unlisten</h2>
 
 <h3>Syntax</h3>
@@ -249,6 +295,8 @@ zardoz.foo(); => two alerts, 'ABC,' then '123.'
 fleegix.event.unlisten(zardoz, 'foo', logansRun, 'bar');
 zardoz.foo(); => now just one alert, 'ABC.'</code></pre>
 
+<a name="fleegix.event.publish">
+
 <h2>fleegix.event.publish</h2>
 
 <h3>Syntax</h3>
@@ -276,6 +324,8 @@ listening as a payload of the publish-event.
     theOtherProp: 2112 };
 
 fleegix.event.publish('sciFi' pubObj);</code></pre>
+
+<a name="fleegix.event.subscribe">
 
 <h2>fleegix.event.subscribe</h2>
 
@@ -321,6 +371,8 @@ var pubObj = {
 fleegix.event.publish('sciFi' pubObj); => passes pubObj to
 handlePublish method of zardoz, which alerts 'foo.'</code></pre>
 
+<a name="fleegix.event.unsubscribe">
+
 <h2>fleegix.event.unsubscribe</h2>
 
 <h3>Syntax</h3>
@@ -343,13 +395,19 @@ channel to stop listening.</p>
 
 <pre><code>fleegix.event.unsubscribe('sciFi', zardoz');</code></pre>
 
+<a name="fleegix.form">
+
 <h1>Forms</h1>
+
+<hr/>
+
+<a name="fleegix.form.serialize">
 
 <h2>fleegix.form.serialize</h2>
 
 <h3>Syntax</h3>
 
-fleegix.form.serialize(formElement, [serializeOptions]);
+<p>fleegix.form.serialize(formElement, [serializeOptions]);</p>
 
 <h3>Parameters</h3>
 
@@ -391,6 +449,8 @@ var url = 'get_page.rbx?' + str;
 fleegix.xhr.doGet(handlerFunc, url);
 => Use the serialized form as a query string in a GET</code></pre>
 
+<a name="fleegix.form.toHash">
+
 <h2>fleegix.form.toHash</h2>
 
 <h3>Syntax</h3>
@@ -419,6 +479,8 @@ in the hash.</p>
 someForm.firstTextBox.value = 'foo';
 var obj = fleegix.form.toHash(someForm);
 alert(obj.firstTextBox); => alerts 'foo.'</code></pre>
+
+<a name="fleegix.form.restore">
 
 <h2>fleegix.form.restore</h2>
 
@@ -457,6 +519,8 @@ function doRestore(str) {
 getDataAndRestore();
 => Pulls the original serialized form data used to save the
 user settings, and uses them to pre-fill the form</code></pre>
+
+<a name="fleegix.form.diff">
 
 <h2>fleegix.form.diff</h2>
 
@@ -525,7 +589,13 @@ alert(changes.count); => alerts '1.'
 alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
 alert(changes.diffs.firstTextField[1]); => alerts 'foo.'</code></pre>
 
+<a name="fleegix.fx">
+
 <h1>Effects</h1>
+
+<hr/>
+
+<a name="fleegix.fx.fadeOut">
 
 <h2>fleegix.fx.fadeOut</h2>
 
@@ -561,6 +631,8 @@ applying the effect.</p>
 <pre><code>var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadeOut(fadeDiv);</code></pre>
 
+<a name="fleegix.fx.fadeIn">
+
 <h2>fleegix.fx.fadeIn</h2>
 
 <h3>Syntax</h3>
@@ -595,7 +667,13 @@ applying the effect.</p>
 <pre><code>var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadein(fadeDiv);</code></pre>
 
+<a name="fleegix.json">
+
 <h1>JSON</h1>
+
+<hr/>
+
+<a name="fleegix.json.serialize">
 
 <h2>fleegix.json.serialize</h2>
 
@@ -618,7 +696,13 @@ fleegix.fx.fadein(fadeDiv);</code></pre>
     members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
 var str = fleegix.json.serialize(obj);</code></pre>
 
+<a name="fleegix.popup">
+
 <h1>Popups</h1>
+
+<hr/>
+
+<a name="fleegix.popup.open">
 
 <h2>fleegix.popup.open</h2>
 
@@ -661,6 +745,8 @@ method again will simply open the new URL in the same window.</p>
 <pre><code>fleegix.popup.open('/search_window.rbx', 
   { width: 480, height: 300 });</code></pre>
 
+<a name="fleegix.popup.close">
+
 <h2>fleegix.popup.close</h2>
 
 <h3>Syntax</h3>
@@ -681,7 +767,13 @@ method again will simply open the new URL in the same window.</p>
   { width: 480, height: 300 });
 fleegix.popup.close();</code></pre>
 
+<a name="fleegix.uri">
+
 <h1>URI</h1>
+
+<hr/>
+
+<a name="fleegix.uri.getQuery">
 
 <h2>fleegix.uri.getQuery</h2>
 
@@ -703,6 +795,8 @@ mark) on a URL.</p>
 
 <pre><code>var query = fleegix.uri.getQuery(location.href);</code></pre>
 
+<a name="fleegix.uri.getBase">
+
 <h2>fleegix.uri.getBase</h2>
 
 <h3>Syntax</h3>
@@ -721,6 +815,8 @@ mark, if there's a query string) on a URL.</p>
 <h3>Examples</h3>
 
 <pre><code>var base = fleegix.uri.getBase(location.href);</code></pre>
+
+<a name="fleegix.uri.getParam">
 
 <h2>fleegix.uri.getParam</h2>
 
@@ -748,6 +844,8 @@ function will return an array of all the values.</p>
 var foo = fleegix.uri.getParam('foo', query);
 foo = foo.join();
 alert(foo); => alerts '2112,1001.'</code></pre>
+
+<a name="fleegix.uri.setParam">
 
 <h2>fleegix.uri.setParam</h2>
 
@@ -782,13 +880,13 @@ that it finds in the string.</p>
 var foo = fleegix.uri.setParam('bar', 'wowzers', query);
 alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'</code></pre>
 
+<a name="fleegix.xhr">
+
 <h1>XHR</h1>
 
-<p>Has two convenient methods for doing the standard GET and POST
-requests, as well as the ability to do requests with more
-detailed control (such as using arbitrary HTTP methods such
-as PUT, setting authentication headers, or the format of the
-response). Implements XHR-object pooling and request queueing.</p>
+<hr/>
+
+<a name="fleegix.xhr.doGet">
 
 <h2>fleegix.xhr.doGet</h2>
 
@@ -838,6 +936,8 @@ function alertStatus(resp, id) {
 }
 fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
     'object');</code></pre>
+
+<a name="fleegix.xhr.doPost">
 
 <h2>fleegix.xhr.doPost</h2>
 
@@ -891,6 +991,8 @@ function alertStatus(resp, id) {
 }
 fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
   'foo=bar&baz=2112', 'object');</code></pre>
+
+<a name="fleegix.xhr.doReq">
 
 <h2>fleegix.xhr.doReq</h2>
 
@@ -962,6 +1064,8 @@ handler function (async) or returns the result inline (sync).</p>
   uber: true
 } );</code></pre>
 
+<a name="fleegix.xhr.abort">
+
 <h2>fleegix.xhr.abort</h2>
 
 <h3>Syntax</h3>
@@ -985,7 +1089,13 @@ processing (i.e., it may have already completed), returns false.</p>
   '/some_file.rbx'); // Get a request ID number
 fleegix.xhr.abort(id); // Abort the request</code></pre>
 
+<a name="fleegix.xml">
+
 <h1>XML</h1>
+
+<hr/>
+
+<a name="fleegix.xml.parse">
 
 <h2>fleegix.xml.parse</h2>
 
