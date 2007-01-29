@@ -369,6 +369,7 @@ fleegix.xhr = new function () {
     
     // If we have a One True Event Handler, use that
     // Best for odd cases such as Safari's 'undefined' status
+    // or 0 (zero) status from trying to load local files or chrome
     if (req.handleAll) {
       req.handleAll(resp, req.id);
     }
@@ -378,7 +379,8 @@ fleegix.xhr = new function () {
       // err in Firefox for broken connections or hitting ESC
       try {
         // Request was successful -- execute response handler
-        if (trans.status > 199 && trans.status < 300) {
+        if ((trans.status > 199 && trans.status < 300) || 
+            trans.status == 304) {
           if (req.async) {
             // Make sure handler is defined
             if (!req.handleSuccess) {
@@ -393,6 +395,14 @@ fleegix.xhr = new function () {
           // Blocking requests return the result inline on success
           else {
             return resp;
+          }
+        }
+        // Status of 0, undefined, null
+        else if (!trans.status) {
+          // Squelch -- if you want to get local files or
+          // chrome, use 'handleAll' above
+          if (this.debug) { 
+            throw('XMLHttpRequest HTTP status either zero or not set.'); 
           }
         }
         // Request failed -- execute error handler
@@ -435,6 +445,7 @@ fleegix.xhr = new function () {
     }
   };
   this.handleErrDefault = function (r) {
+    console.log(r);
     var errorWin;
     // Create new window and display error
     try {
