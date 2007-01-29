@@ -20,13 +20,13 @@ to make debugging easy. In that case, you'd use a script block
 like this:
 
 <script type="text/javascript" 
-    src="/path/to/webapp/fleegix.js.uncompressed.js">
+    src="/fleegix.js.uncompressed.js">
 
 In a production environment, you'll likely want to use the
 compressed version of the file to make downloads faster. The
 script block for that would look like this:
 
-<script type="text/javascript" src="path/to/webapp/fleegix.js">
+<script type="text/javascript" src="/fleegix.js">
 
 The file is compressed with the excellent ShrinkSafe utility
 by Alex Russell (http://alex.dojotoolkit.org/shrinksafe/).
@@ -36,7 +36,10 @@ individual pieces are in the /src directory of the release. To
 use just the XHR (XMLHttpRequest) library, you'd do a script
 tag like this:
 
-<script type="text/javascript" src="path/to/webapp/xhr.js">
+<script type="text/javascript" src="/xhr.js">
+
+All of the paths in these script tags assume you are placing
+the file at the root of your Web server.
 
 Compatibility
 ------------------------
@@ -54,7 +57,8 @@ It is likely to work on other standards-conformant browsers
 Documentation
 ------------------------
 
-Extensive API documentation can be found in /docs/index.txt.
+Extensive API documentation can be found in docs/index.html,
+or in plaintext format in docs/index.txt.
 
 The author
 ------------------------

@@ -10,65 +10,17 @@
 
 <style type="text/css">
 
-body {
-  font: 12px "Verdana", "Arial", sans-serif; 
-  margin: 12; 
-  padding: 0; 
-  background:#ffffff; 
-  width:480px; 
-}
-
-div,form,input { 
-  margin: 0;
-  padding: 0;
-}
-
-h1,h2,h3,h4,h5,h6 {
-  font-family: arial; 
-}
-
-a {
-  color: #6666aa;
-}
-
-a img {
-  border: 0;
-}
-
-h1 {
-  color:#333;
-  margin: 16px 0 0;
-}
-
-h3 {
-  font-weight: normal;
-  font-size: 15px;
-  margin: 0 0 3px;
-  color: #555;
-}
-
-p {
-  margin: 0 0 10px; 
-  line-height:20px; 
-}
-
-code { 
-  font-size:13px; 
-}
-
-hr {
-  border: 0px;
-  height: 1px;
-  background: #ccc;
-  color: #ccc;
-  font-size: 0px;
-  line-height: 1px;
-  margin: 2px 0 0;
-}
-
-.dataType {
- font-style: italic; 
-}
+body { font: 12px "Verdana", "Arial", sans-serif; margin: 12; padding: 0; background:#ffffff; width:480px; }
+div,form,input { margin: 0; padding: 0; }
+h1,h2,h3,h4,h5,h6 { font-family: arial; }
+a { color: #a37159; }
+a img { border: 0; }
+h1 { color:#333; margin: 16px 0 0; }
+h3 { font-weight: normal; font-size: 15px; margin: 0 0 3px; color: #a99; }
+p { margin: 0 0 10px; line-height:20px; }
+code { font-size:13px; }
+hr { border: 0px; height: 1px; background: #ccc; color: #ccc; font-size: 0px; line-height: 1px; margin: 2px 0 8px; }
+.dataType { font-style: italic; }
 
 </style>
 
@@ -76,20 +28,72 @@ hr {
 
 <body>
 
+<h1>Fleegix.js reference</h1>
+
+<hr/>
+
+<p>This page describes the modules in the Fleegix.js JavaScript
+toolkit, and the different methods they contain. Click on a
+module or method name for a detailed description.</p>
+
 <h1>Contents</h1>
 
 <hr/>
 
 <ul>
   <li><a href="#fleegix.event">Events</a></li>
-  <li><a href="#fleegix.form">Form</a></li>
-  <li><a href="#fleegix.fx">Effects</a></li>
-  <li><a href="#fleegix.json">JSON</a></li>
-  <li><a href="#fleegix.uri">URI</a></li>
+    <ul>
+      <li><a href="#fleegix.event.listen">fleegix.event.listen</a></li>
+      <li><a href="#fleegix.event.unlisten">fleegix.event.unlisten</a></li>
+      <li><a href="#fleegix.event.publish">fleegix.event.publish</a></li>
+      <li><a href="#fleegix.event.subscribe">fleegix.event.subscribe</a></li>
+      <li><a href="#fleegix.event.unsubscribe">fleegix.event.unsubscribe</a></li>
+    </ul>
   <li><a href="#fleegix.xhr">XHR</a></li>
+    <ul>
+      <li><a href="#fleegix.xhr.doGet">fleegix.xhr.doGet</a></li>
+      <li><a href="#fleegix.xhr.doPost">fleegix.xhr.doPost</a></li>
+      <li><a href="#fleegix.xhr.doReq">fleegix.xhr.doReq</a></li>
+      <li><a href="#fleegix.xhr.abort">fleegix.xhr.abort</a></li>
+    </ul>
   <li><a href="#fleegix.xml">XML</a></li>
+    <dl>
+      <dd><a href="#fleegix.xml.parse">fleegix.xml.parse</a></dd>
+    </dl>
+  <li><a href="#fleegix.form">Form</a></li>
+    <ul>
+      <li><a href="#fleegix.form.serialize">fleegix.form.serialize</a></li>
+      <li><a href="#fleegix.form.restore">fleegix.form.restore</a></li>
+      <li><a href="#fleegix.form.toHash">fleegix.form.toHash</a></li>
+      <li><a href="#fleegix.form.diff">fleegix.form.diff</a></li>
+    </ul>
+  <li><a href="#fleegix.fx">Effects</a></li>
+    <ul>
+      <li><a href="#fleegix.fx.fadeOut">fleegix.fx.fadeOut</a></li>
+      <li><a href="#fleegix.fx.fadeIn">fleegix.fx.fadeIn</a></li>
+    </ul>
+  <li><a href="#fleegix.json">JSON</a></li>
+    <dl>
+      <dd><a href="#fleegix.json.serialize">fleegix.json.serialize</a></dd>
+    </dl>
+  <li><a href="#fleegix.uri">URI</a></li>
+    <ul>
+      <li><a href="#fleegix.uri.getQuery">fleegix.uri.getQuery</a></li>
+      <li><a href="#fleegix.uri.getBase">fleegix.uri.getBase</a></li>
+      <li><a href="#fleegix.uri.getParam">fleegix.uri.getParam</a></li>
+      <li><a href="#fleegix.uri.setParam">fleegix.uri.setParam</a></li>
+    </ul>
   <li><a href="#fleegix.cookie">Cookies</a></li>
+    <ul>
+      <li><a href="#fleegix.cookie.set">fleegix.cookie.set</a></li>
+      <li><a href="#fleegix.cookie.get">fleegix.cookie.get</a></li>
+      <li><a href="#fleegix.cookie.destroy">fleegix.cookie.destroy</a></li>
+    </ul>
   <li><a href="#fleegix.popup">Popups</a></li>
+    <ul>
+      <li><a href="#fleegix.popup.open">fleegix.popup.open</a></li>
+      <li><a href="#fleegix.popup.close">fleegix.popup.close</a></li>
+    </ul>
 </ul>
 
 <a name="fleegix.event"></a>
@@ -97,6 +101,12 @@ hr {
 <h1>Events</h1>
 
 <hr/>
+
+<p>The Fleegix.js event system provides a convenient and
+flexible way to connect together either DOM events or events in
+your application. It also provides a basic publish/subscribe
+system to allow decentralized communiation between the pieces
+of your Web UI.</p>
 
 <a name="fleegix.event.listen"></a>
 
@@ -117,24 +127,24 @@ hr {
 <p>listenerObj <span class="dataType">(Object)</span> -- Object to add the listener to.</p>
 
 <p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
-will trigger execution of a function or method of an object.</p>
+will trigger execution of a function or method.</p>
 
-<p>someFunction <span class="dataType">(Function)</span> -- Function to execute when the trigger
+<p>someFunction <span class="dataType">(Function)</span> -- Function to execute when the triggering
 event is run.</p>
 
 <p>someObject <span class="dataType">(Object)</span> -- Object with the method you want to
-execute when the trigger event is run.</p>
+execute when the triggering event is run.</p>
 
 <p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to
-execute when the trigger event is run.</p>
+execute when the triggering event is run.</p>
 
 <h3>Description</h3>
 
-<p>Attaches a method of an object or a simple function to the
-triggering of an event or calling of a method of some other
-object. Whenever the trigger event or method is fired, the
-attached method or function will run. Multiple functions or
-methods can be attached to the same trigger.</p>
+<p>Allows you to trigger a function or method whenever a DOM
+event fires, or a method of some object is invoked. Whenever
+the triggering event or method is fired, the attached method
+or function will run. Multiple functions or methods can be
+attached to the same trigger.</p>
 
 <h3>Examples</h3>
 
@@ -179,24 +189,23 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 <p>listenerObj <span class="dataType">(Object)</span> -- Object to remove the listener from.</p>
 
 <p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
-you want to stop triggering a certain function or method of
-an object.</p>
+you want to stop triggering a certain function or method.</p>
 
-<p>psomeFunction <span class="dataType">(Function)</span> -- Function to stop triggering when
-the trigger event is run.</p>
+<p>someFunction <span class="dataType">(Function)</span> -- Function to stop triggering when
+the triggering event is run.</p>
 
-someObject <span class="dataType">(Object)</span> -- Object with the method you want to stop
-from executing when the trigger event is run.
+<p>someObject <span class="dataType">(Object)</span> -- Object with the method you want to stop
+from executing when the triggering event is run.</p>
 
-someMethodName <span class="dataType">(String)</span> -- Name of the method you want to stop
-from executing when the trigger event is run.
+<p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to stop
+from executing when the triggering event is run.</p>
 
 <h3>Description</h3>
 
 <p>Removes an attached listener so it will no longer trigger
 the function or method specified. Use 'unlisten' with the
 exact same parameters you passed to 'listen' to remove that
-specific listener.</p>
+particular listener.</p>
 
 <h3>Examples</h3>
 
@@ -239,9 +248,9 @@ on the specified channel.</p>
 
 <h3>Description</h3>
 
-Allows an object to publish to a specific channel (simply
+<p>Allows an object to publish to a specific channel (simply
 named with a string), and pass a JavaScript object to anyone
-listening as a payload of the publish-event.
+subscribed, as a payload of the publish-event.</p>
 
 <h3>Examples</h3>
 
@@ -322,425 +331,18 @@ channel to stop listening.</p>
 
 <pre><code>fleegix.event.unsubscribe('sciFi', zardoz');</code></pre>
 
-<a name="fleegix.form"></a>
-
-<h1>Forms</h1>
-
-<hr/>
-
-<a name="fleegix.form.serialize"></a>
-
-<h2>fleegix.form.serialize</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.serialize(formElement, [serializeOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
-serialize.</p>
-
-<p>serializeOptions <span class="dataType">(Object)</span> -- Options for how to serialize
-the form. Here is the list of possible properties to set,
-and the default values if they are not set:</p>
-<ul>
-  <li>stripTags: false -- Strip HTML markup tags from the
-    values.</li>
-  <li>includeEmpty: false -- Include variables in the string
-    for all the form elements, even if they have
-    no value set (e.g., even if elemB is empty stil set
-    string to elemA=foo&elemB=&elemC=bar)</li>
-  <li>collapseMulti: false -- take values from elements that
-    can return multiple values (multi-select, checkbox groups)
-    and collapse into a single, comman-delimited value
-    (e.g., foo=asdf,qwer,zxcv)</li>
-</ul>
-
-<h3>Description</h3>
-
-<p>Transforms all the values of form elements in an HTML form
-into a query-string-style string, usually to be submitted as
-the payload in an XMLHttpRequest POST request.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var someForm = document.getElementById('someFormId');
-var str = fleegix.form.serialize(someForm);
-fleegix.xhr.doPost(handlerFunc, '/post_page.rbx', str);
-=> Posts contents of someForm to post_page.rbx
-
-var someForm = document.getElementById('someFormId');
-var str = fleegix.form.serialize(someForm, { includeEmpty: true });
-var url = 'get_page.rbx?' + str;
-fleegix.xhr.doGet(handlerFunc, url);
-=> Use the serialized form as a query string in a GET</code></pre>
-
-<a name="fleegix.form.toHash"></a>
-
-<h2>fleegix.form.toHash</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.toHash(formElement);</p>
-
-<h3>Parameters</h3>
-
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
-convert to a keyword/value object.</p>
-
-<h3>Description</h3>
-
-<p>Transforms all the values of form elements in a form into a
-keyword/value object (hash). When a form element has multiple
-values (like with sets of checkboxes, or multi-select select
-boxes), the values will be put into an array.</p>
-
-<p>All form elements will have a key in the hash. Empty form
-elements (e.g., a blank text box) will have a value of null
-in the hash.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var someForm = document.getElementById('someFormId');
-someForm.firstTextBox.value = 'foo';
-var obj = fleegix.form.toHash(someForm);
-alert(obj.firstTextBox); => alerts 'foo.'</code></pre>
-
-<a name="fleegix.form.restore"></a>
-
-<h2>fleegix.form.restore</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.restore(formElement, serializedString);</p>
-
-<h3>Parameters</h3>
-
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
-restore from a string.</p>
-
-<p>serializedString <span class="dataType">(String)</span> -- The query-string-style string of
-serialized form data you want to use to restore the form-element
-values.</p>
-
-<h3>Description</h3>
-
-<p>Allows you to restore a blank form to the state it was in when
-it was serialized to a string. This can be nice if you don't
-want to fill your server-side code with a bunch of conditionals
-to pre-fill a form from values in the database.</p>
-
-<h3>Examples</h3>
-
-<pre><code>function getDataAndRestore(userId) {
-  fleegix.xhr.doGet(doRestore,
-        '/get_user_settings.rbx?userId=' + userId);
-}
-
-function doRestore(str) {
-  var settingsForm = document.getElementById('settingsForm');
-  fleegix.form.restore(settingsForm, str);
-}
-
-getDataAndRestore();
-=> Pulls the original serialized form data used to save the
-user settings, and uses them to pre-fill the form</code></pre>
-
-<a name="fleegix.form.diff"></a>
-
-<h2>fleegix.form.diff</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.diff(updatedForm, originalForm, [diffOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>updatedForm <span class="dataType">(Object)</span> -- Form (or form
-converted to keyword/value object with fleegix.form.toHash)
-that you want to compare to another form.</p>
-
-<p>originalForm <span class="dataType">(Object)</span> -- Another form (or
-converted to keyword/value object with fleegix.form.toHash)
-that you want to compare to the first one.</p>
-
-<p>diffOptions <span class="dataType">(Object)</span> -- Currently only one option:</p>
-<dl>
-  <dd>intersectionOnly: false -- If this flag is set to true,
-    will only return fields that are in both forms. The
-    default behavior is to return fields as 'different'
-    if they are only in one form and not the other (i.e.,
-    a union).</dd>
-</dl>
-
-<h3>Description</h3>
-
-<p>Allows you to tell how many fields and which fields are
-different between two forms, as well as what the values are
-for each differing field for both forms.  changed field.</p>
-
-<p>One practical use for this method is figuring what has changed
-in a form since it initially loaded. The easy way to do this is
-to make a backup of the form values with fleegix.form.toHash,
-and then compare the updated form to the original form data
-in the backed-up object.</p>
-
-<p>This method returns an object with two properties:</p>
-<ol>
-  <li>count: The number of changed fields</li>
-  <li>diffs: a keyword/value object containing an item for each field
-     that has changed. The value of the item is an array where the
-     first item is the changed value, and the second is the original
-     value.</li>
-</ol>
-
-<h3>Examples</h3>
-
-<pre><code>// Get a ref to the form
-var someForm = document.getElementById('someFormId');
-
-// Set the value of a text box to 'foo'
-someForm.firstTextField.value = 'foo';
-
-// Make a copy of the data in the form
-var backupOfForm = fleegix.form.toHash(someForm);
-
-// Change the text box value to something else
-someForm.firstTextField.value = 'bar';
-
-// Let's see what changed
-var changes = fleegix.form.diff(someForm, backupOfForm);
-
-alert(changes.count); => alerts '1.'
-alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
-alert(changes.diffs.firstTextField[1]); => alerts 'foo.'</code></pre>
-
-<a name="fleegix.fx"></a>
-
-<h1>Effects</h1>
-
-<hr/>
-
-<a name="fleegix.fx.fadeOut"></a>
-
-<h2>fleegix.fx.fadeOut</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.fx.fadeOut(domElement, [fadeOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
-that you wish to apply a fadeout animation effect to.</p>
-
-<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
-is the list of possible properties to set, and the default
-values if they are not set:</p>
-<ul>
-  <li>duration: 500 -- Number of milliseconds to do the fadeout
-    animatinon in.</li>
-  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
-  <li>doOnStart: null -- Function to execute as the animation starts</li>
-  <li>doAfter: null -- Function to exectute after the animation
-    completes</li>
-</ul>
-
-<h3>Description</h3>
-
-<p>Does a basic opacity fadeout animation effect on the desired
-DOM element. The element should be set to 100% opacity before
-applying the effect.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var fadeDiv = document.getElementById('someDiv');
-fleegix.fx.fadeOut(fadeDiv);</code></pre>
-
-<a name="fleegix.fx.fadeIn"></a>
-
-<h2>fleegix.fx.fadeIn</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.fx.fadeIn(domElement, [fadeOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
-that you wish to apply a fadein animation effect to.</p>
-
-<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
-is the list of possible properties to set, and the default
-values if they are not set:</p>
-<ul>
-  <li>duration: 500 -- Number of milliseconds to do the fadein
-    animatinon in.</li>
-  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
-  <li>doOnStart: null -- Function to execute as the animation starts</li>
-  <li>doAfter: null -- Function to exectute after the animation
-    completes</li>
-</ul>
-
-<h3>Description</h3>
-
-<p>Does a basic opacity fadein animation effect on the desired
-DOM element. The element should be set to zero opacity before
-applying the effect.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var fadeDiv = document.getElementById('someDiv');
-fleegix.fx.fadein(fadeDiv);</code></pre>
-
-<a name="fleegix.json"></a>
-
-<h1>JSON</h1>
-
-<hr/>
-
-<a name="fleegix.json.serialize"></a>
-
-<h2>fleegix.json.serialize</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.json.serialize(serializeObj);</p>
-
-<h3>Parameters</h3>
-
-<p>serializeObj <span class="dataType">(Object)</span> -- Object to serialize as a JSON string. </p>
-
-<h3>Description</h3>
-
-<p>Serializes a JavaScript object into a JSON
-(http://www.json.org/) string.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var obj = { name: 'Rush', 
-    members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
-var str = fleegix.json.serialize(obj);</code></pre>
-
-<a name="fleegix.uri"></a>
-
-<h1>URI</h1>
-
-<hr/>
-
-<a name="fleegix.uri.getQuery"></a>
-
-<h2>fleegix.uri.getQuery</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.uri.getQuery(urlString);</p>
-
-<h3>Parameters</h3>
-
-<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the query string
-from.</p>
-
-<h3>Description</h3>
-
-<p>Returns the query string (i.e, the portion after the question
-mark) on a URL.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var query = fleegix.uri.getQuery(location.href);</code></pre>
-
-<a name="fleegix.uri.getBase"></a>
-
-<h2>fleegix.uri.getBase</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.uri.getBase(urlString);</p>
-
-<h3>Parameters</h3>
-
-<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the base URL from.</p>
-
-<h3>Description</h3>
-
-<p>Returns the base URL (i.e, the portion before the question
-mark, if there's a query string) on a URL.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var base = fleegix.uri.getBase(location.href);</code></pre>
-
-<a name="fleegix.uri.getParam"></a>
-
-<h2>fleegix.uri.getParam</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.uri.getParam(paramName, querystring);</p>
-
-<h3>Parameters</h3>
-
-<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to get
-the value of.</p>
-
-<p>querystring <span class="dataType">(String)</span> -- The query string you want to get a value
-from.</p>
-
-<h3>Description</h3>
-
-<p>Returns the value of a parameter on a query string. If the same
-parameter name appears multiple times in the query string, the
-function will return an array of all the values.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var query = 'foo=2112&bar=howdy&foo=1001';
-var foo = fleegix.uri.getParam('foo', query);
-foo = foo.join();
-alert(foo); => alerts '2112,1001.'</code></pre>
-
-<a name="fleegix.uri.setParam"></a>
-
-<h2>fleegix.uri.setParam</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.uri.setParam(paramName, value, querystring);</p>
-
-<h3>Parameters</h3>
-
-<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to set
-the value of.</p>
-
-<p>value <span class="dataType">(String)</span> -- The value you want to set the parameter to.</p>
-
-<p>querystring <span class="dataType">(String)</span> -- The query string you want to set a value
-for a param on.</p>
-
-<h3>Description</h3>
-
-<p>Sets the value of a parameter in a query string. If the param is
-not in the string, it appends it with the desired value at the
-end of the string. If the entire string is empty, it creates a
-query string with the single param and value in it.</p>
-
-<p>If the parameter is in the query string multiple times, the
-function will set the value of the first instance of the param
-that it finds in the string.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var query = 'foo=2112&bar=howdy&foo=1001';
-var foo = fleegix.uri.setParam('bar', 'wowzers', query);
-alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'</code></pre>
-
 <a name="fleegix.xhr"></a>
 
 <h1>XHR</h1>
 
 <hr/>
+
+<p>The XHR module has two convenience methods for doing the
+standard GET and POST requests, as well as the ability to do
+requests with more detailed control (such as using arbitrary
+HTTP methods such as PUT, or setting authentication headers
+or the format of the response). Uses XHR-object pooling and
+request queueing.</p>
 
 <a name="fleegix.xhr.doGet"></a>
 
@@ -908,8 +510,8 @@ values if they are not set:</p>
 
 <h3>Description</h3>
 
-<p>Makes an XHR request, and passes the result to the specified
-handler function (async) or returns the result inline (sync).</p>
+<p>Makes an XHR request, with fine-grained control over the type
+of request, type of response, as well as many other options.</p>
 
 <h3>Examples</h3>
 
@@ -951,6 +553,10 @@ fleegix.xhr.abort(id); // Abort the request</code></pre>
 
 <hr/>
 
+<p>Has a basic XML parser that converts a set of same-named
+XML tags (i.e, a tag list such as a set of search results)
+into an array of JavaScript Objects.</p>
+
 <a name="fleegix.xml.parse"></a>
 
 <h2>fleegix.xml.parse</h2>
@@ -979,11 +585,447 @@ values are converted to property values (all Strings).</p>
 
 fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');</code></pre>
 
+<a name="fleegix.form"></a>
+
+<h1>Forms</h1>
+
+<hr/>
+
+<p>The Fleegix.js forms module contains a number of helpful
+functions for working with forms, including a serialize
+function for submitting data via XHR, a restore function
+which can pre-populate a form from a its serialized data,
+a form-to-hash converter, and a diff method which allows you
+to compare two different forms (useful in telling what a user
+has changed in a form).</p>
+
+<a name="fleegix.form.serialize"></a>
+
+<h2>fleegix.form.serialize</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.serialize(formElement, [serializeOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
+serialize.</p>
+
+<p>serializeOptions <span class="dataType">(Object)</span> -- Options for how to serialize
+the form. Here is the list of possible properties to set,
+and the default values if they are not set:</p>
+<ul>
+  <li>stripTags: false -- Strip HTML markup tags from the
+    values.</li>
+  <li>includeEmpty: false -- Include variables in the string
+    for all the form elements, even if they have
+    no value set (e.g., even if elemB is empty stil set
+    string to elemA=foo&elemB=&elemC=bar)</li>
+  <li>collapseMulti: false -- take values from elements that
+    can return multiple values (multi-select, checkbox groups)
+    and collapse into a single, comman-delimited value
+    (e.g., foo=asdf,qwer,zxcv)</li>
+</ul>
+
+<h3>Description</h3>
+
+<p>Transforms all the values of form elements in an HTML form
+into a query-string-style string, usually to be submitted as
+the payload in an XMLHttpRequest POST request.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someForm = document.getElementById('someFormId');
+var str = fleegix.form.serialize(someForm);
+fleegix.xhr.doPost(handlerFunc, '/post_page.rbx', str);
+=> Posts contents of someForm to post_page.rbx
+
+var someForm = document.getElementById('someFormId');
+var str = fleegix.form.serialize(someForm, { includeEmpty: true });
+var url = 'get_page.rbx?' + str;
+fleegix.xhr.doGet(handlerFunc, url);
+=> Use the serialized form as a query string in a GET</code></pre>
+
+<a name="fleegix.form.restore"></a>
+
+<h2>fleegix.form.restore</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.restore(formElement, serializedString);</p>
+
+<h3>Parameters</h3>
+
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
+restore from a string.</p>
+
+<p>serializedString <span class="dataType">(String)</span> -- The query-string-style string of
+serialized form data you want to use to restore the form-element
+values.</p>
+
+<h3>Description</h3>
+
+<p>Allows you to restore a blank form to the state it was in when
+it was serialized to a string. This can be nice if you don't
+want to fill your server-side code with a bunch of conditionals
+to pre-fill a form from values in the database.</p>
+
+<h3>Examples</h3>
+
+<pre><code>function getDataAndRestore(userId) {
+  fleegix.xhr.doGet(doRestore,
+        '/get_user_settings.rbx?userId=' + userId);
+}
+
+function doRestore(str) {
+  var settingsForm = document.getElementById('settingsForm');
+  fleegix.form.restore(settingsForm, str);
+}
+
+getDataAndRestore();
+=> Pulls the original serialized form data used to save the
+user settings, and uses them to pre-fill the form</code></pre>
+
+<a name="fleegix.form.toHash"></a>
+
+<h2>fleegix.form.toHash</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.toHash(formElement);</p>
+
+<h3>Parameters</h3>
+
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
+convert to a keyword/value object.</p>
+
+<h3>Description</h3>
+
+<p>Transforms all the values of form elements in a form into a
+keyword/value object (hash). When a form element has multiple
+values (like with sets of checkboxes, or multi-select select
+boxes), the values will be put into an array.</p>
+
+<p>All form elements will have a key in the hash. Empty form
+elements (e.g., a blank text box) will have a value of null
+in the hash.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someForm = document.getElementById('someFormId');
+someForm.firstTextBox.value = 'foo';
+var obj = fleegix.form.toHash(someForm);
+alert(obj.firstTextBox); => alerts 'foo.'</code></pre>
+
+<a name="fleegix.form.diff"></a>
+
+<h2>fleegix.form.diff</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.diff(updatedForm, originalForm, [diffOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>updatedForm <span class="dataType">(Object)</span> -- Form (or form
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to another form.</p>
+
+<p>originalForm <span class="dataType">(Object)</span> -- Another form (or
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to the first one.</p>
+
+<p>diffOptions <span class="dataType">(Object)</span> -- Currently only one option:</p>
+<dl>
+  <dd>intersectionOnly: false -- If this flag is set to true,
+    will only return fields that are in both forms. The
+    default behavior is to return fields as 'different'
+    if they are only in one form and not the other (i.e.,
+    a union).</dd>
+</dl>
+
+<h3>Description</h3>
+
+<p>Allows you to tell how many fields and which fields are
+different between two forms, as well as what the values are
+for each differing field for both forms.  changed field.</p>
+
+<p>One practical use for this method is figuring what has changed
+in a form since it initially loaded. The easy way to do this is
+to make a backup of the form values with fleegix.form.toHash,
+and then compare the updated form to the original form data
+in the backed-up object.</p>
+
+<p>This method returns an object with two properties:</p>
+<ol>
+  <li>count: The number of changed fields</li>
+  <li>diffs: a keyword/value object containing an item for each field
+     that has changed. The value of the item is an array where the
+     first item is the changed value, and the second is the original
+     value.</li>
+</ol>
+
+<h3>Examples</h3>
+
+<pre><code>// Get a ref to the form
+var someForm = document.getElementById('someFormId');
+
+// Set the value of a text box to 'foo'
+someForm.firstTextField.value = 'foo';
+
+// Make a copy of the data in the form
+var backupOfForm = fleegix.form.toHash(someForm);
+
+// Change the text box value to something else
+someForm.firstTextField.value = 'bar';
+
+// Let's see what changed
+var changes = fleegix.form.diff(someForm, backupOfForm);
+
+alert(changes.count); => alerts '1.'
+alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
+alert(changes.diffs.firstTextField[1]); => alerts 'foo.'</code></pre>
+
+<a name="fleegix.fx"></a>
+
+<h1>Effects</h1>
+
+<hr/>
+
+<p>A new effects module which provides the two most useful
+visual effects for a Web app -- fade-in and fade-out.</p>
+
+<a name="fleegix.fx.fadeOut"></a>
+
+<h2>fleegix.fx.fadeOut</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.fadeOut(domElement, [fadeOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
+that you wish to apply a fadeout animation effect to.</p>
+
+<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
+is the list of possible properties to set, and the default
+values if they are not set:</p>
+<ul>
+  <li>duration: 500 -- Number of milliseconds to do the fadeout
+    animatinon in.</li>
+  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
+  <li>doOnStart: null -- Function to execute as the animation starts</li>
+  <li>doAfter: null -- Function to exectute after the animation
+    completes</li>
+</ul>
+
+<h3>Description</h3>
+
+<p>Does a basic opacity fadeout animation effect on the desired
+DOM element. The element should be set to 100% opacity before
+applying the effect.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var fadeDiv = document.getElementById('someDiv');
+fleegix.fx.fadeOut(fadeDiv);</code></pre>
+
+<a name="fleegix.fx.fadeIn"></a>
+
+<h2>fleegix.fx.fadeIn</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.fadeIn(domElement, [fadeOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
+that you wish to apply a fadein animation effect to.</p>
+
+<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
+is the list of possible properties to set, and the default
+values if they are not set:</p>
+<ul>
+  <li>duration: 500 -- Number of milliseconds to do the fadein
+    animatinon in.</li>
+  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
+  <li>doOnStart: null -- Function to execute as the animation starts</li>
+  <li>doAfter: null -- Function to exectute after the animation
+    completes</li>
+</ul>
+
+<h3>Description</h3>
+
+<p>Does a basic opacity fadein animation effect on the desired
+DOM element. The element should be set to zero opacity before
+applying the effect.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var fadeDiv = document.getElementById('someDiv');
+fleegix.fx.fadein(fadeDiv);</code></pre>
+
+<a name="fleegix.json"></a>
+
+<h1>JSON</h1>
+
+<hr/>
+
+<p>Contains a function for serializing a JavaScript object to
+the JSON data format.</p>
+
+<a name="fleegix.json.serialize"></a>
+
+<h2>fleegix.json.serialize</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.json.serialize(serializeObj);</p>
+
+<h3>Parameters</h3>
+
+<p>serializeObj <span class="dataType">(Object)</span> -- Object to serialize as a JSON string. </p>
+
+<h3>Description</h3>
+
+<p>Serializes a JavaScript object into a JSON
+(http://www.json.org/) string.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var obj = { name: 'Rush', 
+    members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
+var str = fleegix.json.serialize(obj);</code></pre>
+
+<a name="fleegix.uri"></a>
+
+<h1>URI</h1>
+
+<hr/>
+
+<p>The URI module in Fleegix.js contains a number of functions
+for working with URIs -- specifically query strings. With these
+functions you can grab values out of query-string parameters,
+or update query-string parameters with new values.</p>
+
+<a name="fleegix.uri.getQuery"></a>
+
+<h2>fleegix.uri.getQuery</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.uri.getQuery(urlString);</p>
+
+<h3>Parameters</h3>
+
+<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the query string
+from.</p>
+
+<h3>Description</h3>
+
+<p>Returns the query string (i.e, the portion after the question
+mark) on a URL.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var query = fleegix.uri.getQuery(location.href);</code></pre>
+
+<a name="fleegix.uri.getBase"></a>
+
+<h2>fleegix.uri.getBase</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.uri.getBase(urlString);</p>
+
+<h3>Parameters</h3>
+
+<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the base URL from.</p>
+
+<h3>Description</h3>
+
+<p>Returns the base URL (i.e, the portion before the question
+mark, if there's a query string) on a URL.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var base = fleegix.uri.getBase(location.href);</code></pre>
+
+<a name="fleegix.uri.getParam"></a>
+
+<h2>fleegix.uri.getParam</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.uri.getParam(paramName, querystring);</p>
+
+<h3>Parameters</h3>
+
+<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to get
+the value of.</p>
+
+<p>querystring <span class="dataType">(String)</span> -- The query string you want to get a value
+from.</p>
+
+<h3>Description</h3>
+
+<p>Returns the value of a parameter on a query string. If the same
+parameter name appears multiple times in the query string, the
+function will return an array of all the values.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var query = 'foo=2112&bar=howdy&foo=1001';
+var foo = fleegix.uri.getParam('foo', query);
+foo = foo.join();
+alert(foo); => alerts '2112,1001.'</code></pre>
+
+<a name="fleegix.uri.setParam"></a>
+
+<h2>fleegix.uri.setParam</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.uri.setParam(paramName, value, querystring);</p>
+
+<h3>Parameters</h3>
+
+<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to set
+the value of.</p>
+
+<p>value <span class="dataType">(String)</span> -- The value you want to set the parameter to.</p>
+
+<p>querystring <span class="dataType">(String)</span> -- The query string you want to set a value
+for a param on.</p>
+
+<h3>Description</h3>
+
+<p>Sets the value of a parameter in a query string. If the param is
+not in the string, it appends it with the desired value at the
+end of the string. If the entire string is empty, it creates a
+query string with the single param and value in it.</p>
+
+<p>If the parameter is in the query string multiple times, the
+function will set the value of the first instance of the param
+that it finds in the string.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var query = 'foo=2112&bar=howdy&foo=1001';
+var foo = fleegix.uri.setParam('bar', 'wowzers', query);
+alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'</code></pre>
+
 <a name="fleegix.cookie"></a>
 
 <h1>Cookies</h1>
 
 <hr/>
+
+<p>A nice, clean wrapper for getting and setting cookie values
+in the browser.</p>
 
 <a name="fleegix.cookie.set"></a>
 
@@ -1078,6 +1120,11 @@ omitted, assumes root ('/').</p>
 
 <hr/>
 
+<p>Yes, even in the Ajax world, people still use pop-up windows.
+The Fleegix.js pop-up module gives you a simple way to invoke
+pop-up windows, but keep the amount of UI clutter to a minimum
+by enforcing a one-window limit.</p>
+
 <a name="fleegix.popup.open"></a>
 
 <h2>fleegix.popup.open</h2>
@@ -1142,6 +1189,9 @@ method again will simply open the new URL in the same window.</p>
 <pre><code>fleegix.popup.open('/search_window.rbx', 
   { width: 480, height: 300 });
 fleegix.popup.close();</code></pre>
+
+<p>Copyright 2007 Matthew Eernisse, 
+<a href="mailto:mde@fleegix.org">mde@fleegix.org</a>.</p>
 
 </body>
 
