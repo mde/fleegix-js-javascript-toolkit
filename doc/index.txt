@@ -750,7 +750,7 @@ applying the effect.
 Examples
 
 var fadeDiv = document.getElementById('someDiv');
-fleegix.fx.fadein(fadeDiv);
+fleegix.fx.fadeIn(fadeDiv);
 
 JSON
 
