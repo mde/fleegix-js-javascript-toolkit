@@ -79,16 +79,24 @@ fleegix.event = new function() {
       reg.orig.methCode.apply(reg.orig.obj, args);
     }
     if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
-      args[0] = args[0] || window.event;
+      // Normalize the various event models
+      args[0] = args[0] || window.event; // Pass the event
+      // Set both target and srcElement
+      if (!args[0].target) {
+        args[0].target = args[0].srcElement;
+      }
+      if (!args[0].srcElement) {
+        args[0].srcElement = args[0].target;
+      }
     }
     
     // Execute all the handler functions registered
     for (var i = 0; i < reg.after.length; i++) {
       var ex = reg.after[i];
       // Single functions
-      if (ex.length == 0) {
+      if (typeof ex == 'function') {
         var execFunction = ex;
-        execFunction(args);
+        execFunction.apply(window, args);
       }
       // Methods of objects
       else {
