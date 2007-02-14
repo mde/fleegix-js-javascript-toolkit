@@ -16,37 +16,35 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.ui = new function() {
-  this.getWindowHeight = function() {
+  this.getViewportWidth = function () {
+    return fleegix.ui.getViewportMeasure('Width');
+  };
+  this.getViewportHeight = function () {
+    return fleegix.ui.getViewportMeasure('Height');
+  };
+  this.getViewportMeasure = function (s) {
     // IE
     if (document.all) {
       if (document.documentElement && 
-        document.documentElement.clientHeight) {
-        return document.documentElement.clientHeight;
+        document.documentElement['client' + s]) {
+        return document.documentElement['client' + s];
       }
       else {
-        return document.body.clientHeight;
+        return document.body['client' + s];
       }
     }
     // Moz/compat
     else {
-      return window.innerHeight;
+      return window['inner' + s];
     }
   };
-  this.getWindowWidth = function() {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement.clientWidth) {
-        return document.documentElement.clientWidth;
-      }
-      else {
-        return document.body.clientWidth;
-      }
-    }
-    // Moz/compat
-    else {
-      return window.innerWidth;
-    }
+  this.center = function (node) {
+    var nW = node.offsetWidth;
+    var nH = node.offsetHeight;
+    var vW = fleegix.ui.getViewportWidth();
+    var vH = fleegix.ui.getViewportHeight();
+    node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
+    node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
   };
 };
 fleegix.ui.constructor = null;
