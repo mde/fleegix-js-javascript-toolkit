@@ -86,7 +86,7 @@ fleegix.fx.Effecter = function (elem, opts) {
   this.startTime = new Date().getTime();
   this.timeSpent = 0;
   this.doOnStart = opts.doOnStart || null;
-  this.doAfter = opts.doAfter || null;
+  this.doAfterFinished = opts.doAfterFinished || null;
   this.autoStart = opts.autoStart == false ? false : true;
   
   if (typeof this.transitions[this.trans] != 'function') {

@@ -1,517 +1,92 @@
 if(typeof fleegix=="undefined"){
 var fleegix={};
 }
-fleegix.json=new function(){
-this.serialize=function(_1){
-var _2="";
-switch(typeof _1){
-case "object":
-if(_1==null){
-return "null";
+fleegix.popup=new function(){
+var _1=this;
+this.win=null;
+this.open=function(_2,_3){
+var _4=_3||{};
+var _5="";
+var _6={"width":"","height":"","location":0,"menubar":0,"resizable":1,"scrollbars":0,"status":0,"titlebar":1,"toolbar":0};
+for(var _7 in _6){
+_5+=_7+"=";
+_5+=_4[_7]?_4[_7]:_6[_7];
+_5+=",";
+}
+var _8=_5.length;
+if(_8){
+_5=_5.substr(0,_8-1);
+}
+if(!_1.win||_1.win.closed){
+_1.win=window.open(_2,"thePopupWin",_5);
 }else{
-if(_1 instanceof Array){
-for(var i=0;i<_1.length;i++){
-if(_2){
-_2+=",";
-}
-_2+=fleegix.json.serialize(_1[i]);
-}
-return "["+_2+"]";
-}else{
-if(typeof _1.toString!="undefined"){
-for(var i in _1){
-if(_2){
-_2+=",";
-}
-_2+="\""+i+"\":";
-_2+=(_1[i]==undefined)?"\"undefined\"":fleegix.json.serialize(_1[i]);
-}
-return "{"+_2+"}";
-}
-}
-}
-return _2;
-break;
-case "unknown":
-case "undefined":
-case "function":
-return "\"undefined\"";
-break;
-case "string":
-_2+="\""+_1.replace(/(["\\])/g,"\\$1").replace(/\r/g,"").replace(/\n/g,"\\n")+"\"";
-return _2;
-break;
-default:
-return String(_1);
-break;
+_1.win.focus();
+_1.win.document.location=_2;
 }
 };
-};
-fleegix.json.constructor=null;
-fleegix.xml=new function(){
-var _4=this;
-this.parse=function(_5,_6){
-var _7=new Array;
-var _8;
-var _9=[];
-if(_5.hasChildNodes()){
-_7=_5.getElementsByTagName(_6);
-_8=_7[0];
-for(var j=0;j<_7.length;j++){
-_8=_7[j];
-_9[j]=_4.xmlElem2Obj(_7[j]);
-}
-}
-return _9;
-};
-this.xmlElem2Obj=function(_b){
-var _c=new Object();
-_4.setPropertiesRecursive(_c,_b);
-return _c;
-};
-this.setPropertiesRecursive=function(_d,_e){
-if(_e.childNodes.length>0){
-for(var i=0;i<_e.childNodes.length;i++){
-if(_e.childNodes[i].nodeType==1&&_e.childNodes[i].firstChild){
-if(_e.childNodes[i].childNodes.length==1){
-_d[_e.childNodes[i].tagName]=_e.childNodes[i].firstChild.nodeValue;
-}else{
-_d[_e.childNodes[i].tagName]=[];
-_4.setPropertiesRecursive(_d[_e.childNodes[i].tagName],_e.childNodes[i]);
-}
-}
-}
+this.close=function(){
+if(_1.win){
+_1.win.window.close();
+_1.win=null;
 }
 };
-this.cleanXMLObjText=function(_10){
-var _11=_10;
-for(var _12 in _11){
-_11[_12]=cleanText(_11[_12]);
-}
-return _11;
-};
-this.cleanText=function(str){
-var ret=str;
-ret=ret.replace(/\n/g,"");
-ret=ret.replace(/\r/g,"");
-ret=ret.replace(/\'/g,"\\'");
-ret=ret.replace(/\[CDATA\[/g,"");
-ret=ret.replace(/\]]/g,"");
-return ret;
-};
-this.rendered2Source=function(str){
-var _16=str;
-_16=_16.replace(/</g,"&lt;");
-_16=_16.replace(/>/g,"&gt;");
-return "<pre>"+_16+"</pre>";
-};
-this.getXMLDocElem=function(_17,_18){
-var _19=[];
-var _1a=null;
-if(document.all){
-var _1b=document.getElementById(_17).innerHTML;
-var _1c=new ActiveXObject("Microsoft.XMLDOM");
-_1c.loadXML(_1b);
-_1a=_1c.documentElement;
-}else{
-_19=window.document.body.getElementsByTagName(_18);
-_1a=_19[0];
-}
-return _1a;
+this.goURLMainWin=function(_9){
+location=_9;
+_1.close();
 };
 };
-fleegix.xml.constructor=null;
-fleegix.xhr=new function(){
-function spawnTransporter(_1d){
-var i=0;
-var t=[function(){
-return new XMLHttpRequest();
-},function(){
-return new ActiveXObject("Msxml2.XMLHTTP");
-},function(){
-return new ActiveXObject("Microsoft.XMLHTTP");
-}];
-var _20=null;
-while(!_20&&(i<t.length)){
-try{
-_20=t[i++]();
-}
-catch(e){
-}
-}
-if(_20){
-if(_1d){
-return _20;
-}else{
-fleegix.xhr.transporters.push(_20);
-var _21=fleegix.xhr.transporters.length-1;
-return _21;
-}
-}else{
-throw ("Could not create XMLHttpRequest object.");
-}
-}
-this.transporters=[];
-this.maxTransporters=5;
-this.lastReqId=0;
-this.requestQueue=[];
-this.idleTransporters=[];
-this.processingMap={};
-this.processingArray=[];
-this.syncTransporter=spawnTransporter(true);
-this.syncRequest=null;
-this.debug=false;
-this.processingWatcherId=null;
-this.doGet=function(){
-var o={};
-var _23=null;
-var _24=Array.prototype.slice.apply(arguments);
-if(typeof _24[0]=="function"){
-o.async=true;
-_23=_24.shift();
-}else{
-o.async=false;
-}
-var url=_24.shift();
-if(typeof _24[0]=="object"){
-var _26=_24.shift();
-for(var p in _26){
-o[p]=_26[p];
-}
-}else{
-o.responseFormat=_24.shift()||"text";
-}
-o.handleSuccess=_23;
-o.url=url;
-return this.doReq(o);
-};
-this.doPost=function(){
-var o={};
-var _29=null;
-var _2a=Array.prototype.slice.apply(arguments);
-if(typeof _2a[0]=="function"){
-o.async=true;
-_29=_2a.shift();
-}else{
-o.async=false;
-}
-var url=_2a.shift();
-var _2c=_2a.shift();
-if(typeof _2a[0]=="object"){
-var _2d=_2a.shift();
-for(var p in _2d){
-o[p]=_2d[p];
-}
-}else{
-o.responseFormat=_2a.shift()||"text";
-}
-o.handleSuccess=_29;
-o.url=url;
-o.dataPayload=_2c;
-o.method="POST";
-return this.doReq(o);
-};
-this.doReq=function(o){
-var _30=o||{};
-var req=new fleegix.xhr.Request();
-var _32=null;
-for(var p in _30){
-req[p]=_30[p];
-}
-req.id=this.lastReqId;
-this.lastReqId++;
-if(req.async){
-if(this.idleTransporters.length){
-_32=this.idleTransporters.shift();
-}else{
-if(this.transporters.length<this.maxTransporters){
-_32=spawnTransporter();
-}
-}
-if(_32!=null){
-this.processReq(req,_32);
-}else{
-if(req.uber){
-this.requestQueue.unshift(req);
-}else{
-this.requestQueue.push(req);
-}
-}
-return req.id;
-}else{
-return this.processReq(req);
-}
-};
-this.processReq=function(req,t){
-var _36=this;
-var _37=null;
-var _38=null;
-var url="";
-var _3a=null;
-if(req.async){
-_37=t;
-_38=this.transporters[_37];
-this.processingMap[req.id]=req;
-this.processingArray.unshift(req);
-req.transporterId=_37;
-}else{
-_38=this.syncTransporter;
-this.syncRequest=req;
-}
-if(req.preventCache){
-var dt=new Date().getTime();
-url=req.url.indexOf("?")>-1?req.url+"&preventCache="+dt:req.url+"?preventCache="+dt;
-}else{
-url=req.url;
-}
-if(document.all){
-_38.abort();
-}
-if(req.username&&req.password){
-_38.open(req.method,url,req.async,req.username,req.password);
-}else{
-_38.open(req.method,url,req.async);
-}
-if(req.mimeType&&navigator.userAgent.indexOf("MSIE")==-1){
-_38.overrideMimeType(req.mimeType);
-}
-if(req.headers.length){
-for(var i=0;i<req.headers.length;i++){
-var _3d=req.headers[i].split(": ");
-_38.setRequestHeader(_3d[i],_3d[1]);
-}
-}else{
-if(req.method=="POST"){
-_38.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-}
-}
-_38.send(req.dataPayload);
-if(this.processingWatcherId==null){
-this.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
-}
-if(!req.async){
-var ret=this.handleResponse(_38,req);
-this.syncRequest=null;
-if(_36.processingArray.length){
-_36.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
-}
-return ret;
-}
-};
-this.getResponseByType=function(_3f,req){
-switch(req.responseFormat){
-case "text":
-r=_3f.responseText;
-break;
-case "xml":
-r=_3f.responseXML;
-break;
-case "object":
-r=_3f;
-break;
-}
-return r;
-};
-this.watchProcessing=function(){
-var _41=fleegix.xhr;
-var _42=_41.processingArray;
-var d=new Date().getTime();
-if(_41.syncRequest!=null){
-return;
-}else{
-for(var i=0;i<_42.length;i++){
-var req=_42[i];
-var _46=_41.transporters[req.transporterId];
-var _47=((d-req.startTime)>(req.timeoutSeconds*1000));
-switch(true){
-case (req.aborted||!_46.readyState):
-_41.processingArray.splice(i,1);
-case _47:
-_41.processingArray.splice(i,1);
-_41.timeout(req);
-break;
-case (_46.readyState==4):
-_41.processingArray.splice(i,1);
-_41.handleResponse.apply(_41,[_46,req]);
-break;
-}
-}
-}
-clearTimeout(_41.processingWatcherId);
-if(_41.processingArray.length){
-_41.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
-}else{
-_41.processingWatcherId=null;
-}
-};
-this.abort=function(_48){
-var r=this.processingMap[_48];
-var t=this.transporters[r.transporterId];
-if(t){
-t.onreadystatechange=function(){
-};
-t.abort();
-r.aborted=true;
-this.cleanupAfterReq(r);
-return true;
-}else{
-return false;
-}
-};
-this.timeout=function(req){
-if(fleegix.xhr.abort.apply(fleegix.xhr,[req.id])){
-if(typeof req.handleTimeout=="function"){
-req.handleTimeout();
-}else{
-alert("XMLHttpRequest to "+req.url+" timed out.");
-}
-}
-};
-this.handleResponse=function(_4c,req){
-var _4e=this.getResponseByType(_4c,req);
-if(req.handleAll){
-req.handleAll(_4e,req.id);
-}else{
-try{
-if((_4c.status>199&&_4c.status<300)||_4c.status==304){
-if(req.async){
-if(!req.handleSuccess){
-throw ("No response handler defined "+"for this request");
-return;
-}else{
-req.handleSuccess(_4e,req.id);
-}
-}else{
-return _4e;
-}
-}else{
-if(!_4c.status){
-if(this.debug){
-throw ("XMLHttpRequest HTTP status either zero or not set.");
-}
-}else{
-if(req.handleErr){
-req.handleErr(_4e,req.id);
-}else{
-this.handleErrDefault(_4c);
-}
-}
-}
-}
-catch(e){
-if(this.debug){
-throw (e);
-}
-}
-}
-if(req.async){
-this.cleanupAfterReq(req);
-}
-return true;
-};
-this.cleanupAfterReq=function(req){
-delete this.processingMap[req.id];
-if(this.requestQueue.length){
-var _50=this.requestQueue.shift();
-_50.startTime=new Date().getTime();
-this.processReq(_50,req.transporterId);
-}else{
-this.idleTransporters.push(req.transporterId);
-}
-};
-this.handleErrDefault=function(r){
-console.log(r);
-var _52;
-try{
-_52=window.open("","errorWin");
-_52.document.body.innerHTML=r.responseText;
-}
-catch(e){
-alert("An error occurred, but the error message cannot be"+" displayed because of your browser's pop-up blocker.\n"+"Please allow pop-ups from this Web site.");
-}
-};
-};
-fleegix.xhr.constructor=null;
-fleegix.xhr.Request=function(){
-this.id=0;
-this.transporterId=null;
-this.url=null;
-this.status=null;
-this.statusText="";
-this.method="GET";
-this.async=true;
-this.dataPayload=null;
-this.readyState=null;
-this.responseText=null;
-this.responseXML=null;
-this.handleSuccess=null;
-this.handleErr=null;
-this.handleAll=null;
-this.handleTimeout=null;
-this.responseFormat="text",this.mimeType=null;
-this.username="";
-this.password="";
-this.headers=[];
-this.preventCache=false;
-this.startTime=new Date().getTime();
-this.timeoutSeconds=30;
-this.uber=false;
-this.aborted=false;
-};
-fleegix.xhr.Request.prototype.setRequestHeader=function(_53,_54){
-this.headers.push(_53+": "+_54);
-};
+fleegix.popup.constructor=null;
 fleegix.form={};
 fleegix.form.serialize=function(f,o){
 var h=fleegix.form.toHash(f);
-var _58=o||{};
-var str="";
-var pat=null;
-if(_58.stripTags){
-pat=/<[^>]*>/g;
+var _d=o||{};
+var _e="";
+var _f=null;
+if(_d.stripTags){
+_f=/<[^>]*>/g;
 }
 for(var n in h){
 var s="";
 var v=h[n];
 if(v){
 if(typeof v=="string"){
-s=_58.stripTags?v.replace(pat,""):v;
-str+=n+"="+encodeURIComponent(s);
+s=_d.stripTags?v.replace(_f,""):v;
+_e+=n+"="+encodeURIComponent(s);
 }else{
 var sep="";
-if(_58.collapseMulti){
+if(_d.collapseMulti){
 sep=",";
-str+=n+"=";
+_e+=n+"=";
 }else{
 sep="&";
 }
 for(var j=0;j<v.length;j++){
-s=_58.stripTags?v[j].replace(pat,""):v[j];
-s=(!_58.collapseMulti)?n+"="+encodeURIComponent(s):encodeURIComponent(s);
-str+=s+sep;
+s=_d.stripTags?v[j].replace(_f,""):v[j];
+s=(!_d.collapseMulti)?n+"="+encodeURIComponent(s):encodeURIComponent(s);
+_e+=s+sep;
 }
-str=str.substr(0,str.length-1);
+_e=_e.substr(0,_e.length-1);
 }
-str+="&";
+_e+="&";
 }else{
-if(_58.includeEmpty){
-str+=n+"=&";
+if(_d.includeEmpty){
+_e+=n+"=&";
 }
 }
 }
-str=str.substr(0,str.length-1);
-return str;
+_e=_e.substr(0,_e.length-1);
+return _e;
 };
 fleegix.form.toHash=function(f){
 var h={};
-function expandToArr(_62,val){
-if(_62){
+function expandToArr(_17,val){
+if(_17){
 var r=null;
-if(typeof _62=="string"){
+if(typeof _17=="string"){
 r=[];
-r.push(_62);
+r.push(_17);
 }else{
-r=_62;
+r=_17;
 }
 r.push(val);
 return r;
@@ -558,26 +133,26 @@ break;
 }
 return h;
 };
-fleegix.form.restore=function(_67,str){
+fleegix.form.restore=function(_1c,str){
 var arr=str.split("&");
 var d={};
 for(var i=0;i<arr.length;i++){
-var _6c=arr[i].split("=");
-var _6d=_6c[0];
-var val=_6c[1];
-if(typeof d[_6d]=="undefined"){
-d[_6d]=val;
+var _21=arr[i].split("=");
+var _22=_21[0];
+var val=_21[1];
+if(typeof d[_22]=="undefined"){
+d[_22]=val;
 }else{
-if(!(d[_6d] instanceof Array)){
-var t=d[_6d];
-d[_6d]=[];
-d[_6d].push(t);
+if(!(d[_22] instanceof Array)){
+var t=d[_22];
+d[_22]=[];
+d[_22].push(t);
 }
-d[_6d].push(val);
+d[_22].push(val);
 }
 }
-for(var i=0;i<_67.elements.length;i++){
-elem=_67.elements[i];
+for(var i=0;i<_1c.elements.length;i++){
+elem=_1c.elements[i];
 if(typeof d[elem.name]!="undefined"){
 val=d[elem.name];
 switch(elem.type){
@@ -613,381 +188,490 @@ break;
 }
 }
 }
-return _67;
+return _1c;
 };
-fleegix.form.diff=function(_73,_74,_75){
-var o=_75||{};
-var _77=_73.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_73):_73;
-var _78=_74.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_74):_74;
-var _79=[];
-var _7a=0;
-function addDiff(n,hA,hB,_7e){
-if(!_79[n]){
-_7a++;
-_79[n]=_7e?[hB[n],hA[n]]:[hA[n],hB[n]];
+fleegix.form.diff=function(_28,_29,_2a){
+var o=_2a||{};
+var _2c=_28.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_28):_28;
+var _2d=_29.toString()=="[object HTMLFormElement]"?fleegix.form.toHash(_29):_29;
+var _2e=[];
+var _2f=0;
+function addDiff(n,hA,hB,_33){
+if(!_2e[n]){
+_2f++;
+_2e[n]=_33?[hB[n],hA[n]]:[hA[n],hB[n]];
 }
 }
-function diffSweep(hA,hB,_81){
+function diffSweep(hA,hB,_36){
 for(n in hA){
 if(typeof hB[n]=="undefined"){
 if(o.intersectionOnly){
 continue;
 }
-addDiff(n,hA,hB,_81);
+addDiff(n,hA,hB,_36);
 }else{
 v=hA[n];
 if(v instanceof Array){
 if(!hB[n]||(hB[n].toString()!=v.toString())){
-addDiff(n,hA,hB,_81);
+addDiff(n,hA,hB,_36);
 }
 }else{
 if(hB[n]!=v){
-addDiff(n,hA,hB,_81);
+addDiff(n,hA,hB,_36);
 }
 }
 }
 }
 }
-diffSweep(_77,_78,false);
-diffSweep(_78,_77,true);
-return {count:_7a,diffs:_79};
+diffSweep(_2c,_2d,false);
+diffSweep(_2d,_2c,true);
+return {count:_2f,diffs:_2e};
 };
-fleegix.popup=new function(){
-var _82=this;
-this.win=null;
-this.open=function(url,_84){
-var _85=_84||{};
-var str="";
-var _87={"width":"","height":"","location":0,"menubar":0,"resizable":1,"scrollbars":0,"status":0,"titlebar":1,"toolbar":0};
-for(var _88 in _87){
-str+=_88+"=";
-str+=_85[_88]?_85[_88]:_87[_88];
-str+=",";
+fleegix.xhr=new function(){
+function spawnTransporter(_37){
+var i=0;
+var t=[function(){
+return new XMLHttpRequest();
+},function(){
+return new ActiveXObject("Msxml2.XMLHTTP");
+},function(){
+return new ActiveXObject("Microsoft.XMLHTTP");
+}];
+var _3a=null;
+while(!_3a&&(i<t.length)){
+try{
+_3a=t[i++]();
 }
-var len=str.length;
-if(len){
-str=str.substr(0,len-1);
+catch(e){
 }
-if(!_82.win||_82.win.closed){
-_82.win=window.open(url,"thePopupWin",str);
+}
+if(_3a){
+if(_37){
+return _3a;
 }else{
-_82.win.focus();
-_82.win.document.location=url;
+fleegix.xhr.transporters.push(_3a);
+var _3b=fleegix.xhr.transporters.length-1;
+return _3b;
+}
+}else{
+throw ("Could not create XMLHttpRequest object.");
+}
+}
+this.transporters=[];
+this.maxTransporters=5;
+this.lastReqId=0;
+this.requestQueue=[];
+this.idleTransporters=[];
+this.processingMap={};
+this.processingArray=[];
+this.syncTransporter=spawnTransporter(true);
+this.syncRequest=null;
+this.debug=false;
+this.processingWatcherId=null;
+this.doGet=function(){
+var o={};
+var _3d=null;
+var _3e=Array.prototype.slice.apply(arguments);
+if(typeof _3e[0]=="function"){
+o.async=true;
+_3d=_3e.shift();
+}else{
+o.async=false;
+}
+var url=_3e.shift();
+if(typeof _3e[0]=="object"){
+var _40=_3e.shift();
+for(var p in _40){
+o[p]=_40[p];
+}
+}else{
+o.responseFormat=_3e.shift()||"text";
+}
+o.handleSuccess=_3d;
+o.url=url;
+return this.doReq(o);
+};
+this.doPost=function(){
+var o={};
+var _43=null;
+var _44=Array.prototype.slice.apply(arguments);
+if(typeof _44[0]=="function"){
+o.async=true;
+_43=_44.shift();
+}else{
+o.async=false;
+}
+var url=_44.shift();
+var _46=_44.shift();
+if(typeof _44[0]=="object"){
+var _47=_44.shift();
+for(var p in _47){
+o[p]=_47[p];
+}
+}else{
+o.responseFormat=_44.shift()||"text";
+}
+o.handleSuccess=_43;
+o.url=url;
+o.dataPayload=_46;
+o.method="POST";
+return this.doReq(o);
+};
+this.doReq=function(o){
+var _4a=o||{};
+var req=new fleegix.xhr.Request();
+var _4c=null;
+for(var p in _4a){
+req[p]=_4a[p];
+}
+req.id=this.lastReqId;
+this.lastReqId++;
+if(req.async){
+if(this.idleTransporters.length){
+_4c=this.idleTransporters.shift();
+}else{
+if(this.transporters.length<this.maxTransporters){
+_4c=spawnTransporter();
+}
+}
+if(_4c!=null){
+this.processReq(req,_4c);
+}else{
+if(req.uber){
+this.requestQueue.unshift(req);
+}else{
+this.requestQueue.push(req);
+}
+}
+return req.id;
+}else{
+return this.processReq(req);
 }
 };
-this.close=function(){
-if(_82.win){
-_82.win.window.close();
-_82.win=null;
+this.processReq=function(req,t){
+var _50=this;
+var _51=null;
+var _52=null;
+var url="";
+var _54=null;
+if(req.async){
+_51=t;
+_52=this.transporters[_51];
+this.processingMap[req.id]=req;
+this.processingArray.unshift(req);
+req.transporterId=_51;
+}else{
+_52=this.syncTransporter;
+this.syncRequest=req;
 }
-};
-this.goURLMainWin=function(url){
-location=url;
-_82.close();
-};
-};
-fleegix.popup.constructor=null;
-fleegix.fx=new function(){
-function doFade(_8b,_8c,dir){
-var s=dir=="in"?0:100;
-var e=dir=="in"?100:0;
-var o={startVal:s,endVal:e,props:{opacity:[s,e]},trans:"lightEaseIn"};
-for(p in _8c){
-o[p]=_8c[p];
+if(req.preventCache){
+var dt=new Date().getTime();
+url=req.url.indexOf("?")>-1?req.url+"&preventCache="+dt:req.url+"?preventCache="+dt;
+}else{
+url=req.url;
 }
-return new fleegix.fx.Effecter(_8b,o);
-}
-this.fadeOut=function(_91,_92){
-return doFade(_91,_92,"out");
-};
-this.fadeIn=function(_93,_94){
-return doFade(_93,_94,"in");
-};
-this.setCSSProp=function(_95,p,v){
-if(p=="opacity"){
 if(document.all){
-_95.style.filter="alpha(opacity="+v+")";
+_52.abort();
+}
+if(req.username&&req.password){
+_52.open(req.method,url,req.async,req.username,req.password);
 }else{
-var d=v/100;
-_95.style.opacity=d;
+_52.open(req.method,url,req.async);
+}
+if(req.mimeType&&navigator.userAgent.indexOf("MSIE")==-1){
+_52.overrideMimeType(req.mimeType);
+}
+if(req.headers.length){
+for(var i=0;i<req.headers.length;i++){
+var _57=req.headers[i].split(": ");
+_52.setRequestHeader(_57[i],_57[1]);
 }
 }else{
-if(p.toLowerCase().indexOf("color")>-1){
-_95.style[p]=v;
-}else{
-_95.style[p]=document.all?parseInt(v)+"px":v+"px";
+if(req.method=="POST"){
+_52.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 }
+}
+_52.send(req.dataPayload);
+if(this.processingWatcherId==null){
+this.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
+}
+if(!req.async){
+var ret=this.handleResponse(_52,req);
+this.syncRequest=null;
+if(_50.processingArray.length){
+_50.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
+}
+return ret;
+}
+};
+this.getResponseByType=function(_59,req){
+switch(req.responseFormat){
+case "text":
+r=_59.responseText;
+break;
+case "xml":
+r=_59.responseXML;
+break;
+case "object":
+r=_59;
+break;
+}
+return r;
+};
+this.watchProcessing=function(){
+var _5b=fleegix.xhr;
+var _5c=_5b.processingArray;
+var d=new Date().getTime();
+if(_5b.syncRequest!=null){
+return;
+}else{
+for(var i=0;i<_5c.length;i++){
+var req=_5c[i];
+var _60=_5b.transporters[req.transporterId];
+var _61=((d-req.startTime)>(req.timeoutSeconds*1000));
+switch(true){
+case (req.aborted||!_60.readyState):
+_5b.processingArray.splice(i,1);
+case _61:
+_5b.processingArray.splice(i,1);
+_5b.timeout(req);
+break;
+case (_60.readyState==4):
+_5b.processingArray.splice(i,1);
+_5b.handleResponse.apply(_5b,[_60,req]);
+break;
+}
+}
+}
+clearTimeout(_5b.processingWatcherId);
+if(_5b.processingArray.length){
+_5b.processingWatcherId=setTimeout(fleegix.xhr.watchProcessing,10);
+}else{
+_5b.processingWatcherId=null;
+}
+};
+this.abort=function(_62){
+var r=this.processingMap[_62];
+var t=this.transporters[r.transporterId];
+if(t){
+t.onreadystatechange=function(){
+};
+t.abort();
+r.aborted=true;
+this.cleanupAfterReq(r);
+return true;
+}else{
+return false;
+}
+};
+this.timeout=function(req){
+if(fleegix.xhr.abort.apply(fleegix.xhr,[req.id])){
+if(typeof req.handleTimeout=="function"){
+req.handleTimeout();
+}else{
+alert("XMLHttpRequest to "+req.url+" timed out.");
+}
+}
+};
+this.handleResponse=function(_66,req){
+var _68=this.getResponseByType(_66,req);
+if(req.handleAll){
+req.handleAll(_68,req.id);
+}else{
+try{
+if((_66.status>199&&_66.status<300)||_66.status==304){
+if(req.async){
+if(!req.handleSuccess){
+throw ("No response handler defined "+"for this request");
+return;
+}else{
+req.handleSuccess(_68,req.id);
+}
+}else{
+return _68;
+}
+}else{
+if(!_66.status){
+if(this.debug){
+throw ("XMLHttpRequest HTTP status either zero or not set.");
+}
+}else{
+if(req.handleErr){
+req.handleErr(_68,req.id);
+}else{
+this.handleErrDefault(_66);
+}
+}
+}
+}
+catch(e){
+if(this.debug){
+throw (e);
+}
+}
+}
+if(req.async){
+this.cleanupAfterReq(req);
 }
 return true;
 };
-this.hexPat=/^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-this.hexToRGB=function(str,_9a){
-var rgb=[];
-var h=str.match(this.hexPat);
-if(h){
-for(var i=1;i<h.length;i++){
-var s=h[i];
-s=s.length==1?s+s:s;
-rgb.push(parseInt(s,16));
-}
-s="rgb("+rgb.join()+")";
-return _9a?rgb:s;
+this.cleanupAfterReq=function(req){
+delete this.processingMap[req.id];
+if(this.requestQueue.length){
+var _6a=this.requestQueue.shift();
+_6a.startTime=new Date().getTime();
+this.processReq(_6a,req.transporterId);
 }else{
-throw ("\""+str+"\" not a valid hex value.");
+this.idleTransporters.push(req.transporterId);
+}
+};
+this.handleErrDefault=function(r){
+console.log(r);
+var _6c;
+try{
+_6c=window.open("","errorWin");
+_6c.document.body.innerHTML=r.responseText;
+}
+catch(e){
+alert("An error occurred, but the error message cannot be"+" displayed because of your browser's pop-up blocker.\n"+"Please allow pop-ups from this Web site.");
 }
 };
 };
-fleegix.fx.Effecter=function(_9f,_a0){
-var _a1=this;
-this.props=_a0.props;
-this.trans=_a0.trans||"lightEaseIn";
-this.duration=_a0.duration||500;
-this.fps=30;
+fleegix.xhr.constructor=null;
+fleegix.xhr.Request=function(){
+this.id=0;
+this.transporterId=null;
+this.url=null;
+this.status=null;
+this.statusText="";
+this.method="GET";
+this.async=true;
+this.dataPayload=null;
+this.readyState=null;
+this.responseText=null;
+this.responseXML=null;
+this.handleSuccess=null;
+this.handleErr=null;
+this.handleAll=null;
+this.handleTimeout=null;
+this.responseFormat="text",this.mimeType=null;
+this.username="";
+this.password="";
+this.headers=[];
+this.preventCache=false;
 this.startTime=new Date().getTime();
-this.timeSpent=0;
-this.doOnStart=_a0.doOnStart||null;
-this.doAfter=_a0.doAfter||null;
-this.autoStart=_a0.autoStart==false?false:true;
-if(typeof this.transitions[this.trans]!="function"){
-throw ("\""+this.trans+"\" is not a valid transition.");
-}
-this.start=function(){
-_a1.id=setInterval(function(){
-_a1.doStep.apply(_a1,[_9f]);
-},Math.round(1000/_a1.fps));
-if(typeof _a0.doOnStart=="function"){
-_a1.doOnStart();
-}
+this.timeoutSeconds=30;
+this.uber=false;
+this.aborted=false;
 };
-if(this.autoStart){
-this.start();
-}
-return this;
+fleegix.xhr.Request.prototype.setRequestHeader=function(_6d,_6e){
+this.headers.push(_6d+": "+_6e);
 };
-fleegix.fx.Effecter.prototype.doStep=function(_a2){
-var t=new Date().getTime();
-var p=this.props;
-if(t<(this.startTime+this.duration)){
-this.timeSpent=t-this.startTime;
-for(var i in p){
-fleegix.fx.setCSSProp(_a2,i,this.calcCurrVal(i));
-}
-}else{
-for(var i in p){
-fleegix.fx.setCSSProp(_a2,i,p[i][1]);
-}
-clearInterval(this.id);
-if(typeof this.doAfterFinished=="function"){
-this.doAfterFinished();
-}
-}
-};
-fleegix.fx.Effecter.prototype.calcCurrVal=function(key){
-var _a7=this.props[key][0];
-var _a8=this.props[key][1];
-var _a9=this.transitions[this.trans];
-if(key.toLowerCase().indexOf("color")>-1){
-var _aa=fleegix.fx.hexToRGB(_a7,true);
-var _ab=fleegix.fx.hexToRGB(_a8,true);
-var _ac=[];
-for(var i=0;i<_aa.length;i++){
-var s=_aa[i];
-var e=_ab[i];
-_ac.push(parseInt(_a9(this.timeSpent,s,(e-s),this.duration)));
-}
-return "rgb("+_ac.join()+")";
-}else{
-return _a9(this.timeSpent,_a7,(_a8-_a7),this.duration);
-}
-};
-fleegix.fx.Effecter.prototype.transitions={linear:function(t,b,c,d){
-return c*(t/d)+b;
-},lightEaseIn:function(t,b,c,d){
-return c*(t/=d)*t+b;
-},lightEaseOut:function(t,b,c,d){
-return -c*(t/=d)*(t-2)+b;
-},lightEaseInOut:function(t,b,c,d){
-if((t/=d/2)<1){
-return c/2*t*t+b;
-}
-return -c/2*((--t)*(t-2)-1)+b;
-},heavyEaseIn:function(t,b,c,d){
-return c*(t/=d)*t*t+b;
-},heavyEaseOut:function(t,b,c,d){
-return c*((t=t/d-1)*t*t+1)+b;
-},heavyEaseInOut:function(t,b,c,d){
-if((t/=d/2)<1){
-return c/2*t*t*t+b;
-}
-return c/2*((t-=2)*t*t+2)+b;
-}};
-fleegix.uri=new function(){
-var _cc=this;
-this.params={};
-this.getParamHash=function(str){
-var q=str||_cc.getQuery();
-var d={};
-if(q){
-var arr=q.split("&");
-for(var i=0;i<arr.length;i++){
-var _d2=arr[i].split("=");
-var _d3=_d2[0];
-var val=_d2[1];
-if(typeof d[_d3]=="undefined"){
-d[_d3]=val;
-}else{
-if(!(d[_d3] instanceof Array)){
-var t=d[_d3];
-d[_d3]=[];
-d[_d3].push(t);
-}
-d[_d3].push(val);
-}
-}
-}
-return d;
-};
-this.getParam=function(_d6,str){
-var p=null;
-if(str){
-var h=this.getParamHash(str);
-p=h[_d6];
-}else{
-p=this.params[_d6];
-}
-return p;
-};
-this.setParam=function(_da,val,str){
-var ret=null;
-if(str){
-var pat=new RegExp("(^|&)("+_da+"=[^&]*)(&|$)");
-var arr=str.match(pat);
-if(arr){
-ret=str.replace(arr[0],arr[1]+_da+"="+val+arr[3]);
-}else{
-ret=str+"&"+_da+"="+val;
-}
-}else{
-ret=_da+"="+val;
-}
-return ret;
-};
-this.getQuery=function(s){
-var l=s?s:location.href;
-return l.split("?")[1];
-};
-this.getBase=function(s){
-var l=s?s:location.href;
-return l.split("?")[0];
-};
-this.params=this.getParamHash();
-};
-fleegix.uri.constructor=null;
 fleegix.event=new function(){
-var _e4=[];
-var _e5={};
+var _6f=[];
+var _70={};
 this.listen=function(){
-var _e6=arguments[0];
-var _e7=arguments[1];
-var _e8=_e6[_e7]?_e6[_e7].listenReg:null;
-if(!_e8){
-_e8={};
-_e8.orig={};
-_e8.orig.obj=_e6,_e8.orig.methName=_e7;
-if(_e6[_e7]){
-_e8.orig.methCode=_e6[_e7];
+var _71=arguments[0];
+var _72=arguments[1];
+var _73=_71[_72]?_71[_72].listenReg:null;
+if(!_73){
+_73={};
+_73.orig={};
+_73.orig.obj=_71,_73.orig.methName=_72;
+if(_71[_72]){
+_73.orig.methCode=_71[_72];
 }
-_e8.after=[];
-_e6[_e7]=function(){
-var _e9=[];
+_73.after=[];
+_71[_72]=function(){
+var _74=[];
 for(var i=0;i<arguments.length;i++){
-_e9.push(arguments[i]);
+_74.push(arguments[i]);
 }
-fleegix.event.exec(_e6[_e7].listenReg,_e9);
+fleegix.event.exec(_71[_72].listenReg,_74);
 };
-_e6[_e7].listenReg=_e8;
-_e4.push(_e6[_e7].listenReg);
+_71[_72].listenReg=_73;
+_6f.push(_71[_72].listenReg);
 }
 if(typeof arguments[2]=="function"){
-_e8.after.push(arguments[2]);
+_73.after.push(arguments[2]);
 }else{
-_e8.after.push([arguments[2],arguments[3]]);
+_73.after.push([arguments[2],arguments[3]]);
 }
-_e6[_e7].listenReg=_e8;
+_71[_72].listenReg=_73;
 };
-this.exec=function(reg,_ec){
+this.exec=function(reg,_77){
 if(reg.orig.methCode){
-reg.orig.methCode.apply(reg.orig.obj,_ec);
+reg.orig.methCode.apply(reg.orig.obj,_77);
 }
 if(reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)){
-_ec[0]=_ec[0]||window.event;
-if(!_ec[0].target){
-_ec[0].target=_ec[0].srcElement;
+_77[0]=_77[0]||window.event;
+if(!_77[0].target){
+_77[0].target=_77[0].srcElement;
 }
-if(!_ec[0].srcElement){
-_ec[0].srcElement=_ec[0].target;
+if(!_77[0].srcElement){
+_77[0].srcElement=_77[0].target;
 }
 }
 for(var i=0;i<reg.after.length;i++){
 var ex=reg.after[i];
 if(typeof ex=="function"){
-var _ef=ex;
-_ef.apply(window,_ec);
+var _7a=ex;
+_7a.apply(window,_77);
 }else{
 execObj=ex[0];
 execMethod=ex[1];
-execObj[execMethod].apply(execObj,_ec);
+execObj[execMethod].apply(execObj,_77);
 }
 }
 };
 this.unlisten=function(){
-var _f0=arguments[0];
-var _f1=arguments[1];
-var _f2=_f0[_f1]?_f0[_f1].listenReg:null;
-var _f3=null;
-if(!_f2){
+var _7b=arguments[0];
+var _7c=arguments[1];
+var _7d=_7b[_7c]?_7b[_7c].listenReg:null;
+var _7e=null;
+if(!_7d){
 return false;
 }
-for(var i=0;i<_f2.after.length;i++){
-var ex=_f2.after[i];
+for(var i=0;i<_7d.after.length;i++){
+var ex=_7d.after[i];
 if(typeof arguments[2]=="function"){
 if(ex==arguments[2]){
-_f2.after.splice(i,1);
+_7d.after.splice(i,1);
 }
 }else{
 if(ex[0]==arguments[2]&&ex[1]==arguments[3]){
-_f2.after.splice(i,1);
+_7d.after.splice(i,1);
 }
 }
 }
-_f0[_f1].listenReg=_f2;
+_7b[_7c].listenReg=_7d;
 };
 this.flush=function(){
-for(var i=0;i<_e4.length;i++){
-var reg=_e4[i];
+for(var i=0;i<_6f.length;i++){
+var reg=_6f[i];
 removeObj=reg.orig.obj;
 removeMethod=reg.orig.methName;
 removeObj[removeMethod]=null;
 }
 };
-this.subscribe=function(_f8,obj,_fa){
+this.subscribe=function(_83,obj,_85){
 if(!obj){
 return;
 }
-if(!_e5[_f8]){
-_e5[_f8]={};
-_e5[_f8].audience=[];
+if(!_70[_83]){
+_70[_83]={};
+_70[_83].audience=[];
 }else{
-this.unsubscribe(_f8,obj);
+this.unsubscribe(_83,obj);
 }
-_e5[_f8].audience.push([obj,_fa]);
+_70[_83].audience.push([obj,_85]);
 };
-this.unsubscribe=function(_fb,obj){
+this.unsubscribe=function(_86,obj){
 if(!obj){
-_e5[_fb]=null;
+_70[_86]=null;
 }else{
-if(_e5[_fb]){
-var aud=_e5[_fb].audience;
+if(_70[_86]){
+var aud=_70[_86].audience;
 for(var i=0;i<aud.length;i++){
 if(aud[i][0]==obj){
 aud.splice(i,1);
@@ -996,13 +680,13 @@ aud.splice(i,1);
 }
 }
 };
-this.publish=function(pub,data){
-if(_e5[pub]){
-aud=_e5[pub].audience;
+this.publish=function(pub,_8b){
+if(_70[pub]){
+aud=_70[pub].audience;
 for(var i=0;i<aud.length;i++){
-var _102=aud[i][0];
-var _103=aud[i][1];
-_102[_103](data);
+var _8d=aud[i][0];
+var _8e=aud[i][1];
+_8d[_8e](_8b);
 }
 }
 };
@@ -1031,6 +715,322 @@ return ret.id;
 };
 fleegix.event.constructor=null;
 fleegix.event.listen(window,"onunload",fleegix.event,"flush");
+fleegix.xml=new function(){
+var _91=this;
+this.parse=function(_92,_93){
+var _94=new Array;
+var _95;
+var _96=[];
+if(_92.hasChildNodes()){
+_94=_92.getElementsByTagName(_93);
+_95=_94[0];
+for(var j=0;j<_94.length;j++){
+_95=_94[j];
+_96[j]=_91.xmlElem2Obj(_94[j]);
+}
+}
+return _96;
+};
+this.xmlElem2Obj=function(_98){
+var ret=new Object();
+_91.setPropertiesRecursive(ret,_98);
+return ret;
+};
+this.setPropertiesRecursive=function(obj,_9b){
+if(_9b.childNodes.length>0){
+for(var i=0;i<_9b.childNodes.length;i++){
+if(_9b.childNodes[i].nodeType==1&&_9b.childNodes[i].firstChild){
+if(_9b.childNodes[i].childNodes.length==1){
+obj[_9b.childNodes[i].tagName]=_9b.childNodes[i].firstChild.nodeValue;
+}else{
+obj[_9b.childNodes[i].tagName]=[];
+_91.setPropertiesRecursive(obj[_9b.childNodes[i].tagName],_9b.childNodes[i]);
+}
+}
+}
+}
+};
+this.cleanXMLObjText=function(_9d){
+var _9e=_9d;
+for(var _9f in _9e){
+_9e[_9f]=cleanText(_9e[_9f]);
+}
+return _9e;
+};
+this.cleanText=function(str){
+var ret=str;
+ret=ret.replace(/\n/g,"");
+ret=ret.replace(/\r/g,"");
+ret=ret.replace(/\'/g,"\\'");
+ret=ret.replace(/\[CDATA\[/g,"");
+ret=ret.replace(/\]]/g,"");
+return ret;
+};
+this.rendered2Source=function(str){
+var _a3=str;
+_a3=_a3.replace(/</g,"&lt;");
+_a3=_a3.replace(/>/g,"&gt;");
+return "<pre>"+_a3+"</pre>";
+};
+this.getXMLDocElem=function(_a4,_a5){
+var _a6=[];
+var _a7=null;
+if(document.all){
+var _a8=document.getElementById(_a4).innerHTML;
+var _a9=new ActiveXObject("Microsoft.XMLDOM");
+_a9.loadXML(_a8);
+_a7=_a9.documentElement;
+}else{
+_a6=window.document.body.getElementsByTagName(_a5);
+_a7=_a6[0];
+}
+return _a7;
+};
+};
+fleegix.xml.constructor=null;
+fleegix.uri=new function(){
+var _aa=this;
+this.params={};
+this.getParamHash=function(str){
+var q=str||_aa.getQuery();
+var d={};
+if(q){
+var arr=q.split("&");
+for(var i=0;i<arr.length;i++){
+var _b0=arr[i].split("=");
+var _b1=_b0[0];
+var val=_b0[1];
+if(typeof d[_b1]=="undefined"){
+d[_b1]=val;
+}else{
+if(!(d[_b1] instanceof Array)){
+var t=d[_b1];
+d[_b1]=[];
+d[_b1].push(t);
+}
+d[_b1].push(val);
+}
+}
+}
+return d;
+};
+this.getParam=function(_b4,str){
+var p=null;
+if(str){
+var h=this.getParamHash(str);
+p=h[_b4];
+}else{
+p=this.params[_b4];
+}
+return p;
+};
+this.setParam=function(_b8,val,str){
+var ret=null;
+if(str){
+var pat=new RegExp("(^|&)("+_b8+"=[^&]*)(&|$)");
+var arr=str.match(pat);
+if(arr){
+ret=str.replace(arr[0],arr[1]+_b8+"="+val+arr[3]);
+}else{
+ret=str+"&"+_b8+"="+val;
+}
+}else{
+ret=_b8+"="+val;
+}
+return ret;
+};
+this.getQuery=function(s){
+var l=s?s:location.href;
+return l.split("?")[1];
+};
+this.getBase=function(s){
+var l=s?s:location.href;
+return l.split("?")[0];
+};
+this.params=this.getParamHash();
+};
+fleegix.uri.constructor=null;
+fleegix.fx=new function(){
+function doFade(_c2,_c3,dir){
+var s=dir=="in"?0:100;
+var e=dir=="in"?100:0;
+var o={startVal:s,endVal:e,props:{opacity:[s,e]},trans:"lightEaseIn"};
+for(p in _c3){
+o[p]=_c3[p];
+}
+return new fleegix.fx.Effecter(_c2,o);
+}
+this.fadeOut=function(_c8,_c9){
+return doFade(_c8,_c9,"out");
+};
+this.fadeIn=function(_ca,_cb){
+return doFade(_ca,_cb,"in");
+};
+this.setCSSProp=function(_cc,p,v){
+if(p=="opacity"){
+if(document.all){
+_cc.style.filter="alpha(opacity="+v+")";
+}else{
+var d=v/100;
+_cc.style.opacity=d;
+}
+}else{
+if(p.toLowerCase().indexOf("color")>-1){
+_cc.style[p]=v;
+}else{
+_cc.style[p]=document.all?parseInt(v)+"px":v+"px";
+}
+}
+return true;
+};
+this.hexPat=/^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
+this.hexToRGB=function(str,_d1){
+var rgb=[];
+var h=str.match(this.hexPat);
+if(h){
+for(var i=1;i<h.length;i++){
+var s=h[i];
+s=s.length==1?s+s:s;
+rgb.push(parseInt(s,16));
+}
+s="rgb("+rgb.join()+")";
+return _d1?rgb:s;
+}else{
+throw ("\""+str+"\" not a valid hex value.");
+}
+};
+};
+fleegix.fx.Effecter=function(_d6,_d7){
+var _d8=this;
+this.props=_d7.props;
+this.trans=_d7.trans||"lightEaseIn";
+this.duration=_d7.duration||500;
+this.fps=30;
+this.startTime=new Date().getTime();
+this.timeSpent=0;
+this.doOnStart=_d7.doOnStart||null;
+this.doAfterFinished=_d7.doAfterFinished||null;
+this.autoStart=_d7.autoStart==false?false:true;
+if(typeof this.transitions[this.trans]!="function"){
+throw ("\""+this.trans+"\" is not a valid transition.");
+}
+this.start=function(){
+_d8.id=setInterval(function(){
+_d8.doStep.apply(_d8,[_d6]);
+},Math.round(1000/_d8.fps));
+if(typeof _d7.doOnStart=="function"){
+_d8.doOnStart();
+}
+};
+if(this.autoStart){
+this.start();
+}
+return this;
+};
+fleegix.fx.Effecter.prototype.doStep=function(_d9){
+var t=new Date().getTime();
+var p=this.props;
+if(t<(this.startTime+this.duration)){
+this.timeSpent=t-this.startTime;
+for(var i in p){
+fleegix.fx.setCSSProp(_d9,i,this.calcCurrVal(i));
+}
+}else{
+for(var i in p){
+fleegix.fx.setCSSProp(_d9,i,p[i][1]);
+}
+clearInterval(this.id);
+if(typeof this.doAfterFinished=="function"){
+this.doAfterFinished();
+}
+}
+};
+fleegix.fx.Effecter.prototype.calcCurrVal=function(key){
+var _de=this.props[key][0];
+var _df=this.props[key][1];
+var _e0=this.transitions[this.trans];
+if(key.toLowerCase().indexOf("color")>-1){
+var _e1=fleegix.fx.hexToRGB(_de,true);
+var _e2=fleegix.fx.hexToRGB(_df,true);
+var _e3=[];
+for(var i=0;i<_e1.length;i++){
+var s=_e1[i];
+var e=_e2[i];
+_e3.push(parseInt(_e0(this.timeSpent,s,(e-s),this.duration)));
+}
+return "rgb("+_e3.join()+")";
+}else{
+return _e0(this.timeSpent,_de,(_df-_de),this.duration);
+}
+};
+fleegix.fx.Effecter.prototype.transitions={linear:function(t,b,c,d){
+return c*(t/d)+b;
+},lightEaseIn:function(t,b,c,d){
+return c*(t/=d)*t+b;
+},lightEaseOut:function(t,b,c,d){
+return -c*(t/=d)*(t-2)+b;
+},lightEaseInOut:function(t,b,c,d){
+if((t/=d/2)<1){
+return c/2*t*t+b;
+}
+return -c/2*((--t)*(t-2)-1)+b;
+},heavyEaseIn:function(t,b,c,d){
+return c*(t/=d)*t*t+b;
+},heavyEaseOut:function(t,b,c,d){
+return c*((t=t/d-1)*t*t+1)+b;
+},heavyEaseInOut:function(t,b,c,d){
+if((t/=d/2)<1){
+return c/2*t*t*t+b;
+}
+return c/2*((t-=2)*t*t+2)+b;
+}};
+fleegix.json=new function(){
+this.serialize=function(obj){
+var str="";
+switch(typeof obj){
+case "object":
+if(obj==null){
+return "null";
+}else{
+if(obj instanceof Array){
+for(var i=0;i<obj.length;i++){
+if(str){
+str+=",";
+}
+str+=fleegix.json.serialize(obj[i]);
+}
+return "["+str+"]";
+}else{
+if(typeof obj.toString!="undefined"){
+for(var i in obj){
+if(str){
+str+=",";
+}
+str+="\""+i+"\":";
+str+=(obj[i]==undefined)?"\"undefined\"":fleegix.json.serialize(obj[i]);
+}
+return "{"+str+"}";
+}
+}
+}
+return str;
+break;
+case "unknown":
+case "undefined":
+case "function":
+return "\"undefined\"";
+break;
+case "string":
+str+="\""+obj.replace(/(["\\])/g,"\\$1").replace(/\r/g,"").replace(/\n/g,"\\n")+"\"";
+return str;
+break;
+default:
+return String(obj);
+break;
+}
+};
+};
+fleegix.json.constructor=null;
 fleegix.cookie=new function(){
 this.set=function(name,_107,_108){
 var opts=_108||{};

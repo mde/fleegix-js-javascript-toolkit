@@ -703,7 +703,7 @@ values if they are not set:
       the fade
     * doOnStart: null -- Function to execute as the animation
       starts
-    * doAfter: null -- Function to exectute after the animation
+    * doAfterFinished: null -- Function to exectute after the animation
       completes
 
 Description
@@ -738,7 +738,7 @@ values if they are not set:
       the fade
     * doOnStart: null -- Function to execute as the animation
       starts
-    * doAfter: null -- Function to exectute after the animation
+    * doAfterFinished: null -- Function to exectute after the animation
       completes
 
 Description
