@@ -1,96 +1,108 @@
-Fleegix.js reference
------------------------------------------------------------------
-This page describes the modules in the Fleegix.js JavaScript
-toolkit, and the different methods they contain. Click on a
-module or method name for a detailed description.
 
-Contents
------------------------------------------------------------------
+                      Fleegix.js reference
+     __________________________________________________
 
-    * Events
-          o fleegix.event.listen
-          o fleegix.event.unlisten
-          o fleegix.event.publish
-          o fleegix.event.subscribe
-          o fleegix.event.unsubscribe
-    * XHR
-          o fleegix.xhr.doGet
-          o fleegix.xhr.doPost
-          o fleegix.xhr.doReq
-          o fleegix.xhr.abort
-    * XML
+   This page describes the modules in the Fleegix.js
+   JavaScript toolkit, and the different methods they
+   contain. Click on a module or method name for a
+   detailed description.
+
+                            Contents
+     __________________________________________________
+
+     * Events
+
+     * fleegix.event.listen
+     * fleegix.event.unlisten
+     * fleegix.event.publish
+     * fleegix.event.subscribe
+     * fleegix.event.unsubscribe
+
+     XHR
+     * fleegix.xhr.doGet
+     * fleegix.xhr.doPost
+     * fleegix.xhr.doReq
+     * fleegix.xhr.abort
+
+     XML
 
           fleegix.xml.parse
 
-    * Form
-          o fleegix.form.serialize
-          o fleegix.form.restore
-          o fleegix.form.toHash
-          o fleegix.form.diff
-    * Effects
-          o fleegix.fx.fadeOut
-          o fleegix.fx.fadeIn
-    * JSON
+     Form
+     * fleegix.form.serialize
+     * fleegix.form.restore
+     * fleegix.form.toHash
+     * fleegix.form.diff
+
+     Effects
+     * fleegix.fx.fadeOut
+     * fleegix.fx.fadeIn
+
+     JSON
 
           fleegix.json.serialize
 
-    * URI
-          o fleegix.uri.getQuery
-          o fleegix.uri.getBase
-          o fleegix.uri.getParam
-          o fleegix.uri.setParam
-    * Cookies
-          o fleegix.cookie.set
-          o fleegix.cookie.get
-          o fleegix.cookie.destroy
-    * Popups
-          o fleegix.popup.open
-          o fleegix.popup.close
+     URI
+     * fleegix.uri.getQuery
+     * fleegix.uri.getBase
+     * fleegix.uri.getParam
+     * fleegix.uri.setParam
 
-Events
------------------------------------------------------------------
+     Cookies
+     * fleegix.cookie.set
+     * fleegix.cookie.get
+     * fleegix.cookie.destroy
 
-The Fleegix.js event system provides a convenient and flexible
-way to connect together either DOM events or events in your
-application. It also provides a basic publish/subscribe system
-to allow decentralized communiation between the pieces of your
-Web UI.
+     Popups
+     * fleegix.popup.open
+     * fleegix.popup.close
+
+                             Events
+     __________________________________________________
+
+   The Fleegix.js event system provides a convenient and
+   flexible way to connect together either DOM events or
+   events in your application. It also provides a basic
+   publish/subscribe system to allow decentralized
+   communiation between the pieces of your Web UI.
 
 fleegix.event.listen
 
-Syntax
+  Syntax
 
-fleegix.event.listen(listenerObj, triggerEventName,
-someFunction); (calling just a simple function)
+   fleegix.event.listen(listenerObj, triggerEventName,
+   someFunction); (calling just a simple function)
 
-fleegix.event.listen(listenerObj, triggerEventName, someObject,
-someMethodName); (calling a method of an object) 
+   fleegix.event.listen(listenerObj, triggerEventName,
+   someObject, someMethodName); (calling a method of an
+   object)
 
-Parameters
+  Parameters
 
-listenerObj (Object) -- Object to add the listener to.
+   listenerObj (Object) -- Object to add the listener to.
 
-triggerEventName (String) -- Name of method or event which
-will trigger execution of a function or method.
+   triggerEventName (String) -- Name of method or event
+   which will trigger execution of a function or method.
 
-someFunction (Function) -- Function to execute when the
-triggering event is run.
+   someFunction (Function) -- Function to execute when the
+   triggering event is run.
 
-someObject (Object) -- Object with the method you want to
-execute when the triggering event is run.
+   someObject (Object) -- Object with the method you want
+   to execute when the triggering event is run.
 
-someMethodName (String) -- Name of the method you want to
-execute when the triggering event is run.
+   someMethodName (String) -- Name of the method you want
+   to execute when the triggering event is run.
 
-Description
+  Description
 
-Allows you to trigger a function or method whenever a DOM
-event fires, or a method of some object is invoked. Whenever
-the triggering event or method is fired, the attached method
-or function will run. Multiple functions or methods can be
-attached to the same trigger.
+   Allows you to trigger a function or method whenever a
+   DOM event fires, or a method of some object is invoked.
+   Whenever the triggering event or method is fired, the
+   attached method or function will run. Multiple
+   functions or methods can be attached to the same
+   trigger.
 
-Examples
+  Examples
 
 function simpleAlert() {
   alert('simple');
@@ -116,38 +128,43 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'
 
 fleegix.event.unlisten
 
-Syntax
+  Syntax
 
-fleegix.event.unlisten(listenerObj, triggerEventName,
-someFunction); (with a simple function)
+   fleegix.event.unlisten(listenerObj, triggerEventName,
+   someFunction); (with a simple function)
 
-fleegix.event.unlisten(listenerObj, triggerEventName,
-someObject, someMethodName); (with a method of an object)
+   fleegix.event.unlisten(listenerObj, triggerEventName,
+   someObject, someMethodName); (with a method of an
+   object)
 
-Parameters
+  Parameters
 
-listenerObj (Object) -- Object to remove the listener from.
+   listenerObj (Object) -- Object to remove the listener
+   from.
 
-triggerEventName (String) -- Name of method or event which
-you want to stop triggering a certain function or method.
+   triggerEventName (String) -- Name of method or event
+   which you want to stop triggering a certain function or
+   method.
 
-someFunction (Function) -- Function to stop triggering when
-the triggering event is run.
+   someFunction (Function) -- Function to stop triggering
+   when the triggering event is run.
 
-someObject (Object) -- Object with the method you want to stop
-from executing when the triggering event is run.
+   someObject (Object) -- Object with the method you want
+   to stop from executing when the triggering event is
+   run.
 
-someMethodName (String) -- Name of the method you want to stop
-from executing when the triggering event is run.
+   someMethodName (String) -- Name of the method you want
+   to stop from executing when the triggering event is
+   run.
 
-Description
+  Description
 
-Removes an attached listener so it will no longer trigger
-the function or method specified. Use 'unlisten' with the
-exact same parameters you passed to 'listen' to remove that
-particular listener.
+   Removes an attached listener so it will no longer
+   trigger the function or method specified. Use
+   'unlisten' with the exact same parameters you passed to
+   'listen' to remove that particular listener.
 
-Examples
+  Examples
 
 function simpleAlert() {
   alert('simple');
@@ -173,24 +190,26 @@ zardoz.foo(); => now just one alert, 'ABC.'
 
 fleegix.event.publish
 
-Syntax
+  Syntax
 
-fleegix.event.publish(channelName, publishPayload);
+   fleegix.event.publish(channelName, publishPayload);
 
-Parameters
+  Parameters
 
-channelName (String) -- Name of the channel to publish on.
+   channelName (String) -- Name of the channel to publish
+   on.
 
-publishPayload (Object) -- Object to send to anyone listening
-on the specified channel.
+   publishPayload (Object) -- Object to send to anyone
+   listening on the specified channel.
 
-Description
+  Description
 
-Allows an object to publish to a specific channel (simply
-named with a string), and pass a JavaScript object to anyone
-subscribed, as a payload of the publish-event.
+   Allows an object to publish to a specific channel
+   (simply named with a string), and pass a JavaScript
+   object to anyone subscribed, as a payload of the
+   publish-event.
 
-Examples
+  Examples
 
 var pubObj = {
     thisProp: 'foo',
@@ -201,32 +220,32 @@ fleegix.event.publish('sciFi' pubObj);
 
 fleegix.event.subscribe
 
-Syntax
+  Syntax
 
-fleegix.event.subscribe(channelName, subscriberObj,
-handlerMethod);
+   fleegix.event.subscribe(channelName, subscriberObj,
+   handlerMethod);
 
-Parameters
+  Parameters
 
-channelName (String) -- Name of the channel to listen for
-publish-events on.
+   channelName (String) -- Name of the channel to listen
+   for publish-events on.
 
-subscriberObj (Object) -- Object that is listening for
-publish-events on that channel.
+   subscriberObj (Object) -- Object that is listening for
+   publish-events on that channel.
 
-handlerMethod (Function) -- Method to invoke when the
-publish-event occurs. The publish event will pass this method
-a JavaScript Object as a parameter.
+   handlerMethod (Function) -- Method to invoke when the
+   publish-event occurs. The publish event will pass this
+   method a JavaScript Object as a parameter.
 
-Description
+  Description
 
-Allows an object to listen for published events on a specific
-channel (simply named with a string), and specify a handler
-method that will be fired on each publish-event, and be handed
-a JavaScript object as the publish-event payload.
+   Allows an object to listen for published events on a
+   specific channel (simply named with a string), and
+   specify a handler method that will be fired on each
+   publish-event, and be handed a JavaScript object as the
+   publish-event payload.
 
-
-Examples
+  Examples
 
 var zardoz = new function () {
   this.handlePublish = function (pubObj) {
@@ -234,7 +253,7 @@ var zardoz = new function () {
   };
 }
 
-fleegix.event.subscribe('sciFi', zardoz, 'handlePublish'); 
+fleegix.event.subscribe('sciFi', zardoz, 'handlePublish');
 
 var pubObj = {
     thisProp: 'foo',
@@ -246,64 +265,70 @@ handlePublish method of zardoz, which alerts 'foo.'
 
 fleegix.event.unsubscribe
 
-Syntax
+  Syntax
 
-fleegix.event.unsubscribe(channelName, unsubscribeObj);
+   fleegix.event.unsubscribe(channelName, unsubscribeObj);
 
-Parameters
+  Parameters
 
-channelName (String) -- Name of the channel to unsubscribe from.
+   channelName (String) -- Name of the channel to
+   unsubscribe from.
 
-unsubscribeObj (Object) -- Object that should stop listening
-to that channel.
+   unsubscribeObj (Object) -- Object that should stop
+   listening to that channel.
 
-Description
+  Description
 
-Allows an object that's subscribed to a particular publishing
-channel to stop listening.
+   Allows an object that's subscribed to a particular
+   publishing channel to stop listening.
 
-Examples
+  Examples
 
 fleegix.event.unsubscribe('sciFi', zardoz');
 
-XHR
+                              XHR
+     __________________________________________________
 
-The XHR module has two convenience methods for doing the
-standard GET and POST requests, as well as the ability to do
-requests with more detailed control (such as using arbitrary
-HTTP methods such as PUT, or setting authentication headers
-or the format of the response). Uses XHR-object pooling and
-request queueing.  fleegix.xhr.doGet
+   The XHR module has two convenience methods for doing
+   the standard GET and POST requests, as well as the
+   ability to do requests with more detailed control (such
+   as using arbitrary HTTP methods such as PUT, or setting
+   authentication headers or the format of the response).
+   Uses XHR-object pooling and request queueing.
 
-Syntax
+fleegix.xhr.doGet
 
-fleegix.xhr.doGet(handlerFunction, url, [responseFormat]);
-(Asynchronous requests)
+  Syntax
 
-fleegix.xhr.doGet(url, [responseFormat]); (Synchronous requests)
+   fleegix.xhr.doGet(handlerFunction, url,
+   [responseFormat]); (Asynchronous requests)
 
-Parameters
+   fleegix.xhr.doGet(url, [responseFormat]); (Synchronous
+   requests)
 
-handlerFunction (Function) -- function called when an
-asynchronous XHR request returns. If first argument is missing,
-doGet assumes a synchronous (blocking) request. When called by
-the response, it will be passed two parameters -- the response
-in the desired format, and the request ID.
+  Parameters
 
-url (String) -- The URL to make the request to.
+   handlerFunction (Function) -- function called when an
+   asynchronous XHR request returns. If first argument is
+   missing, doGet assumes a synchronous (blocking)
+   request. When called by the response, it will be passed
+   two parameters -- the response in the desired format,
+   and the request ID.
 
-responseFormat (String) -- Optional parameter, sets the format
-of the response passed to the handler function. Possible values
-are 'text' (to pass the responseText of the XHR object), 'xml'
-(the responseXML), and 'object' (to get the XHR object itself)
-Defaults to 'text.'
+   url (String) -- The URL to make the request to.
 
-Description
+   responseFormat (String) -- Optional parameter, sets the
+   format of the response passed to the handler function.
+   Possible values are 'text' (to pass the responseText of
+   the XHR object), 'xml' (the responseXML), and 'object'
+   (to get the XHR object itself) Defaults to 'text.'
 
-Makes an XHR GET request, and passes the result to the specified
-handler function.
+  Description
 
-Examples
+   Makes an XHR GET request, and passes the result to the
+   specified handler function.
+
+  Examples
 
 function alertResponse(resp, id) {
   alert(resp);
@@ -317,43 +342,45 @@ alert(s);
 function alertStatus(resp, id) {
   alert(resp.status);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
     'object');
 
 fleegix.xhr.doPost
 
-Syntax
+  Syntax
 
-fleegix.xhr.doPost(handlerFunction, url, dataPayload,
-[responseFormat]); (Asynchronous requests)
+   fleegix.xhr.doPost(handlerFunction, url, dataPayload,
+   [responseFormat]); (Asynchronous requests)
 
-fleegix.xhr.doPost(url, dataPayload, [responseFormat]);
-(Synchronous requests)
+   fleegix.xhr.doPost(url, dataPayload, [responseFormat]);
+   (Synchronous requests)
 
-Parameters
+  Parameters
 
-handlerFunction (Function) -- function called when an
-asynchronous XHR request returns. If first argument is missing,
-doPost assumes a synchronous (blocking) request. When called by
-the response, it will be passed two parameters -- the response
-in the desired format, and the request ID.
+   handlerFunction (Function) -- function called when an
+   asynchronous XHR request returns. If first argument is
+   missing, doPost assumes a synchronous (blocking)
+   request. When called by the response, it will be passed
+   two parameters -- the response in the desired format,
+   and the request ID.
 
-url (String) -- The URL to make the request to.
+   url (String) -- The URL to make the request to.
 
-dataPayload (String) -- Data payload to send with the request.
+   dataPayload (String) -- Data payload to send with the
+   request.
 
-responseFormat (String) -- Optional parameter, sets the format
-of the response passed to the handler function. Possible values
-are 'text' (to pass the responseText of the XHR object), 'xml'
-(the responseXML), and 'object' (to get the XHR object itself)
-Defaults to 'text.'
+   responseFormat (String) -- Optional parameter, sets the
+   format of the response passed to the handler function.
+   Possible values are 'text' (to pass the responseText of
+   the XHR object), 'xml' (the responseXML), and 'object'
+   (to get the XHR object itself) Defaults to 'text.'
 
-Description
+  Description
 
-Makes an XHR POST request, and passes the result to the
-specified handler function.
+   Makes an XHR POST request, and passes the result to the
+   specified handler function.
 
-Examples
+  Examples
 
 function alertResponse(resp, id) {
   alert(resp);
@@ -361,7 +388,7 @@ function alertResponse(resp, id) {
 fleegix.xhr.doPost(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112');
 
-var s = fleegix.xhr.doPost('random_textfile.txt', 
+var s = fleegix.xhr.doPost('random_textfile.txt',
   'foo=bar&baz=2112');
 alert(s);
 
@@ -369,68 +396,76 @@ function alertStatus(resp, id) {
   alert(resp.status);
   alert('Request ID was: ' + id);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112', 'object');
 
 fleegix.xhr.doReq
 
-Syntax
+  Syntax
 
-fleegix.xhr.doReq(requestOptions); (Either asynchronous or
-synchronous)
+   fleegix.xhr.doReq(requestOptions); (Either asynchronous
+   or synchronous)
 
-Parameters
+  Parameters
 
-requestOptions (Object) -- Options for the XHR request. Here
-is the list of possible properties to set, and the default
-values if they are not set:
+   requestOptions (Object) -- Options for the XHR request.
+   Here is the list of possible properties to set, and the
+   default values if they are not set:
+     * url: null -- The URL to make the request to
+     * method: 'GET' -- HTTP request method to use
+     * async: true -- If set to false, makes a blocking
+       request and returns the result inline
+     * dataPayload: null -- data to send with POST or PUT
+       requests
+     * handleSuccess: null -- Function to handle
+       successful responses for asynchronous requests
+     * handleErr: null -- Function to handle error
+       responses for asynchronous requests. If no
+       error/all handler exists, the error will be handled
+       with the built-in function
+       fleegix.xhr.handleErrDefault, which pops up the
+       error page from the server in a new, full-sized
+       window
+     * handleAll: null -- Function to handle both errors
+       or successful responses. If you set this, don't set
+       handleSuccess or handleErr
+     * handleTimeout: null -- Function to handle cases
+       where the request is processing for longer than
+       timeoutSeconds
+     * responseFormat: 'text' -- format to use when
+       passing the response to the handler function (valid
+       values are 'text,' 'xml,' 'object')
+     * mimeType: null -- Can be used to override the MIME
+       type of the response returned by the server.
+       Sometimes used to ensure tje browser handles
+       response as XML, even if the server doesn't set the
+       Content-type header properly
+     * username: '' -- Set when using basic auth with the
+       request
+     * password: '' -- Set when using basic auth with the
+       request
+     * headers: [] -- Used to set any special headers you
+       might want on the request
+     * preventCache: false -- Adds a dummy variable to the
+       end of the request URL to prevent caching in
+       retarded browsers like IE6
+     * timeoutSeconds: 30 -- The number of seconds until
+       the request times out. (Note this doesn't include
+       time spent in the request queue -- the clock starts
+       when the request is picked up and sent by the XHR
+       object.)
+     * uber: false -- Give the request priority over any
+       existing queued async requests. If uber property is
+       set to true, this request goes directly to the
+       front of the queue
 
-    * url: null -- The URL to make the request to
-    * method: 'GET' -- HTTP request method to use
-    * async: true -- If set to false, makes a blocking request
-      and returns the result inline
-    * dataPayload: null -- data to send with POST or PUT
-      requests
-    * handleSuccess: null -- Function to handle successful
-      responses for asynchronous requests
-    * handleErr: null -- Function to handle error responses
-      for asynchronous requests. If no error/all handler exists,
-      the error will be handled with the built-in function
-      fleegix.xhr.handleErrDefault, which pops up the error page
-      from the server in a new, full-sized window
-    * handleAll: null -- Function to handle both errors
-      or successful responses. If you set this, don't set
-      handleSuccess or handleErr
-    * handleTimeout: null -- Function to handle cases where
-      the request is processing for longer than timeoutSeconds
-    * responseFormat: 'text' -- format to use when passing the
-      response to the handler function (valid values are 'text,'
-      'xml,' 'object')
-    * mimeType: null -- Can be used to override the MIME type
-      of the response returned by the server. Sometimes used to
-      ensure tje browser handles response as XML, even if the
-      server doesn't set the Content-type header properly
-    * username: '' -- Set when using basic auth with the request
-    * password: '' -- Set when using basic auth with the request
-    * headers: [] -- Used to set any special headers you might
-      want on the request
-    * preventCache: false -- Adds a dummy variable to the end
-      of the request URL to prevent caching in retarded browsers
-      like IE6
-    * timeoutSeconds: 30 -- The number of seconds until the
-      request times out. (Note this doesn't include time spent
-      in the request queue -- the clock starts when the request
-      is picked up and sent by the XHR object.)
-    * uber: false -- Give the request priority over any existing
-      queued async requests. If uber property is set to true,
-      this request goes directly to the front of the queue
+  Description
 
-Description
+   Makes an XHR request, with fine-grained control over
+   the type of request, type of response, as well as many
+   other options.
 
-Makes an XHR request, with fine-grained control over the type
-of request, type of response, as well as many other options.
-
-Examples
+  Examples
 
 fleegix.xhr.doReq({
   url: 'some_page.rbx',
@@ -441,50 +476,53 @@ fleegix.xhr.doReq({
 
 fleegix.xhr.abort
 
-Syntax
+  Syntax
 
-fleegix.xhr.abort(requestId);
+   fleegix.xhr.abort(requestId);
 
-Parameters
+  Parameters
 
-requestId (Number) -- Request ID of a currently processing
-XHR request to abort.
+   requestId (Number) -- Request ID of a currently
+   processing XHR request to abort.
 
-Description
+  Description
 
-If the request is still processing, will abort it and return
-true. If the request identified by requestId is not currently
-processing (i.e., it may have already completed), returns false.
+   If the request is still processing, will abort it and
+   return true. If the request identified by requestId is
+   not currently processing (i.e., it may have already
+   completed), returns false.
 
-Examples
+  Examples
 
-var id = fleegix.doGet(handlerFunction, 
+var id = fleegix.doGet(handlerFunction,
   '/some_file.rbx'); // Get a request ID number
 fleegix.xhr.abort(id); // Abort the request
 
-XML
+                              XML
+     __________________________________________________
 
-Has a basic XML parser that converts a set of same-named XML
-tags (i.e, a tag list such as a set of search results) into
-an array of JavaScript Objects.
+   Has a basic XML parser that converts a set of
+   same-named XML tags (i.e, a tag list such as a set of
+   search results) into an array of JavaScript Objects.
 
 fleegix.xml.parse
 
-Syntax
+  Syntax
 
-fleegix.xml.parse(xml);
+   fleegix.xml.parse(xml);
 
-Parameters
+  Parameters
 
-xml (Object) -- DOM-compatible Document object.
+   xml (Object) -- DOM-compatible Document object.
 
-Description
+  Description
 
-Parses a list of XML tags into an equivalent array of JavaScript
-objects. Tag names are converted to property names, and tag
-values are converted to property values (all Strings).
+   Parses a list of XML tags into an equivalent array of
+   JavaScript objects. Tag names are converted to property
+   names, and tag values are converted to property values
+   (all Strings).
 
-Examples
+  Examples
 
 function handleUserList(xml) {
   var users = fleegix.xml.parse(xml);
@@ -494,47 +532,53 @@ function handleUserList(xml) {
 
 fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');
 
-Forms
+                             Forms
+     __________________________________________________
 
-The Fleegix.js forms module contains a number of helpful
-functions for working with forms, including a serialize
-function for submitting data via XHR, a restore function
-which can pre-populate a form from a its serialized data,
-a form-to-hash converter, and a diff method which allows you
-to compare two different forms (useful in telling what a user
-has changed in a form).
+   The Fleegix.js forms module contains a number of
+   helpful functions for working with forms, including a
+   serialize function for submitting data via XHR, a
+   restore function which can pre-populate a form from a
+   its serialized data, a form-to-hash converter, and a
+   diff method which allows you to compare two different
+   forms (useful in telling what a user has changed in a
+   form).
 
 fleegix.form.serialize
 
-Syntax
+  Syntax
 
-fleegix.form.serialize(formElement, [serializeOptions]);
+   fleegix.form.serialize(formElement,
+   [serializeOptions]);
 
-Parameters
+  Parameters
 
-formElement (Object) -- The HTML form you want to serialize.
+   formElement (Object) -- The HTML form you want to
+   serialize.
 
-serializeOptions (Object) -- Options for how to serialize
-the form. Here is the list of possible properties to set,
-and the default values if they are not set:
+   serializeOptions (Object) -- Options for how to
+   serialize the form. Here is the list of possible
+   properties to set, and the default values if they are
+   not set:
+     * stripTags: false -- Strip HTML markup tags from the
+       values.
+     * includeEmpty: false -- Include variables in the
+       string for all the form elements, even if they have
+       no value set (e.g., even if elemB is empty stil set
+       string to elemA=foo&elemB=&elemC=bar)
+     * collapseMulti: false -- take values from elements
+       that can return multiple values (multi-select,
+       checkbox groups) and collapse into a single,
+       comman-delimited value (e.g., foo=asdf,qwer,zxcv)
 
-    * stripTags: false -- Strip HTML markup tags from the values.
-    * includeEmpty: false -- Include variables in the string
-      for all the form elements, even if they have no value
-      set (e.g., even if elemB is empty stil set string to
-      elemA=foo&elemB=&elemC=bar)
-    * collapseMulti: false -- take values from elements that
-      can return multiple values (multi-select, checkbox groups)
-      and collapse into a single, comman-delimited value (e.g.,
-      foo=asdf,qwer,zxcv)
+  Description
 
-Description
+   Transforms all the values of form elements in an HTML
+   form into a query-string-style string, usually to be
+   submitted as the payload in an XMLHttpRequest POST
+   request.
 
-Transforms all the values of form elements in an HTML form
-into a query-string-style string, usually to be submitted as
-the payload in an XMLHttpRequest POST request.
-
-Examples
+  Examples
 
 var someForm = document.getElementById('someFormId');
 var str = fleegix.form.serialize(someForm);
@@ -542,34 +586,36 @@ fleegix.xhr.doPost(handlerFunc, '/post_page.rbx', str);
 => Posts contents of someForm to post_page.rbx
 
 var someForm = document.getElementById('someFormId');
-var str = fleegix.form.serialize(someForm, { includeEmpty: true });
+var str = fleegix.form.serialize(someForm, { includeEmpty: true
+});
 var url = 'get_page.rbx?' + str;
 fleegix.xhr.doGet(handlerFunc, url);
 => Use the serialized form as a query string in a GET
 
 fleegix.form.restore
 
-Syntax
+  Syntax
 
-fleegix.form.restore(formElement, serializedString);
+   fleegix.form.restore(formElement, serializedString);
 
-Parameters
+  Parameters
 
-formElement (Object) -- The HTML form you want to restore from
-a string.
+   formElement (Object) -- The HTML form you want to
+   restore from a string.
 
-serializedString (String) -- The query-string-style string of
-serialized form data you want to use to restore the form-element
-values.
+   serializedString (String) -- The query-string-style
+   string of serialized form data you want to use to
+   restore the form-element values.
 
-Description
+  Description
 
-Allows you to restore a blank form to the state it was in when
-it was serialized to a string. This can be nice if you don't
-want to fill your server-side code with a bunch of conditionals
-to pre-fill a form from values in the database.
+   Allows you to restore a blank form to the state it was
+   in when it was serialized to a string. This can be nice
+   if you don't want to fill your server-side code with a
+   bunch of conditionals to pre-fill a form from values in
+   the database.
 
-Examples
+  Examples
 
 function getDataAndRestore(userId) {
   fleegix.xhr.doGet(doRestore,
@@ -587,27 +633,28 @@ user settings, and uses them to pre-fill the form
 
 fleegix.form.toHash
 
-Syntax
+  Syntax
 
-fleegix.form.toHash(formElement);
+   fleegix.form.toHash(formElement);
 
-Parameters
+  Parameters
 
-formElement (Object) -- The HTML form you want to convert to
-a keyword/value object.
+   formElement (Object) -- The HTML form you want to
+   convert to a keyword/value object.
 
-Description
+  Description
 
-Transforms all the values of form elements in a form into a
-keyword/value object (hash). When a form element has multiple
-values (like with sets of checkboxes, or multi-select select
-boxes), the values will be put into an array.
+   Transforms all the values of form elements in a form
+   into a keyword/value object (hash). When a form element
+   has multiple values (like with sets of checkboxes, or
+   multi-select select boxes), the values will be put into
+   an array.
 
-All form elements will have a key in the hash. Empty form
-elements (e.g., a blank text box) will have a value of null
-in the hash.
+   All form elements will have a key in the hash. Empty
+   form elements (e.g., a blank text box) will have a
+   value of null in the hash.
 
-Examples
+  Examples
 
 var someForm = document.getElementById('someFormId');
 someForm.firstTextBox.value = 'foo';
@@ -616,48 +663,51 @@ alert(obj.firstTextBox); => alerts 'foo.'
 
 fleegix.form.diff
 
-Syntax
+  Syntax
 
-fleegix.form.diff(updatedForm, originalForm, [diffOptions]);
+   fleegix.form.diff(updatedForm, originalForm,
+   [diffOptions]);
 
-Parameters
+  Parameters
 
-updatedForm (Object) -- Form (or form converted to keyword/value
-object with fleegix.form.toHash) that you want to compare to
-another form.
+   updatedForm (Object) -- Form (or form converted to
+   keyword/value object with fleegix.form.toHash) that you
+   want to compare to another form.
 
-originalForm (Object) -- Another form (or converted to
-keyword/value object with fleegix.form.toHash) that you want
-to compare to the first one.
+   originalForm (Object) -- Another form (or converted to
+   keyword/value object with fleegix.form.toHash) that you
+   want to compare to the first one.
 
-diffOptions (Object) -- Currently only one option:
+   diffOptions (Object) -- Currently only one option:
 
-    intersectionOnly: false -- If this flag is set to true,
-    will only return fields that are in both forms. The default
-    behavior is to return fields as 'different' if they are
-    only in one form and not the other (i.e., a union).
+          intersectionOnly: false -- If this flag is set
+          to true, will only return fields that are in
+          both forms. The default behavior is to return
+          fields as 'different' if they are only in one
+          form and not the other (i.e., a union).
 
-Description
+  Description
 
-Allows you to tell how many fields and which fields are
-different between two forms, as well as what the values are
-for each differing field for both forms. changed field.
+   Allows you to tell how many fields and which fields are
+   different between two forms, as well as what the values
+   are for each differing field for both forms. changed
+   field.
 
-One practical use for this method is figuring what has changed
-in a form since it initially loaded. The easy way to do this is
-to make a backup of the form values with fleegix.form.toHash,
-and then compare the updated form to the original form data
-in the backed-up object.
+   One practical use for this method is figuring what has
+   changed in a form since it initially loaded. The easy
+   way to do this is to make a backup of the form values
+   with fleegix.form.toHash, and then compare the updated
+   form to the original form data in the backed-up object.
 
-This method returns an object with two properties:
+   This method returns an object with two properties:
+    1. count: The number of changed fields
+    2. diffs: a keyword/value object containing an item
+       for each field that has changed. The value of the
+       item is an array where the first item is the
+       changed value, and the second is the original
+       value.
 
-   1. count: The number of changed fields
-   2. diffs: a keyword/value object containing an item for
-      each field that has changed. The value of the item is an
-      array where the first item is the changed value, and the
-      second is the original value.
-
-Examples
+  Examples
 
 // Get a ref to the form
 var someForm = document.getElementById('someFormId');
@@ -678,171 +728,179 @@ alert(changes.count); => alerts '1.'
 alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
 alert(changes.diffs.firstTextField[1]); => alerts 'foo.'
 
-Effects
+                            Effects
+     __________________________________________________
 
-A new effects module which provides the two most useful
-visual effects for a Web app -- fade-in and fade-out.
+   A new effects module which provides the two most useful
+   visual effects for a Web app -- fade-in and fade-out.
+
 fleegix.fx.fadeOut
 
-Syntax
+  Syntax
 
-fleegix.fx.fadeOut(domElement, [fadeOptions]);
+   fleegix.fx.fadeOut(domElement, [fadeOptions]);
 
-Parameters
+  Parameters
 
-domElement (Object) -- DOM node (such as div or span) that
-you wish to apply a fadeout animation effect to.
+   domElement (Object) -- DOM node (such as div or span)
+   that you wish to apply a fadeout animation effect to.
 
-fadeOptions (Object) -- Options for the fadeout animation. Here
-is the list of possible properties to set, and the default
-values if they are not set:
+   fadeOptions (Object) -- Options for the fadeout
+   animation. Here is the list of possible properties to
+   set, and the default values if they are not set:
+     * duration: 500 -- Number of milliseconds to do the
+       fadeout animatinon in.
+     * trans: 'lightEaseIn' -- easing transition to use in
+       the fade
+     * doOnStart: null -- Function to execute as the
+       animation starts
+     * doAfterFinished: null -- Function to exectute after
+       the animation completes
 
-    * duration: 500 -- Number of milliseconds to do the fadeout
-      animatinon in.
-    * trans: 'lightEaseIn' -- easing transition to use in
-      the fade
-    * doOnStart: null -- Function to execute as the animation
-      starts
-    * doAfterFinished: null -- Function to exectute after the animation
-      completes
+  Description
 
-Description
+   Does a basic opacity fadeout animation effect on the
+   desired DOM element. The element should be set to 100%
+   opacity before applying the effect.
 
-Does a basic opacity fadeout animation effect on the desired
-DOM element. The element should be set to 100% opacity before
-applying the effect.
-
-Examples
+  Examples
 
 var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadeOut(fadeDiv);
 
 fleegix.fx.fadeIn
 
-Syntax
+  Syntax
 
-fleegix.fx.fadeIn(domElement, [fadeOptions]);
+   fleegix.fx.fadeIn(domElement, [fadeOptions]);
 
-Parameters
+  Parameters
 
-domElement (Object) -- DOM node (such as div or span) that
-you wish to apply a fadein animation effect to.
+   domElement (Object) -- DOM node (such as div or span)
+   that you wish to apply a fadein animation effect to.
 
-fadeOptions (Object) -- Options for the fadein animation. Here
-is the list of possible properties to set, and the default
-values if they are not set:
+   fadeOptions (Object) -- Options for the fadein
+   animation. Here is the list of possible properties to
+   set, and the default values if they are not set:
+     * duration: 500 -- Number of milliseconds to do the
+       fadein animatinon in.
+     * trans: 'lightEaseIn' -- easing transition to use in
+       the fade
+     * doOnStart: null -- Function to execute as the
+       animation starts
+     * doAfterFinished: null -- Function to exectute after
+       the animation completes
 
-    * duration: 500 -- Number of milliseconds to do the fadein
-      animatinon in.
-    * trans: 'lightEaseIn' -- easing transition to use in
-      the fade
-    * doOnStart: null -- Function to execute as the animation
-      starts
-    * doAfterFinished: null -- Function to exectute after the animation
-      completes
+  Description
 
-Description
+   Does a basic opacity fadein animation effect on the
+   desired DOM element. The element should be set to zero
+   opacity before applying the effect.
 
-Does a basic opacity fadein animation effect on the desired
-DOM element. The element should be set to zero opacity before
-applying the effect.
-
-Examples
+  Examples
 
 var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadeIn(fadeDiv);
 
-JSON
+                              JSON
+     __________________________________________________
 
-Contains a function for serializing a JavaScript object to
-the JSON data format.  fleegix.json.serialize
+   Contains a function for serializing a JavaScript object
+   to the JSON data format.
 
-Syntax
+fleegix.json.serialize
 
-fleegix.json.serialize(serializeObj);
+  Syntax
 
-Parameters
+   fleegix.json.serialize(serializeObj);
 
-serializeObj (Object) -- Object to serialize as a JSON string.
+  Parameters
 
-Description
+   serializeObj (Object) -- Object to serialize as a JSON
+   string.
 
-Serializes a JavaScript object into a JSON
-(http://www.json.org/) string.
+  Description
 
-Examples
+   Serializes a JavaScript object into a JSON
+   (http://www.json.org/) string.
 
-var obj = { name: 'Rush', 
+  Examples
+
+var obj = { name: 'Rush',
     members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
 var str = fleegix.json.serialize(obj);
 
-URI
+                              URI
+     __________________________________________________
 
-The URI module in Fleegix.js contains a number of functions
-for working with URIs -- specifically query strings. With these
-functions you can grab values out of query-string parameters,
-or update query-string parameters with new values.
+   The URI module in Fleegix.js contains a number of
+   functions for working with URIs -- specifically query
+   strings. With these functions you can grab values out
+   of query-string parameters, or update query-string
+   parameters with new values.
 
 fleegix.uri.getQuery
 
-Syntax
+  Syntax
 
-fleegix.uri.getQuery(urlString);
+   fleegix.uri.getQuery(urlString);
 
-Parameters
+  Parameters
 
-urlString (String) -- The URL you want to get the query
-string from.
+   urlString (String) -- The URL you want to get the query
+   string from.
 
-Description
+  Description
 
-Returns the query string (i.e, the portion after the question
-mark) on a URL.
+   Returns the query string (i.e, the portion after the
+   question mark) on a URL.
 
-Examples
+  Examples
 
 var query = fleegix.uri.getQuery(location.href);
 
 fleegix.uri.getBase
 
-Syntax
+  Syntax
 
-fleegix.uri.getBase(urlString);
+   fleegix.uri.getBase(urlString);
 
-Parameters
+  Parameters
 
-urlString (String) -- The URL you want to get the base URL from.
+   urlString (String) -- The URL you want to get the base
+   URL from.
 
-Description
+  Description
 
-Returns the base URL (i.e, the portion before the question mark,
-if there's a query string) on a URL.
+   Returns the base URL (i.e, the portion before the
+   question mark, if there's a query string) on a URL.
 
-Examples
+  Examples
 
 var base = fleegix.uri.getBase(location.href);
 
 fleegix.uri.getParam
 
-Syntax
+  Syntax
 
-fleegix.uri.getParam(paramName, querystring);
+   fleegix.uri.getParam(paramName, querystring);
 
-Parameters
+  Parameters
 
-paramName (String) -- The name of the parameter you want to
-get the value of.
+   paramName (String) -- The name of the parameter you
+   want to get the value of.
 
-querystring (String) -- The query string you want to get a
-value from.
+   querystring (String) -- The query string you want to
+   get a value from.
 
-Description
+  Description
 
-Returns the value of a parameter on a query string. If the
-same parameter name appears multiple times in the query string,
-the function will return an array of all the values.
+   Returns the value of a parameter on a query string. If
+   the same parameter name appears multiple times in the
+   query string, the function will return an array of all
+   the values.
 
-Examples
+  Examples
 
 var query = 'foo=2112&bar=howdy&foo=1001';
 var foo = fleegix.uri.getParam('foo', query);
@@ -851,185 +909,199 @@ alert(foo); => alerts '2112,1001.'
 
 fleegix.uri.setParam
 
-Syntax
+  Syntax
 
-fleegix.uri.setParam(paramName, value, querystring);
+   fleegix.uri.setParam(paramName, value, querystring);
 
-Parameters
+  Parameters
 
-paramName (String) -- The name of the parameter you want to
-set the value of.
+   paramName (String) -- The name of the parameter you
+   want to set the value of.
 
-value (String) -- The value you want to set the parameter to.
+   value (String) -- The value you want to set the
+   parameter to.
 
-querystring (String) -- The query string you want to set a
-value for a param on.
+   querystring (String) -- The query string you want to
+   set a value for a param on.
 
-Description
+  Description
 
-Sets the value of a parameter in a query string. If the param
-is not in the string, it appends it with the desired value
-at the end of the string. If the entire string is empty,
-it creates a query string with the single param and value in it.
+   Sets the value of a parameter in a query string. If the
+   param is not in the string, it appends it with the
+   desired value at the end of the string. If the entire
+   string is empty, it creates a query string with the
+   single param and value in it.
 
-If the parameter is in the query string multiple times, the
-function will set the value of the first instance of the param
-that it finds in the string.
+   If the parameter is in the query string multiple times,
+   the function will set the value of the first instance
+   of the param that it finds in the string.
 
-Examples
+  Examples
 
 var query = 'foo=2112&bar=howdy&foo=1001';
 var foo = fleegix.uri.setParam('bar', 'wowzers', query);
 alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'
 
-Cookies
+                            Cookies
+     __________________________________________________
 
-A nice, clean wrapper for getting and setting cookie values
-in the browser.  fleegix.cookie.set
+   A nice, clean wrapper for getting and setting cookie
+   values in the browser.
 
-Syntax
+fleegix.cookie.set
 
-fleegix.cookie.set(cookieName, [opts]);
+  Syntax
 
-Parameters
+   fleegix.cookie.set(cookieName, [opts]);
 
-cookieName (String) -- Name of the cookie you want to set the
-value for.
+  Parameters
 
-opts (Object) -- Object with keyword options for the
-cookie. Here is the list of possible properties to set, and
-the default values if they are not set:
+   cookieName (String) -- Name of the cookie you want to
+   set the value for.
 
-    * path: '/' -- Path for the cookie -- documents in this
-      path on the server will be able to use it.
-    * hours: (none) -- The number of hours the cookie will last
-    * minutes (none) -- The number of minutes the cookie
-      will last
+   opts (Object) -- Object with keyword options for the
+   cookie. Here is the list of possible properties to set,
+   and the default values if they are not set:
+     * path: '/' -- Path for the cookie -- documents in
+       this path on the server will be able to use it.
+     * days: (none) -- The number of days the cookie will
+       last
+     * hours: (none) -- The number of hours the cookie
+       will last
+     * minutes (none) -- The number of minutes the cookie
+       will last
 
-Description
+  Description
 
-Sets the value of the cookie with the specified name and
-path. Days, hours, and minutes for the duration of the cookie
-may be used in combination. If no opts are passed, assumes
-'/' for path, and the cookie will expire when the user closes
-the browser,
+   Sets the value of the cookie with the specified name
+   and path. Days, hours, and minutes for the duration of
+   the cookie may be used in combination. If no opts are
+   passed, assumes '/' for path, and the cookie will
+   expire when the user closes the browser,
 
-Examples
+  Examples
 
 fleegix.cookie.set('loginId');
 
-fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2, 
+fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2,
   minutes: 30 });
 
 fleegix.cookie.get
 
-Syntax
+  Syntax
 
-fleegix.cookie.get(cookieName, [path]);
+   fleegix.cookie.get(cookieName, [path]);
 
-Parameters
+  Parameters
 
-cookieName (String) -- Name of the cookie you want to get the
-value for.
+   cookieName (String) -- Name of the cookie you want to
+   get the value for.
 
-path (String) -- Path for the cookie you want to get the value
-for. If omitted, assumes root ('/').
+   path (String) -- Path for the cookie you want to get
+   the value for. If omitted, assumes root ('/').
 
-Description
+  Description
 
-Gets the value of the cookie with the specified name and path.
+   Gets the value of the cookie with the specified name
+   and path.
 
-Examples
+  Examples
 
 fleegix.cookie.get('loginId');
 
 fleegix.cookie.destroy
 
-Syntax
+  Syntax
 
-fleegix.cookie.destroy(cookieName, [path]);
+   fleegix.cookie.destroy(cookieName, [path]);
 
-Parameters
+  Parameters
 
-cookieName (String) -- Name of the cookie you want to remove.
+   cookieName (String) -- Name of the cookie you want to
+   remove.
 
-path (String) -- Path for the cookie you want to remove. If
-omitted, assumes root ('/').
+   path (String) -- Path for the cookie you want to
+   remove. If omitted, assumes root ('/').
 
-Description
+  Description
 
-Removes the cookie with the specified name and path.
+   Removes the cookie with the specified name and path.
 
-Examples
+  Examples
 
 fleegix.cookie.remove('loginId');
 
-Popups
+                             Popups
+     __________________________________________________
 
-Yes, even in the Ajax world, people still use pop-up
-windows. The Fleegix.js pop-up module gives you a simple way
-to invoke pop-up windows, but keep the amount of UI clutter
-to a minimum by enforcing a one-window limit.
+   Yes, even in the Ajax world, people still use pop-up
+   windows. The Fleegix.js pop-up module gives you a
+   simple way to invoke pop-up windows, but keep the
+   amount of UI clutter to a minimum by enforcing a
+   one-window limit.
 
 fleegix.popup.open
 
-Syntax
+  Syntax
 
-fleegix.popup.open(url, [popupOptions]);
+   fleegix.popup.open(url, [popupOptions]);
 
-Parameters
+  Parameters
 
-url (String) -- URL for the location of the popup window
+   url (String) -- URL for the location of the popup
+   window
 
-popupOptions (Object) -- Options for the window to be
-opened. Here is the list of possible properties to set, and
-the default values if they are not set:
+   popupOptions (Object) -- Options for the window to be
+   opened. Here is the list of possible properties to set,
+   and the default values if they are not set:
+     * width: null -- Width of the window to open. If
+       unset, the window is a full-sized window
+     * height: null -- Height of the window to open. If
+       unset, the window is a full-sized window
+     * location: false -- Display the location bar or not
+     * menubar: false -- Display a menubar or not
+     * resizable: true -- Make the window resizable or not
+     * scrollbars: false -- Include scrollbars or not
+     * status: false -- Add a statusbar at the bottom or
+       not
+     * titlebar: true -- Add a titlebar at the top or not
+     * toolbar: false -- Include a toolbar at the top or
+       not
 
-    * width: null -- Width of the window to open. If unset,
-      the window is a full-sized window
-    * height: null -- Height of the window to open. If unset,
-      the window is a full-sized window
-    * location: false -- Display the location bar or not
-    * menubar: false -- Display a menubar or not
-    * resizable: true -- Make the window resizable or not
-    * scrollbars: false -- Include scrollbars or not
-    * status: false -- Add a statusbar at the bottom or not
-    * titlebar: true -- Add a titlebar at the top or not
-    * toolbar: false -- Include a toolbar at the top or not
+  Description
 
-Description
+   Opens a popup window with the desired set of options.
+   If no options are passed, it simply opens a normal new
+   browser window.
 
-Opens a popup window with the desired set of options. If no
-options are passed, it simply opens a normal new browser window.
+   This implementation allows only a single popup window
+   at a time, to keep things simple for end-users. Calling
+   the open method again will simply open the new URL in
+   the same window.
 
-This implementation allows only a single popup window at a
-time, to keep things simple for end-users. Calling the open
-method again will simply open the new URL in the same window.
+  Examples
 
-Examples
-
-fleegix.popup.open('/search_window.rbx', 
+fleegix.popup.open('/search_window.rbx',
   { width: 480, height: 300 });
 
 fleegix.popup.close
 
-Syntax
+  Syntax
 
-fleegix.popup.close();
+   fleegix.popup.close();
 
-Parameters
+  Parameters
 
-(None)
+   (None)
 
-Description
+  Description
 
-Closes the popup window opened with fleegix.popup.open.
+   Closes the popup window opened with fleegix.popup.open.
 
-Examples
+  Examples
 
-fleegix.popup.open('/search_window.rbx', 
+fleegix.popup.open('/search_window.rbx',
   { width: 480, height: 300 });
 fleegix.popup.close();
 
-Copyright 2007 Matthew Eernisse, mde@fleegix.org.
-
+   Copyright 2007 Matthew Eernisse, mde@fleegix.org.
