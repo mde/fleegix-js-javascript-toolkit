@@ -23,12 +23,8 @@ fleegix.xhr = new function () {
   function spawnTransporter(isSync) {
     var i = 0;
     var t = [
-      'Msxml2.XMLHTTP.7.0',
       'Msxml2.XMLHTTP.6.0',
-      'Msxml2.XMLHTTP.5.0',
-      'Msxml2.XMLHTTP.4.0',
       'MSXML2.XMLHTTP.3.0',
-      'MSXML2.XMLHTTP',
       'Microsoft.XMLHTTP'
     ];
     var trans = null;
