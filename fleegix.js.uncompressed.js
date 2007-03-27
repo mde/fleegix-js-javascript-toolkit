@@ -316,18 +316,38 @@ fleegix.form.diff = function (formUpdated, formOrig, opts) {
 
 fleegix.xhr = new function () {
   
+  var msProgId = null; // Cache the prog ID if needed
   function spawnTransporter(isSync) {
     var i = 0;
-    var t = [ // Array of XHR obj to try to invoke
-      function () { return new XMLHttpRequest(); },
-      function () { return new ActiveXObject('Msxml2.XMLHTTP') },
-      function () { return new ActiveXObject('Microsoft.XMLHTTP' )} ];
+    var t = [
+      'Msxml2.XMLHTTP.7.0',
+      'Msxml2.XMLHTTP.6.0',
+      'Msxml2.XMLHTTP.5.0',
+      'Msxml2.XMLHTTP.4.0',
+      'MSXML2.XMLHTTP.3.0',
+      'MSXML2.XMLHTTP',
+      'Microsoft.XMLHTTP'
+    ];
     var trans = null;
-    // Instantiate XHR obj
-    while (!trans && (i < t.length)) {
-      try { trans = t[i++](); } 
-      catch(e) {}
+    if (window.XMLHttpRequest != null) {
+      trans = new XMLHttpRequest();
     }
+    else if (window.ActiveXObject != null) {
+      if (msProgId) {
+        trans = new ActiveXObject(msProgId);
+      }
+      else {
+        for (var i = 0; i < t.length; i++) {
+          try {
+            trans = new ActiveXObject(t[i]);
+            // Cache the prog ID, break the loop
+            msProgId = t[i]; break;
+          }
+          catch(e) {}
+        }
+      }
+    }
+    // Instantiate XHR obj
     if (trans) {
       if (isSync) {
         return trans;
