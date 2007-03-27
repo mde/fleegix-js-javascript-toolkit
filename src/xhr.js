@@ -1,13 +1,13 @@
 /*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org) 
+ * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
  * and SitePoint Pty. Ltd, www.sitepoint.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,9 +62,9 @@ fleegix.xhr = new function () {
     }
   }
   
-  // Public members 
+  // Public members
   // ================================
-  // Array of XHR obj transporters, spawned as needed up to 
+  // Array of XHR obj transporters, spawned as needed up to
   // maxTransporters ceiling
   this.transporters = [];
   // Maximum number of XHR objects to spawn to handle requests
@@ -79,9 +79,9 @@ fleegix.xhr = new function () {
   // are in use -- FIFO list, XHR objs respond to waiting
   // requests immediately as then finish processing the current one
   this.requestQueue = [];
-  // List of free XHR objs -- transporters sit here when not 
+  // List of free XHR objs -- transporters sit here when not
   // processing requests. If this is empty when a new request comes
-  // in, we try to spawn a request -- if we're already at max 
+  // in, we try to spawn a request -- if we're already at max
   // transporter number, we queue the request
   this.idleTransporters = [];
   // Hash of currently in-flight requests -- each string key is
@@ -161,7 +161,7 @@ fleegix.xhr = new function () {
     var req = new fleegix.xhr.Request();
     var transporterId = null;
 
-    // Override default request opts with any specified 
+    // Override default request opts with any specified
     for (var p in opts) {
       req[p] = opts[p];
     }
@@ -199,11 +199,11 @@ fleegix.xhr = new function () {
           this.requestQueue.push(req);
         }
       }
-      // Return request ID -- may be used for aborting, 
+      // Return request ID -- may be used for aborting,
       // external tracking, etc.
       return req.id;
     }
-    // Sync -- do request inlne and return actual result 
+    // Sync -- do request inlne and return actual result
     // -------
     else {
         return this.processReq(req);
@@ -224,7 +224,7 @@ fleegix.xhr = new function () {
       this.processingArray.unshift(req);
       req.transporterId = transporterId;
     }
-    // Sync mode -- use single sync XHR 
+    // Sync mode -- use single sync XHR
     else {
       trans = this.syncTransporter;
       this.syncRequest = req;
@@ -233,7 +233,7 @@ fleegix.xhr = new function () {
     // Defeat the evil power of the IE caching mechanism
     if (req.preventCache) {
       var dt = new Date().getTime();
-      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt : 
+      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt :
         req.url + '?preventCache=' + dt;
     }
     else {
@@ -269,7 +269,7 @@ fleegix.xhr = new function () {
     // Otherwise set correct content-type for POST
     else {
       if (req.method == 'POST') {
-        trans.setRequestHeader('Content-Type', 
+        trans.setRequestHeader('Content-Type',
           'application/x-www-form-urlencoded');
       }
     }
@@ -391,11 +391,11 @@ fleegix.xhr = new function () {
     }
     // Otherwise hand to either success/failure
     else {
-      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE 
+      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE
       // err in Firefox for broken connections or hitting ESC
       try {
         // Request was successful -- execute response handler
-        if ((trans.status > 199 && trans.status < 300) || 
+        if ((trans.status > 199 && trans.status < 300) ||
             trans.status == 304) {
           if (req.async) {
             // Make sure handler is defined
@@ -417,8 +417,8 @@ fleegix.xhr = new function () {
         else if (!trans.status) {
           // Squelch -- if you want to get local files or
           // chrome, use 'handleAll' above
-          if (this.debug) { 
-            throw('XMLHttpRequest HTTP status either zero or not set.'); 
+          if (this.debug) {
+            throw('XMLHttpRequest HTTP status either zero or not set.');
           }
         }
         // Request failed -- execute error handler
@@ -432,7 +432,7 @@ fleegix.xhr = new function () {
         }
       }
       // Squelch
-      catch (e) { 
+      catch (e) {
         if (this.debug) { throw(e); }
       }
     }
@@ -448,7 +448,7 @@ fleegix.xhr = new function () {
     // this XHR can't be aborted until it's processing again
     delete this.processingMap[req.id];
     
-    // Requests queued up, grab one to respond to 
+    // Requests queued up, grab one to respond to
     if (this.requestQueue.length) {
       var nextReq = this.requestQueue.shift();
       // Reset the start time for the request for timeout purposes
@@ -509,5 +509,4 @@ fleegix.xhr.Request = function () {
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
-    
 
