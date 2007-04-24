@@ -38,8 +38,12 @@ fleegix.json = new function() {
           for (var i in obj) {
             if (str) { str += ',' }
             str += '"' + i + '":';
-            str += (obj[i] == undefined) ?
-              '"undefined"' : fleegix.json.serialize(obj[i]);
+            if (typeof obj[i] == 'undefined') {
+              str += '"undefined"';
+            }
+            else {
+              str += fleegix.json.serialize(obj[i]);
+            }
           }
           return '{' + str + '}';
         }

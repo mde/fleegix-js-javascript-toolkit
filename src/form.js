@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,7 +55,7 @@ fleegix.form.serialize = function (f, o) {
       }
       // Multiple vals -- array
       else {
-        var sep = ''; 
+        var sep = '';
         if (opts.collapseMulti) {
           sep = ',';
           str += n + '=';
@@ -65,7 +65,7 @@ fleegix.form.serialize = function (f, o) {
         }
         for (var j = 0; j < v.length; j++) {
           s = opts.stripTags ? v[j].replace(pat, '') : v[j];
-          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) : 
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
             encodeURIComponent(s);
           str += s + sep;
         }
@@ -81,9 +81,9 @@ fleegix.form.serialize = function (f, o) {
   return str;
 };
 
-fleegix.form.toHash = function (f) { 
+fleegix.form.toHash = function (f) {
   var h = {};
-  
+
   function expandToArr(orig, val) {
     if (orig) {
       var r = null;
@@ -101,10 +101,10 @@ fleegix.form.toHash = function (f) {
       return val;
     }
   }
-  
+
   for (i = 0; i < f.elements.length; i++) {
     elem = f.elements[i];
-    
+
     switch (elem.type) {
       // Text fields, hidden form elements
       case 'text':
@@ -114,7 +114,7 @@ fleegix.form.toHash = function (f) {
       case 'select-one':
         h[elem.name] = elem.value || null;
         break;
-        
+
       // Multi-option select
       case 'select-multiple':
         h[elem.name] = null;
@@ -125,25 +125,25 @@ fleegix.form.toHash = function (f) {
           }
         }
         break;
-      
+
       // Radio buttons
       case 'radio':
-        if (typeof h[elem.name] == 'undefined') { 
+        if (typeof h[elem.name] == 'undefined') {
           h[elem.name] = null; }
         if (elem.checked) {
-          h[elem.name] = elem.value; 
+          h[elem.name] = elem.value;
         }
         break;
-        
+
       // Checkboxes
       case 'checkbox':
-        if (typeof h[elem.name] == 'undefined') { 
+        if (typeof h[elem.name] == 'undefined') {
           h[elem.name] = null; }
         if (elem.checked) {
           h[elem.name] = expandToArr(h[elem.name], elem.value);
         }
         break;
-        
+
     }
   }
   return h;
@@ -182,13 +182,13 @@ fleegix.form.restore = function (form, str) {
           break;
         case 'radio':
           if (encodeURIComponent(elem.value) == val) {
-            elem.checked = true; 
+            elem.checked = true;
           }
           break;
         case 'checkbox':
           for (var j = 0; j < val.length; j++) {
             if (encodeURIComponent(elem.value) == val[j]) {
-              elem.checked = true; 
+              elem.checked = true;
             }
           }
           break;
@@ -197,7 +197,7 @@ fleegix.form.restore = function (form, str) {
             var opt = elem.options[h];
             for (var j = 0; j < val.length; j++) {
               if (encodeURIComponent(opt.value) == val[j]) {
-                opt.selected = true; 
+                opt.selected = true;
               }
             }
           }
@@ -211,21 +211,21 @@ fleegix.form.restore = function (form, str) {
 fleegix.form.diff = function (formUpdated, formOrig, opts) {
   var o = opts || {};
   // Accept either form or hash-conversion of form
-  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ? 
+  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ?
     fleegix.form.toHash(formUpdated) : formUpdated;
-  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ? 
+  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ?
     fleegix.form.toHash(formOrig) : formOrig;
   var diffs = [];
   var count = 0;
-  
+
   function addDiff(n, hA, hB, secondPass) {
     if (!diffs[n]) {
       count++;
-      diffs[n] = secondPass? [hB[n], hA[n]] : 
+      diffs[n] = secondPass? [hB[n], hA[n]] :
         [hA[n], hB[n]];
     }
   }
-  
+
   function diffSweep(hA, hB, secondPass) {
     for (n in hA) {
       // Elem doesn't exist in B
@@ -258,9 +258,9 @@ fleegix.form.diff = function (formUpdated, formOrig, opts) {
   diffSweep(hUpdated, hOrig, false);
   // Second sweep, check all items in orig
   diffSweep(hOrig, hUpdated, true);
-  
+
   // Return an obj with the count and the hash of diffs
-  return { 
+  return {
     count: count,
     diffs: diffs
   };
