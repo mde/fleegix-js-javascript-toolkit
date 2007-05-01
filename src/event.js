@@ -51,10 +51,6 @@ fleegix.event = new function () {
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
-        
-        //fleegix.event.exec(
-        //  tgtObj[tgtMeth].listenReg, args);
-        
         // Execute the original code for the trigger
         // method if there is any -- apply arguments
         // passed, in the right execution context
