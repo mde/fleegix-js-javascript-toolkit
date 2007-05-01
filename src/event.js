@@ -16,29 +16,6 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.dumpIntoPopup = function (o) {
-    var errorWin;
-    var str = '';
-    if (typeof o != 'string') {
-        for (var p in o) {
-            str += p + ': ' + o[p] + ' (' + typeof o[p] + ')<br/>';
-        }
-    }
-    else {
-        str = o;
-    }
-    // Create new window and display error
-    try {
-      errorWin = window.open('', 'errorWin');
-      errorWin.document.body.innerHTML = str;
-    }
-    // If pop-up gets blocked, inform user
-    catch(e) {
-      alert('An error occurred, but the error message cannot be' +
-      ' displayed because of your browser\'s pop-up blocker.\n' +
-      'Please allow pop-ups from this Web site.');
-    }
-};
 fleegix.event = new function () {
   
   // List of handlers for event listeners
