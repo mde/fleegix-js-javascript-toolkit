@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *         http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -102,7 +102,7 @@ fleegix.form.serialize = function (f, o) {
       }
       // Multiple vals -- array
       else {
-        var sep = ''; 
+        var sep = '';
         if (opts.collapseMulti) {
           sep = ',';
           str += n + '=';
@@ -112,7 +112,7 @@ fleegix.form.serialize = function (f, o) {
         }
         for (var j = 0; j < v.length; j++) {
           s = opts.stripTags ? v[j].replace(pat, '') : v[j];
-          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) : 
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
             encodeURIComponent(s);
           str += s + sep;
         }
@@ -128,9 +128,9 @@ fleegix.form.serialize = function (f, o) {
   return str;
 };
 
-fleegix.form.toHash = function (f) { 
+fleegix.form.toHash = function (f) {
   var h = {};
-  
+
   function expandToArr(orig, val) {
     if (orig) {
       var r = null;
@@ -148,10 +148,10 @@ fleegix.form.toHash = function (f) {
       return val;
     }
   }
-  
+
   for (i = 0; i < f.elements.length; i++) {
     elem = f.elements[i];
-    
+
     switch (elem.type) {
       // Text fields, hidden form elements
       case 'text':
@@ -161,7 +161,7 @@ fleegix.form.toHash = function (f) {
       case 'select-one':
         h[elem.name] = elem.value || null;
         break;
-        
+
       // Multi-option select
       case 'select-multiple':
         h[elem.name] = null;
@@ -172,25 +172,25 @@ fleegix.form.toHash = function (f) {
           }
         }
         break;
-      
+
       // Radio buttons
       case 'radio':
-        if (typeof h[elem.name] == 'undefined') { 
+        if (typeof h[elem.name] == 'undefined') {
           h[elem.name] = null; }
         if (elem.checked) {
-          h[elem.name] = elem.value; 
+          h[elem.name] = elem.value;
         }
         break;
-        
+
       // Checkboxes
       case 'checkbox':
-        if (typeof h[elem.name] == 'undefined') { 
+        if (typeof h[elem.name] == 'undefined') {
           h[elem.name] = null; }
         if (elem.checked) {
           h[elem.name] = expandToArr(h[elem.name], elem.value);
         }
         break;
-        
+
     }
   }
   return h;
@@ -229,13 +229,13 @@ fleegix.form.restore = function (form, str) {
           break;
         case 'radio':
           if (encodeURIComponent(elem.value) == val) {
-            elem.checked = true; 
+            elem.checked = true;
           }
           break;
         case 'checkbox':
           for (var j = 0; j < val.length; j++) {
             if (encodeURIComponent(elem.value) == val[j]) {
-              elem.checked = true; 
+              elem.checked = true;
             }
           }
           break;
@@ -244,7 +244,7 @@ fleegix.form.restore = function (form, str) {
             var opt = elem.options[h];
             for (var j = 0; j < val.length; j++) {
               if (encodeURIComponent(opt.value) == val[j]) {
-                opt.selected = true; 
+                opt.selected = true;
               }
             }
           }
@@ -258,21 +258,21 @@ fleegix.form.restore = function (form, str) {
 fleegix.form.diff = function (formUpdated, formOrig, opts) {
   var o = opts || {};
   // Accept either form or hash-conversion of form
-  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ? 
+  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ?
     fleegix.form.toHash(formUpdated) : formUpdated;
-  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ? 
+  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ?
     fleegix.form.toHash(formOrig) : formOrig;
   var diffs = [];
   var count = 0;
-  
+
   function addDiff(n, hA, hB, secondPass) {
     if (!diffs[n]) {
       count++;
-      diffs[n] = secondPass? [hB[n], hA[n]] : 
+      diffs[n] = secondPass? [hB[n], hA[n]] :
         [hA[n], hB[n]];
     }
   }
-  
+
   function diffSweep(hA, hB, secondPass) {
     for (n in hA) {
       // Elem doesn't exist in B
@@ -305,9 +305,9 @@ fleegix.form.diff = function (formUpdated, formOrig, opts) {
   diffSweep(hUpdated, hOrig, false);
   // Second sweep, check all items in orig
   diffSweep(hOrig, hUpdated, true);
-  
+
   // Return an obj with the count and the hash of diffs
-  return { 
+  return {
     count: count,
     diffs: diffs
   };
@@ -320,12 +320,8 @@ fleegix.xhr = new function () {
   function spawnTransporter(isSync) {
     var i = 0;
     var t = [
-      'Msxml2.XMLHTTP.7.0',
       'Msxml2.XMLHTTP.6.0',
-      'Msxml2.XMLHTTP.5.0',
-      'Msxml2.XMLHTTP.4.0',
       'MSXML2.XMLHTTP.3.0',
-      'MSXML2.XMLHTTP',
       'Microsoft.XMLHTTP'
     ];
     var trans = null;
@@ -363,9 +359,9 @@ fleegix.xhr = new function () {
     }
   }
   
-  // Public members 
+  // Public members
   // ================================
-  // Array of XHR obj transporters, spawned as needed up to 
+  // Array of XHR obj transporters, spawned as needed up to
   // maxTransporters ceiling
   this.transporters = [];
   // Maximum number of XHR objects to spawn to handle requests
@@ -380,9 +376,9 @@ fleegix.xhr = new function () {
   // are in use -- FIFO list, XHR objs respond to waiting
   // requests immediately as then finish processing the current one
   this.requestQueue = [];
-  // List of free XHR objs -- transporters sit here when not 
+  // List of free XHR objs -- transporters sit here when not
   // processing requests. If this is empty when a new request comes
-  // in, we try to spawn a request -- if we're already at max 
+  // in, we try to spawn a request -- if we're already at max
   // transporter number, we queue the request
   this.idleTransporters = [];
   // Hash of currently in-flight requests -- each string key is
@@ -462,7 +458,7 @@ fleegix.xhr = new function () {
     var req = new fleegix.xhr.Request();
     var transporterId = null;
 
-    // Override default request opts with any specified 
+    // Override default request opts with any specified
     for (var p in opts) {
       req[p] = opts[p];
     }
@@ -500,11 +496,11 @@ fleegix.xhr = new function () {
           this.requestQueue.push(req);
         }
       }
-      // Return request ID -- may be used for aborting, 
+      // Return request ID -- may be used for aborting,
       // external tracking, etc.
       return req.id;
     }
-    // Sync -- do request inlne and return actual result 
+    // Sync -- do request inlne and return actual result
     // -------
     else {
         return this.processReq(req);
@@ -525,7 +521,7 @@ fleegix.xhr = new function () {
       this.processingArray.unshift(req);
       req.transporterId = transporterId;
     }
-    // Sync mode -- use single sync XHR 
+    // Sync mode -- use single sync XHR
     else {
       trans = this.syncTransporter;
       this.syncRequest = req;
@@ -534,7 +530,7 @@ fleegix.xhr = new function () {
     // Defeat the evil power of the IE caching mechanism
     if (req.preventCache) {
       var dt = new Date().getTime();
-      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt : 
+      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt :
         req.url + '?preventCache=' + dt;
     }
     else {
@@ -570,7 +566,7 @@ fleegix.xhr = new function () {
     // Otherwise set correct content-type for POST
     else {
       if (req.method == 'POST') {
-        trans.setRequestHeader('Content-Type', 
+        trans.setRequestHeader('Content-Type',
           'application/x-www-form-urlencoded');
       }
     }
@@ -692,11 +688,11 @@ fleegix.xhr = new function () {
     }
     // Otherwise hand to either success/failure
     else {
-      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE 
+      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE
       // err in Firefox for broken connections or hitting ESC
       try {
         // Request was successful -- execute response handler
-        if ((trans.status > 199 && trans.status < 300) || 
+        if ((trans.status > 199 && trans.status < 300) ||
             trans.status == 304) {
           if (req.async) {
             // Make sure handler is defined
@@ -718,8 +714,8 @@ fleegix.xhr = new function () {
         else if (!trans.status) {
           // Squelch -- if you want to get local files or
           // chrome, use 'handleAll' above
-          if (this.debug) { 
-            throw('XMLHttpRequest HTTP status either zero or not set.'); 
+          if (this.debug) {
+            throw('XMLHttpRequest HTTP status either zero or not set.');
           }
         }
         // Request failed -- execute error handler
@@ -733,7 +729,7 @@ fleegix.xhr = new function () {
         }
       }
       // Squelch
-      catch (e) { 
+      catch (e) {
         if (this.debug) { throw(e); }
       }
     }
@@ -749,7 +745,7 @@ fleegix.xhr = new function () {
     // this XHR can't be aborted until it's processing again
     delete this.processingMap[req.id];
     
-    // Requests queued up, grab one to respond to 
+    // Requests queued up, grab one to respond to
     if (this.requestQueue.length) {
       var nextReq = this.requestQueue.shift();
       // Reset the start time for the request for timeout purposes
@@ -810,18 +806,40 @@ fleegix.xhr.Request = function () {
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
-    
 
 
 
-fleegix.event = new function() {
+fleegix.dumpIntoPopup = function (o) {
+    var errorWin;
+    var str = '';
+    if (typeof o != 'string') {
+        for (var p in o) {
+            str += p + ': ' + o[p] + ' (' + typeof o[p] + ')<br/>';
+        }
+    }
+    else {
+        str = o;
+    }
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = str;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
+};
+fleegix.event = new function () {
   
   // List of handlers for event listeners
   var listenerCache = [];
   // List of channels being published to
   var channels = {};
   
-  this.listen = function() {
+  this.listen = function () {
     var tgtObj = arguments[0]; // Target object for the new listener
     var tgtMeth = arguments[1]; // Method to listen for
     // Look to see if there's already a registry of listeners
@@ -836,26 +854,89 @@ fleegix.event = new function() {
       listenReg.orig = {}
       listenReg.orig.obj = tgtObj, 
       listenReg.orig.methName = tgtMeth;
-      // Clone existing method code if it exists
+      // Preserve any existing listener 
       if (tgtObj[tgtMeth]) {
         listenReg.orig.methCode = tgtObj[tgtMeth];
       }
       // Array of handlers to execute if the method fires
       listenReg.after = [];
-      // Replace the original method with the exec proxy
-      tgtObj[tgtMeth] = function() {
+      // Replace the original method with the executor proxy
+      tgtObj[tgtMeth] = function () {
+        var reg = tgtObj[tgtMeth].listenReg;
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
-        fleegix.event.exec(
-          tgtObj[tgtMeth].listenReg, args);
+        
+        //fleegix.event.exec(
+        //  tgtObj[tgtMeth].listenReg, args);
+        
+        // Execute the original code for the trigger
+        // method if there is any -- apply arguments
+        // passed, in the right execution context
+        if (reg.orig.methCode) {
+          reg.orig.methCode.apply(reg.orig.obj, args);
+        }
+        // DOM events
+        if (tgtObj.attachEvent || tgtObj.nodeType ||
+          tgtObj.addEventListener) {
+          // Normalize the different event models
+          var ev = null;
+          // Try to find an event if we're not handed one 
+          if (!args.length) {
+            try {
+              switch (true) {
+                case !!(tgtObj.ownerDocument):
+                  ev = tgtObj.ownerDocument.parentWindow.event;
+                  break;
+                case !!(tgtObj.documentElement):
+                  ev = tgtObj.documentElement.ownerDocument.parentWindow.event;
+                  break;
+                case !!(tgtObj.event):
+                  ev = tgtObj.event;
+                  break;
+                default:
+                  ev = window.event;
+                  break;
+              }
+            }
+            catch(e) {
+              ev = window.event;
+            }
+          }
+          if (ev) {
+            // Set both target and srcElement
+            if (typeof ev.target == 'undefined') {
+              ev.target = ev.srcElement;
+            }
+            if (typeof ev.srcElement == 'undefined') {
+              ev.srcElement = ev.target;
+            }
+            args[0] = ev;
+          }
+        }
+        // Execute all the handler functions registered
+        for (var i = 0; i < reg.after.length; i++) {
+          var ex = reg.after[i];
+          // Single functions
+          if (typeof ex == 'function') {
+            var execFunction = ex;
+            execFunction.apply(window, args);
+          }
+          // Methods of objects
+          else {
+            execObj = ex[0];
+            execMethod = ex[1];
+            // Pass args and exec in correct scope
+            execObj[execMethod].apply(execObj, args);
+          }
+        }
+         
       }
       tgtObj[tgtMeth].listenReg = listenReg;
       // Add to global cache -- so we can remove listeners on unload
       listenerCache.push(tgtObj[tgtMeth].listenReg);
     }
-    
     // Add the new handler to the listener registry
     // -----------------
     // Simple function
@@ -869,43 +950,7 @@ fleegix.event = new function() {
     
     tgtObj[tgtMeth].listenReg = listenReg;
   };
-  this.exec = function(reg, args) {
-    // Execute the original code for the trigger
-    // method if there is any -- apply arguments
-    // passed in the right execution context
-    if (reg.orig.methCode) {
-      reg.orig.methCode.apply(reg.orig.obj, args);
-    }
-    if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
-      // Normalize the various event models
-      args[0] = args[0] || window.event; // Pass the event
-      // Set both target and srcElement
-      if (!args[0].target) {
-        args[0].target = args[0].srcElement;
-      }
-      if (!args[0].srcElement) {
-        args[0].srcElement = args[0].target;
-      }
-    }
-    
-    // Execute all the handler functions registered
-    for (var i = 0; i < reg.after.length; i++) {
-      var ex = reg.after[i];
-      // Single functions
-      if (typeof ex == 'function') {
-        var execFunction = ex;
-        execFunction.apply(window, args);
-      }
-      // Methods of objects
-      else {
-        execObj = ex[0];
-        execMethod = ex[1];
-        // Pass args and exec in correct scope
-        execObj[execMethod].apply(execObj, args);
-      }
-    }
-  };
-  this.unlisten = function() {
+  this.unlisten = function () {
     var tgtObj = arguments[0]; // Obj from which to remove
     var tgtMeth = arguments[1]; // Trigger method
     var listenReg = tgtObj[tgtMeth] ? 
@@ -936,7 +981,7 @@ fleegix.event = new function() {
     }
      tgtObj[tgtMeth].listenReg = listenReg;
   };
-  this.flush = function() {
+  this.flush = function () {
     // Remove all the registered listeners to avoid
     // IE6 memleak
     for (var i = 0; i < listenerCache.length; i++) {
@@ -1441,8 +1486,12 @@ fleegix.json = new function() {
           for (var i in obj) {
             if (str) { str += ',' }
             str += '"' + i + '":';
-            str += (obj[i] == undefined) ? 
-              '"undefined"' : fleegix.json.serialize(obj[i]); 
+            if (typeof obj[i] == 'undefined') {
+              str += '"undefined"';
+            }
+            else {
+              str += fleegix.json.serialize(obj[i]);
+            }
           }
           return '{' + str + '}';
         }
@@ -1494,7 +1543,7 @@ fleegix.cookie = new function() {
     else {
       exp = '';
     }
-    document.cookie = name + '=' + value + 
+    document.cookie = name + '=' + value +
       exp + '; path=' + path;
   };
   this.get = function(name) {
@@ -1519,7 +1568,7 @@ fleegix.cookie = new function() {
     this.set(name, '', opts);
   };
 }
-fleegix.cookie.constructor = null; 
+fleegix.cookie.constructor = null;
 
 
 fleegix.ui = new function() {

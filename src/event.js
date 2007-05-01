@@ -16,14 +16,37 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.event = new function() {
+fleegix.dumpIntoPopup = function (o) {
+    var errorWin;
+    var str = '';
+    if (typeof o != 'string') {
+        for (var p in o) {
+            str += p + ': ' + o[p] + ' (' + typeof o[p] + ')<br/>';
+        }
+    }
+    else {
+        str = o;
+    }
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = str;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
+};
+fleegix.event = new function () {
   
   // List of handlers for event listeners
   var listenerCache = [];
   // List of channels being published to
   var channels = {};
   
-  this.listen = function() {
+  this.listen = function () {
     var tgtObj = arguments[0]; // Target object for the new listener
     var tgtMeth = arguments[1]; // Method to listen for
     // Look to see if there's already a registry of listeners
@@ -38,26 +61,89 @@ fleegix.event = new function() {
       listenReg.orig = {}
       listenReg.orig.obj = tgtObj, 
       listenReg.orig.methName = tgtMeth;
-      // Clone existing method code if it exists
+      // Preserve any existing listener 
       if (tgtObj[tgtMeth]) {
         listenReg.orig.methCode = tgtObj[tgtMeth];
       }
       // Array of handlers to execute if the method fires
       listenReg.after = [];
-      // Replace the original method with the exec proxy
-      tgtObj[tgtMeth] = function() {
+      // Replace the original method with the executor proxy
+      tgtObj[tgtMeth] = function () {
+        var reg = tgtObj[tgtMeth].listenReg;
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
-        fleegix.event.exec(
-          tgtObj[tgtMeth].listenReg, args);
+        
+        //fleegix.event.exec(
+        //  tgtObj[tgtMeth].listenReg, args);
+        
+        // Execute the original code for the trigger
+        // method if there is any -- apply arguments
+        // passed, in the right execution context
+        if (reg.orig.methCode) {
+          reg.orig.methCode.apply(reg.orig.obj, args);
+        }
+        // DOM events
+        if (tgtObj.attachEvent || tgtObj.nodeType ||
+          tgtObj.addEventListener) {
+          // Normalize the different event models
+          var ev = null;
+          // Try to find an event if we're not handed one 
+          if (!args.length) {
+            try {
+              switch (true) {
+                case !!(tgtObj.ownerDocument):
+                  ev = tgtObj.ownerDocument.parentWindow.event;
+                  break;
+                case !!(tgtObj.documentElement):
+                  ev = tgtObj.documentElement.ownerDocument.parentWindow.event;
+                  break;
+                case !!(tgtObj.event):
+                  ev = tgtObj.event;
+                  break;
+                default:
+                  ev = window.event;
+                  break;
+              }
+            }
+            catch(e) {
+              ev = window.event;
+            }
+          }
+          if (ev) {
+            // Set both target and srcElement
+            if (typeof ev.target == 'undefined') {
+              ev.target = ev.srcElement;
+            }
+            if (typeof ev.srcElement == 'undefined') {
+              ev.srcElement = ev.target;
+            }
+            args[0] = ev;
+          }
+        }
+        // Execute all the handler functions registered
+        for (var i = 0; i < reg.after.length; i++) {
+          var ex = reg.after[i];
+          // Single functions
+          if (typeof ex == 'function') {
+            var execFunction = ex;
+            execFunction.apply(window, args);
+          }
+          // Methods of objects
+          else {
+            execObj = ex[0];
+            execMethod = ex[1];
+            // Pass args and exec in correct scope
+            execObj[execMethod].apply(execObj, args);
+          }
+        }
+         
       }
       tgtObj[tgtMeth].listenReg = listenReg;
       // Add to global cache -- so we can remove listeners on unload
       listenerCache.push(tgtObj[tgtMeth].listenReg);
     }
-    
     // Add the new handler to the listener registry
     // -----------------
     // Simple function
@@ -71,43 +157,7 @@ fleegix.event = new function() {
     
     tgtObj[tgtMeth].listenReg = listenReg;
   };
-  this.exec = function(reg, args) {
-    // Execute the original code for the trigger
-    // method if there is any -- apply arguments
-    // passed in the right execution context
-    if (reg.orig.methCode) {
-      reg.orig.methCode.apply(reg.orig.obj, args);
-    }
-    if (reg.orig.methName.match(/onclick|ondblclick|onmouseup|onmousedown|onmouseover|onmouseout|onmousemove|onkeyup/)) {
-      // Normalize the various event models
-      args[0] = args[0] || window.event; // Pass the event
-      // Set both target and srcElement
-      if (!args[0].target) {
-        args[0].target = args[0].srcElement;
-      }
-      if (!args[0].srcElement) {
-        args[0].srcElement = args[0].target;
-      }
-    }
-    
-    // Execute all the handler functions registered
-    for (var i = 0; i < reg.after.length; i++) {
-      var ex = reg.after[i];
-      // Single functions
-      if (typeof ex == 'function') {
-        var execFunction = ex;
-        execFunction.apply(window, args);
-      }
-      // Methods of objects
-      else {
-        execObj = ex[0];
-        execMethod = ex[1];
-        // Pass args and exec in correct scope
-        execObj[execMethod].apply(execObj, args);
-      }
-    }
-  };
-  this.unlisten = function() {
+  this.unlisten = function () {
     var tgtObj = arguments[0]; // Obj from which to remove
     var tgtMeth = arguments[1]; // Trigger method
     var listenReg = tgtObj[tgtMeth] ? 
@@ -138,7 +188,7 @@ fleegix.event = new function() {
     }
      tgtObj[tgtMeth].listenReg = listenReg;
   };
-  this.flush = function() {
+  this.flush = function () {
     // Remove all the registered listeners to avoid
     // IE6 memleak
     for (var i = 0; i < listenerCache.length; i++) {
