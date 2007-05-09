@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *         http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.fx = new function () {
-  
+
   this.fadeOut = function (elem, opts) {
     return doFade(elem, opts, 'out');
   };
@@ -39,7 +39,7 @@ fleegix.fx = new function () {
       if (document.all) {
         elem.style.filter = 'alpha(opacity=' + v + ')';
       }
-      // Moz/compat uses a decimal value 
+      // Moz/compat uses a decimal value
       else {
         var d = v / 100;
         elem.style.opacity = d;
@@ -49,7 +49,7 @@ fleegix.fx = new function () {
       elem.style[p] = v;
     }
     else {
-      elem.style[p] = document.all ? 
+      elem.style[p] = document.all ?
         parseInt(v) + 'px' : v + 'px';
     }
     return true;
@@ -129,14 +129,14 @@ fleegix.fx.Effecter = function (elem, opts) {
   this.doOnStart = opts.doOnStart || null;
   this.doAfterFinished = opts.doAfterFinished || null;
   this.autoStart = opts.autoStart == false ? false : true;
-  
+
   if (typeof this.transitions[this.trans] != 'function') {
     throw('"' + this.trans + '" is not a valid transition.');
   }
-  
+
   this.start = function () {
-    self.id = setInterval( function () { 
-      self.doStep.apply(self, [elem]) }, 
+    self.id = setInterval( function () {
+      self.doStep.apply(self, [elem]) },
       Math.round(1000/self.fps));
     // Run the pre-execution func if any
     if (typeof opts.doOnStart == 'function') {
@@ -196,7 +196,7 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
   }
   else if (key == 'clip') {
     var arrStart = startVal;
-    var arrEnd = endVal; 
+    var arrEnd = endVal;
     var arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
       var s = arrStart[i];
@@ -206,7 +206,7 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
     return 'rect(' + arrCurr.join('px,') + 'px)';
   }
   else {
-    return trans(this.timeSpent, startVal, (endVal - startVal), 
+    return trans(this.timeSpent, startVal, (endVal - startVal),
       this.duration);
   }
 };
@@ -229,7 +229,7 @@ fleegix.fx.Effecter.prototype.transitions = {
     if ((t/=d/2) < 1) return c/2*t*t + b;
     return -c/2 * ((--t)*(t-2) - 1) + b;
   },
-  // 'Heavy' is cubic 
+  // 'Heavy' is cubic
   heavyEaseIn: function (t, b, c, d) {
     return c*(t/=d)*t*t + b;
   },
