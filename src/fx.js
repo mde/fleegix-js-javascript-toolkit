@@ -17,25 +17,21 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.fx = new function () {
   
-  function doFade(elem, opts, dir) {
-    var s = dir == 'in' ? 0 : 100;
-    var e = dir == 'in' ? 100 : 0;
-    var o = {
-      startVal: s, 
-      endVal: e,
-      props: { opacity: [s, e] },
-      trans: 'lightEaseIn' };
-    for (p in opts) {
-      o[p] = opts[p];
-    }
-    return new fleegix.fx.Effecter(elem, o);
-  }
-  
   this.fadeOut = function (elem, opts) {
     return doFade(elem, opts, 'out');
   };
   this.fadeIn = function (elem, opts) {
     return doFade(elem, opts, 'in');
+  };
+  this.blindUp = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'clip';
+    return doBlind(elem, o, 'up');
+  };
+  this.blindDown = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'clip';
+    return doBlind(elem, o, 'down');
   };
   this.setCSSProp = function (elem, p, v) {
     if (p == 'opacity') {
@@ -49,7 +45,7 @@ fleegix.fx = new function () {
         elem.style.opacity = d;
       }
     }
-    else if (p.toLowerCase().indexOf('color') > -1) {
+    else if (p == 'clip' || p.toLowerCase().indexOf('color') > -1) {
       elem.style[p] = v;
     }
     else {
@@ -75,6 +71,51 @@ fleegix.fx = new function () {
       throw('"' + str + '" not a valid hex value.');
     }
   };
+  function doFade(elem, opts, dir) {
+    var s = dir == 'in' ? 0 : 100;
+    var e = dir == 'in' ? 100 : 0;
+    var o = {
+      props: { opacity: [s, e] },
+      trans: 'lightEaseIn' };
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    return new fleegix.fx.Effecter(elem, o);
+  }
+  function doBlind(elem, opts, dir) {
+    var o = {};
+    var s = 0;
+    var e = 0;
+    // Change actual height -- requires ending
+    // height for down direction
+    if (opts.blindType == 'height') {
+      if (dir == 'down') {
+        if (!opts.endHeight) {
+          throw('No endHeight defined for blindDown');
+        }
+        s = 0;
+        e = opts.endHeight;
+      }
+      else {
+        s = elem.offsetHeight;
+        e = 0;
+      }
+      o.props = { height: [s, e] };
+    }
+    // Just clip
+    else {
+      s = dir == 'down' ? 0 : elem.offsetHeight;
+      e = dir == 'down' ? elem.offsetHeight : 0;
+      s = [0, elem.offsetWidth, s, 0];
+      e = [0, elem.offsetWidth, e, 0];
+      o.props = { clip: [s, e] };
+    }
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    o.trans = 'lightEaseIn';
+    return new fleegix.fx.Effecter(elem, o);
+  }
 };
 
 fleegix.fx.Effecter = function (elem, opts) {
@@ -123,7 +164,12 @@ fleegix.fx.Effecter.prototype.doStep = function (elem) {
   else {
     // Make sure to end up on the final values
     for (var i in p) {
-      fleegix.fx.setCSSProp(elem, i, p[i][1]);
+      if (i == 'clip') {
+        fleegix.fx.setCSSProp(elem, i, 'rect(' + p[i][1].join('px,') + 'px)');
+      }
+      else {
+        fleegix.fx.setCSSProp(elem, i, p[i][1]);
+      }
     }
     clearInterval(this.id);
     // Run the post-execution func if any
@@ -147,6 +193,17 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
       arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
     }
     return 'rgb(' + arrCurr.join() + ')';
+  }
+  else if (key == 'clip') {
+    var arrStart = startVal;
+    var arrEnd = endVal; 
+    var arrCurr = [];
+    for (var i = 0; i < arrStart.length; i++) {
+      var s = arrStart[i];
+      var e = arrEnd[i];
+      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
+    }
+    return 'rect(' + arrCurr.join('px,') + 'px)';
   }
   else {
     return trans(this.timeSpent, startVal, (endVal - startVal), 
