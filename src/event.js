@@ -99,16 +99,35 @@ fleegix.event = new function () {
         for (var i = 0; i < reg.after.length; i++) {
           var ex = reg.after[i];
           // Single functions
-          if (typeof ex == 'function') {
+          if (!ex.execObj) {
             var execFunction = ex;
             execFunction.apply(window, args);
           }
           // Methods of objects
           else {
-            execObj = ex[0];
-            execMethod = ex[1];
+            execObj = ex.execObj;
+            execMethod = ex.execMethod;
             // Pass args and exec in correct scope
             execObj[execMethod].apply(execObj, args);
+          }
+          ev = args[0];
+          // Stop propagation if needed
+          if (ex.stopPropagation) {
+            if (ev.stopPropagation) {
+              ev.stopPropagation();
+            }
+            else {
+              ev.cancelBubble = true;
+            }
+          }
+          // Prevent the default action if needed
+          if (ex.preventDefault) {
+            if (ev.preventDefault) {
+              ev.preventDefault();
+            }
+            else {
+              ev.returnValue = false;
+            }
           }
         }
          
@@ -120,13 +139,20 @@ fleegix.event = new function () {
     // Add the new handler to the listener registry
     // -----------------
     // Simple function
+    var r = {}; // package of info about what to execute
+    var o = {}; // options -- stopPropagation or preventDefault
     if (typeof arguments[2] == 'function') {
-      listenReg.after.push(arguments[2]);
+      r.execMethod = arguments[2];
+      o = arguments[3] || {};
     }
     // Object and method
     else {
-      listenReg.after.push([arguments[2], arguments[3]]);
+      r.execObj = arguments[2];
+      r.execMethod = arguments[3];
+      o = arguments[4] || {};
     }
+    for (var x in o) { r[x] = o[x] }
+    listenReg.after.push(r);
     
     tgtObj[tgtMeth].listenReg = listenReg;
   };

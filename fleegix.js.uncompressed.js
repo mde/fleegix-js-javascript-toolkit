@@ -844,10 +844,6 @@ fleegix.event = new function () {
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
-        
-        //fleegix.event.exec(
-        //  tgtObj[tgtMeth].listenReg, args);
-        
         // Execute the original code for the trigger
         // method if there is any -- apply arguments
         // passed, in the right execution context
@@ -896,16 +892,35 @@ fleegix.event = new function () {
         for (var i = 0; i < reg.after.length; i++) {
           var ex = reg.after[i];
           // Single functions
-          if (typeof ex == 'function') {
+          if (!ex.execObj) {
             var execFunction = ex;
             execFunction.apply(window, args);
           }
           // Methods of objects
           else {
-            execObj = ex[0];
-            execMethod = ex[1];
+            execObj = ex.execObj;
+            execMethod = ex.execMethod;
             // Pass args and exec in correct scope
             execObj[execMethod].apply(execObj, args);
+          }
+          ev = args[0];
+          // Stop propagation if needed
+          if (ex.stopPropagation) {
+            if (ev.stopPropagation) {
+              ev.stopPropagation();
+            }
+            else {
+              ev.cancelBubble = true;
+            }
+          }
+          // Prevent the default action if needed
+          if (ex.preventDefault) {
+            if (ev.preventDefault) {
+              ev.preventDefault();
+            }
+            else {
+              ev.returnValue = false;
+            }
           }
         }
          
@@ -917,13 +932,20 @@ fleegix.event = new function () {
     // Add the new handler to the listener registry
     // -----------------
     // Simple function
+    var r = {}; // package of info about what to execute
+    var o = {}; // options -- stopPropagation or preventDefault
     if (typeof arguments[2] == 'function') {
-      listenReg.after.push(arguments[2]);
+      r.execMethod = arguments[2];
+      o = arguments[3] || {};
     }
     // Object and method
     else {
-      listenReg.after.push([arguments[2], arguments[3]]);
+      r.execObj = arguments[2];
+      r.execMethod = arguments[3];
+      o = arguments[4] || {};
     }
+    for (var x in o) { r[x] = o[x] }
+    listenReg.after.push(r);
     
     tgtObj[tgtMeth].listenReg = listenReg;
   };
@@ -1269,26 +1291,22 @@ fleegix.uri = new function () {
 fleegix.uri.constructor = null;
 
 fleegix.fx = new function () {
-  
-  function doFade(elem, opts, dir) {
-    var s = dir == 'in' ? 0 : 100;
-    var e = dir == 'in' ? 100 : 0;
-    var o = {
-      startVal: s, 
-      endVal: e,
-      props: { opacity: [s, e] },
-      trans: 'lightEaseIn' };
-    for (p in opts) {
-      o[p] = opts[p];
-    }
-    return new fleegix.fx.Effecter(elem, o);
-  }
-  
+
   this.fadeOut = function (elem, opts) {
     return doFade(elem, opts, 'out');
   };
   this.fadeIn = function (elem, opts) {
     return doFade(elem, opts, 'in');
+  };
+  this.blindUp = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'clip';
+    return doBlind(elem, o, 'up');
+  };
+  this.blindDown = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'clip';
+    return doBlind(elem, o, 'down');
   };
   this.setCSSProp = function (elem, p, v) {
     if (p == 'opacity') {
@@ -1296,17 +1314,17 @@ fleegix.fx = new function () {
       if (document.all) {
         elem.style.filter = 'alpha(opacity=' + v + ')';
       }
-      // Moz/compat uses a decimal value 
+      // Moz/compat uses a decimal value
       else {
         var d = v / 100;
         elem.style.opacity = d;
       }
     }
-    else if (p.toLowerCase().indexOf('color') > -1) {
+    else if (p == 'clip' || p.toLowerCase().indexOf('color') > -1) {
       elem.style[p] = v;
     }
     else {
-      elem.style[p] = document.all ? 
+      elem.style[p] = document.all ?
         parseInt(v) + 'px' : v + 'px';
     }
     return true;
@@ -1328,6 +1346,51 @@ fleegix.fx = new function () {
       throw('"' + str + '" not a valid hex value.');
     }
   };
+  function doFade(elem, opts, dir) {
+    var s = dir == 'in' ? 0 : 100;
+    var e = dir == 'in' ? 100 : 0;
+    var o = {
+      props: { opacity: [s, e] },
+      trans: 'lightEaseIn' };
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    return new fleegix.fx.Effecter(elem, o);
+  }
+  function doBlind(elem, opts, dir) {
+    var o = {};
+    var s = 0;
+    var e = 0;
+    // Change actual height -- requires ending
+    // height for down direction
+    if (opts.blindType == 'height') {
+      if (dir == 'down') {
+        if (!opts.endHeight) {
+          throw('No endHeight defined for blindDown');
+        }
+        s = 0;
+        e = opts.endHeight;
+      }
+      else {
+        s = elem.offsetHeight;
+        e = 0;
+      }
+      o.props = { height: [s, e] };
+    }
+    // Just clip
+    else {
+      s = dir == 'down' ? 0 : elem.offsetHeight;
+      e = dir == 'down' ? elem.offsetHeight : 0;
+      s = [0, elem.offsetWidth, s, 0];
+      e = [0, elem.offsetWidth, e, 0];
+      o.props = { clip: [s, e] };
+    }
+    for (p in opts) {
+      o[p] = opts[p];
+    }
+    o.trans = 'lightEaseIn';
+    return new fleegix.fx.Effecter(elem, o);
+  }
 };
 
 fleegix.fx.Effecter = function (elem, opts) {
@@ -1341,14 +1404,14 @@ fleegix.fx.Effecter = function (elem, opts) {
   this.doOnStart = opts.doOnStart || null;
   this.doAfterFinished = opts.doAfterFinished || null;
   this.autoStart = opts.autoStart == false ? false : true;
-  
+
   if (typeof this.transitions[this.trans] != 'function') {
     throw('"' + this.trans + '" is not a valid transition.');
   }
-  
+
   this.start = function () {
-    self.id = setInterval( function () { 
-      self.doStep.apply(self, [elem]) }, 
+    self.id = setInterval( function () {
+      self.doStep.apply(self, [elem]) },
       Math.round(1000/self.fps));
     // Run the pre-execution func if any
     if (typeof opts.doOnStart == 'function') {
@@ -1376,7 +1439,12 @@ fleegix.fx.Effecter.prototype.doStep = function (elem) {
   else {
     // Make sure to end up on the final values
     for (var i in p) {
-      fleegix.fx.setCSSProp(elem, i, p[i][1]);
+      if (i == 'clip') {
+        fleegix.fx.setCSSProp(elem, i, 'rect(' + p[i][1].join('px,') + 'px)');
+      }
+      else {
+        fleegix.fx.setCSSProp(elem, i, p[i][1]);
+      }
     }
     clearInterval(this.id);
     // Run the post-execution func if any
@@ -1401,8 +1469,19 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
     }
     return 'rgb(' + arrCurr.join() + ')';
   }
+  else if (key == 'clip') {
+    var arrStart = startVal;
+    var arrEnd = endVal;
+    var arrCurr = [];
+    for (var i = 0; i < arrStart.length; i++) {
+      var s = arrStart[i];
+      var e = arrEnd[i];
+      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
+    }
+    return 'rect(' + arrCurr.join('px,') + 'px)';
+  }
   else {
-    return trans(this.timeSpent, startVal, (endVal - startVal), 
+    return trans(this.timeSpent, startVal, (endVal - startVal),
       this.duration);
   }
 };
@@ -1425,7 +1504,7 @@ fleegix.fx.Effecter.prototype.transitions = {
     if ((t/=d/2) < 1) return c/2*t*t + b;
     return -c/2 * ((--t)*(t-2) - 1) + b;
   },
-  // 'Heavy' is cubic 
+  // 'Heavy' is cubic
   heavyEaseIn: function (t, b, c, d) {
     return c*(t/=d)*t*t + b;
   },
