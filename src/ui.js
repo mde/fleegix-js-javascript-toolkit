@@ -17,10 +17,10 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.ui = new function() {
   this.getViewportWidth = function () {
-    return fleegix.ui.getViewportMeasure('Width');
+    return fleegix.dom.getViewportMeasure('Width');
   };
   this.getViewportHeight = function () {
-    return fleegix.ui.getViewportMeasure('Height');
+    return fleegix.dom.getViewportMeasure('Height');
   };
   this.getViewportMeasure = function (s) {
     // IE
@@ -41,10 +41,10 @@ fleegix.ui = new function() {
   this.center = function (node) {
     var nW = node.offsetWidth;
     var nH = node.offsetHeight;
-    var vW = fleegix.ui.getViewportWidth();
-    var vH = fleegix.ui.getViewportHeight();
+    var vW = fleegix.dom.getViewportWidth();
+    var vH = fleegix.dom.getViewportHeight();
     node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
     node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
   };
 };
-fleegix.ui.constructor = null;
+
