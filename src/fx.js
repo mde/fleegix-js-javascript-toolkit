@@ -25,12 +25,12 @@ fleegix.fx = new function () {
   };
   this.blindUp = function (elem, opts) {
     var o = opts || {};
-    o.blindType = o.blindType || 'clip';
+    o.blindType = o.blindType || 'height';
     return doBlind(elem, o, 'up');
   };
   this.blindDown = function (elem, opts) {
     var o = opts || {};
-    o.blindType = o.blindType || 'clip';
+    o.blindType = o.blindType || 'height';
     return doBlind(elem, o, 'down');
   };
   this.setCSSProp = function (elem, p, v) {
@@ -86,29 +86,55 @@ fleegix.fx = new function () {
     var o = {};
     var s = 0;
     var e = 0;
+    // Just clip
+    if (opts.blindType == 'clip') {
+      s = dir == 'down' ? 0 : elem.offsetHeight;
+      e = dir == 'down' ? elem.offsetHeight : 0;
+      s = [0, elem.offsetWidth, s, 0];
+      e = [0, elem.offsetWidth, e, 0];
+      o.props = { clip: [s, e] };
+    }
     // Change actual height -- requires ending
     // height for down direction
-    if (opts.blindType == 'height') {
+    else {
       if (dir == 'down') {
-        if (!opts.endHeight) {
-          throw('No endHeight defined for blindDown');
+        // Allow an explicit target height to be passed
+        // to avoid touching DOM, and for speed
+        if (opts.endHeight) {
+            e = opts.endHeight;
+        }
+        // If no explicit height is passed, temporarily
+        // remove any height set and temp append to the
+        // DOM to measure end height
+        else {
+            // Remove the style
+            elem.style.height = '';
+            // Dummy DOM node
+            var d = document.createElement('div');
+            d.position = 'absolute';
+            d.style.top = '-9999999999px';
+            d.style.left = '-9999999999px';
+            // Remove from parent node, append to dummy node
+            var par = elem.parentNode;
+            var ch = par.removeChild(elem);
+            d.appendChild(ch);
+            document.body.appendChild(d);
+            // This is how high it will be
+            e = ch.offsetHeight;
+            // Remove from dummy node, set height to zero,
+            // and put it back where it was
+            elem = d.removeChild(ch);
+            var x = document.body.removeChild(d);
+            elem.style.height = '0px';
+            par.appendChild(elem);
         }
         s = 0;
-        e = opts.endHeight;
       }
       else {
         s = elem.offsetHeight;
         e = 0;
       }
       o.props = { height: [s, e] };
-    }
-    // Just clip
-    else {
-      s = dir == 'down' ? 0 : elem.offsetHeight;
-      e = dir == 'down' ? elem.offsetHeight : 0;
-      s = [0, elem.offsetWidth, s, 0];
-      e = [0, elem.offsetWidth, e, 0];
-      o.props = { clip: [s, e] };
     }
     for (p in opts) {
       o[p] = opts[p];
