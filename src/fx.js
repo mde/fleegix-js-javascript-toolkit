@@ -64,8 +64,7 @@ fleegix.fx = new function () {
         s = s.length == 1 ? s + s : s;
         rgb.push(parseInt(s, 16));
       }
-      s = 'rgb(' + rgb.join() + ')';
-      return returnArray ? rgb : s;
+      return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
     }
     else {
       throw('"' + str + '" not a valid hex value.');
@@ -75,7 +74,8 @@ fleegix.fx = new function () {
   // based on C Code in "Computer Graphics -- Principles and Practice,"
   // Foley et al, 1996, p. 593.
   // input h is 0-360, s and v are 0-100, output is 0-255 for each of r,g,b
-  this.hsv2rgb = function (h, s, v) {
+  this.hsv2rgb = function (h, s, v, returnArray) {
+    var rgb = [];
     if (h == 360) { h = 0; }
     s /= 100;
     v /= 100;
@@ -111,7 +111,8 @@ fleegix.fx = new function () {
     r = Math.round(r * 255);
     g = Math.round(g * 255);
     b = Math.round(b * 255);
-    return [r, g, b];
+    rgb = [r, g, b];
+    return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
   };
   function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
