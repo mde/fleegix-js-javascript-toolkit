@@ -18,13 +18,7 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 
 fleegix.dom = new function() {
-  this.getViewportWidth = function () {
-    return fleegix.dom.getViewportMeasure('Width');
-  };
-  this.getViewportHeight = function () {
-    return fleegix.dom.getViewportMeasure('Height');
-  };
-  this.getViewportMeasure = function (s) {
+  var getViewportMeasure = function (s) {
     // IE
     if (document.all) {
       if (document.documentElement &&
@@ -39,6 +33,12 @@ fleegix.dom = new function() {
     else {
       return window['inner' + s];
     }
+  };
+  this.getViewportWidth = function () {
+    return getViewportMeasure('Width');
+  };
+  this.getViewportHeight = function () {
+    return getViewportMeasure('Height');
   };
   this.center = function (node) {
     var nW = node.offsetWidth;
@@ -1732,12 +1732,12 @@ fleegix.cookie.constructor = null;
 
 
 fleegix.css = new function() {
-    this.addCssClass = function (elem, s) {
-        removeCssClass(elem, s);
+    this.addClass = function (elem, s) {
+        fleegix.css.removeClass(elem, s); // Don't add twice
         var c = elem.className;
         elem.className = c += ' ' + s;
     };
-    this.removeCssClass = function (elem, s) {
+    this.removeClass = function (elem, s) {
         var c = elem.className;
         // Esc backslashes in regex pattern
         var pat = '\\b' + s + '\\b';
