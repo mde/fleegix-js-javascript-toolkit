@@ -16,12 +16,12 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.css = new function() {
-    this.addCssClass = function (elem, s) {
-        removeCssClass(elem, s);
+    this.addClass = function (elem, s) {
+        fleegix.css.removeClass(elem, s); // Don't add twice
         var c = elem.className;
         elem.className = c += ' ' + s;
     };
-    this.removeCssClass = function (elem, s) {
+    this.removeClass = function (elem, s) {
         var c = elem.className;
         // Esc backslashes in regex pattern
         var pat = '\\b' + s + '\\b';
