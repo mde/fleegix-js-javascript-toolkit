@@ -1,0 +1,344 @@
+2007-05-10 05:00  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Adding
+	  stopPropagation and preventDefault to fleegix.event.
+
+2007-05-09 07:15  mde
+
+	* src/fx.js: Remove redundant whitespace.
+
+2007-05-09 03:01  mde
+
+	* src/fx.js: Added code for doing windowshade effects.
+
+2007-05-01 05:06  mde
+
+	* src/event.js: Remove remarked-out code.
+
+2007-05-01 04:36  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Remove
+	  debugging function from fleegix.event.
+
+2007-05-01 03:49  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Fix
+	  event.listen to work across iframes.
+
+2007-04-24 06:19  mde
+
+	* src/form.js, src/json.js: Fix null-vs.-undefined issue in
+	  form.toHash, remove redundant whitespace.
+
+2007-03-27 05:54  mde
+
+	* src/base.js, src/cookie.js, src/json.js, src/xhr.js: Remove
+	  redundant whitespace.
+
+2007-03-27 03:03  mde
+
+	* src/xhr.js: Remove undesirable MS prog IDs for the XHR ActiveX
+	  Object, per
+	  http://blogs.msdn.com/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx.
+
+2007-03-27 02:56  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Include MS
+	  prog IDs for XHR ActiveX object.
+
+2007-02-22 04:06  mde
+
+	* doc/index.txt: Use Lynx dump to get plaintext version of API ref.
+
+2007-02-14 21:13  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/ui.js: Centering
+	  functionality for fleegix.ui.
+
+2007-02-14 20:18  mde
+
+	* doc/index.html, doc/index.txt, fleegix.js,
+	  fleegix.js.uncompressed.js, src/fx.js, src/ui.js: Re-adding
+	  ui.js.
+
+2007-02-09 04:00  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Bug fixes
+	  for Events module.
+
+2007-01-29 23:49  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Update XHR
+	  lib to handle undefined or zero HTTP status.
+
+2007-01-29 21:19  mde
+
+	* doc/index.html, doc/index.txt: Fix typo in docs -- should be
+	  'fadeIn,' not 'fadein.'
+
+2007-01-29 05:08  mde
+
+	* README, doc/index.html, doc/index.txt: Complete documentation,
+	  update README.
+
+2007-01-29 02:43  mde
+
+	* doc/index.html: More HTML doc work.
+
+2007-01-29 00:07  mde
+
+	* doc/index.html: More work on HTML docs.
+
+2007-01-28 17:42  mde
+
+	* doc/index.html: More work on HTML doc.
+
+2007-01-28 17:19  mde
+
+	* doc/index.html: Work on HTML doc.
+
+2007-01-28 08:00  mde
+
+	* doc/index.html: Add HTML doc.
+
+2007-01-28 06:48  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js: Newest build.
+
+2007-01-28 06:48  mde
+
+	* LICENSE, README: Adding license and readme text.
+
+2007-01-28 06:13  mde
+
+	* doc/index.txt, src/form.js, src/fx.js: Cleanup and more
+	  documentation.
+
+2007-01-27 08:18  mde
+
+	* doc/index.txt: More doc.
+
+2007-01-26 09:12  mde
+
+	* doc/index.txt, src/fx.js, src/xhr.js: Minor bugfixes, some more
+	  doco.
+
+2007-01-26 06:40  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Reset timeout
+	  start when queued requests are picked up by XHR.
+
+2007-01-24 07:01  mde
+
+	* src/xhr.js: Add excpetion squelch for connection drops and
+	  hitting ESC.
+
+2007-01-24 06:36  mde
+
+	* src/xhr.js: Implemented timeout handling.
+
+2007-01-22 08:10  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/fx.js: Finished basic
+	  underpinnings for effect library.
+
+2007-01-22 03:58  mde
+
+	* src/fx.js, src/ui.js: Rename ui namespace to fx.
+
+2007-01-20 07:40  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/ui.js: First stab at
+	  some effects, with basic linear transitions.
+
+2007-01-20 07:38  mde
+
+	* src/uri.js: Added getBase method for base URL. getBase and
+	  getQuery accept string params to search. setParam will append the
+	  param if it's not in the string.
+
+2007-01-19 04:28  mde
+
+	* src/xhr.js: More improvements for 0.2.1 release.
+
+2007-01-19 04:27  mde
+
+	* src/cookie.js: Allow path to be passed in as a third arg instead
+	  of as part of an opts object.
+
+2007-01-18 06:29  mde
+
+	* doc/index.txt: More documentation.
+
+2007-01-16 07:42  mde
+
+	* doc/index.txt: XHR docs.
+
+2007-01-16 05:34  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js: Updateed main built
+	  library pages.
+
+2007-01-16 05:31  mde
+
+	* doc, doc/index.txt, fleegix.js, fleegix.js.uncompressed.js: Start
+	  of documentation.
+
+2007-01-15 06:39  mde
+
+	* src/xhr.js: Finish work on XHR pooling and request queuing.
+
+2007-01-14 04:01  mde
+
+	* src/xhr.js: Sync requests do not participate in the request
+	  pooling.
+
+2007-01-14 03:23  mde
+
+	* src/xhr.js: Initial work on request pooling.
+
+2007-01-14 03:22  mde
+
+	* src/uri.js: Return query string with the single desired value set
+	  if no query string exists.
+
+2007-01-08 08:10  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/uri.js: Updates to
+	  uri methods -- added setParam method to set a value in an
+	  arbitrary query string.
+
+2007-01-02 20:16  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/timezone.js,
+	  src/xdate.js: Updates for 0.2 release.
+
+2006-12-17 03:37  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Remove
+	  unnecessary eval/valueOf in cloning original method for
+	  event.listen.
+
+2006-12-17 03:36  mde
+
+	* src/xhr.js: Proper rewrite to treat each request as separate obj.
+
+2006-12-17 03:36  mde
+
+	* src/popup.js: A little refactoring.
+
+2006-12-04 07:03  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: form.diff
+	  returns Differ obj with count of diffs, the actual diffs, and a
+	  hasKey method.
+
+2006-12-04 06:47  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Return
+	  object with 'count' and 'diffs' property for form.diff.
+
+2006-12-04 06:33  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: form.diff
+	  return null is no differences. Check for null in B when testing
+	  array value for A.
+
+2006-12-04 06:12  mde
+
+	* src/form.js: Change output val for form.diff to hash.
+
+2006-12-03 17:49  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Allow
+	  form.diff to handle either forms or hash-converted forms.
+
+2006-11-27 07:17  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Added
+	  form.toHash and form.diff. Rewrote form.serialize to use
+	  form.toHash to handle non-sequential, same-named form elements
+	  properly.
+
+2006-11-11 03:08  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Finished
+	  form.restore.
+
+2006-11-05 07:44  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js, src/json.js:
+	  Fixes to JSON serialization. Added form deserialization to
+	  restore a form from a stored string.
+
+2006-10-31 08:01  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/json.js: Add quotes
+	  to JSON object properties.
+
+2006-10-29 05:45  mde
+
+	* src/xdate.js: Fix setAttribute method for XDate -- remove
+	  unsupported attributes (minutes, seconds, etc.). Fix constructor
+	  methods for XDate and XDateTime to allow no params to be passed.
+
+2006-10-28 07:13  mde
+
+	* src/timezone.js, src/xdate.js: Updates to date fu.
+
+2006-10-26 05:25  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js, src/json.js,
+	  src/xhr.js: Bugfixes, added JSON serialization.
+
+2006-10-16 03:08  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Normalize
+	  event models, add getSrcElementId method.
+
+2006-10-15 19:13  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Pass
+	  trigger function args to all triggered funcs/methods in listener
+	  registry, and execute in correct scope.
+
+2006-10-15 09:11  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added basic
+	  event system.
+
+2006-10-09 05:37  mde
+
+	* src/base.js: Adding base object file.
+
+2006-10-09 04:33  mde
+
+	* Rakefile, fleegix.js, fleegix.js.uncompressed.js: During build
+	  strip out comments and the check for base object in module files.
+
+2006-10-09 03:44  mde
+
+	* Rakefile, fleegix.js, fleegix.js.uncompressed.js, src/cookie.js,
+	  src/event.js, src/form.js, src/popup.js, src/ui.js, src/uri.js,
+	  src/xhr.js, src/xml.js: Removed individual file versioning,
+	  changed Rakefile to allow configuring path to ShrinkSafe.
+
+2006-10-09 03:12  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/ajax.js, src/xhr.js:
+	  Change name of module.
+
+2006-10-09 03:12  mde
+
+	* src/ajax.js: Change name of module.
+
+2006-10-09 03:11  mde
+
+	* Rakefile, fleegix.js, fleegix.js.uncompressed.js: Initial test.
+
+2006-10-09 03:02  mde
+
+	* ., Rakefile, fleegix.js, fleegix.js.uncompressed.js, src,
+	  src/ajax.js, src/cookie.js, src/event.js, src/form.js,
+	  src/popup.js, src/ui.js, src/uri.js, src/xml.js: initial import
+
