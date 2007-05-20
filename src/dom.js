@@ -16,13 +16,7 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.dom = new function() {
-  this.getViewportWidth = function () {
-    return fleegix.dom.getViewportMeasure('Width');
-  };
-  this.getViewportHeight = function () {
-    return fleegix.dom.getViewportMeasure('Height');
-  };
-  this.getViewportMeasure = function (s) {
+  var getViewportMeasure = function (s) {
     // IE
     if (document.all) {
       if (document.documentElement &&
@@ -37,6 +31,12 @@ fleegix.dom = new function() {
     else {
       return window['inner' + s];
     }
+  };
+  this.getViewportWidth = function () {
+    return getViewportMeasure('Width');
+  };
+  this.getViewportHeight = function () {
+    return getViewportMeasure('Height');
   };
   this.center = function (node) {
     var nW = node.offsetWidth;
