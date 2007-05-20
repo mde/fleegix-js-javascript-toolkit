@@ -71,11 +71,26 @@ module or method name for a detailed description.</p>
     <ul>
       <li><a href="#fleegix.fx.fadeOut">fleegix.fx.fadeOut</a></li>
       <li><a href="#fleegix.fx.fadeIn">fleegix.fx.fadeIn</a></li>
+      <li><a href="#fleegix.fx.blindUp">fleegix.fx.blindUp</a></li>
+      <li><a href="#fleegix.fx.blindDown">fleegix.fx.blindDown</a></li>
+      <li><a href="#fleegix.fx.hex2rgb">fleegix.fx.hex2rgb</a></li>
+      <li><a href="#fleegix.fx.hsv2rgb">fleegix.fx.hsv2rgb</a></li>
     </ul>
   <li><a href="#fleegix.json">JSON</a></li>
     <dl>
       <dd><a href="#fleegix.json.serialize">fleegix.json.serialize</a></dd>
     </dl>
+  <li><a href="#fleegix.dom">DOM</a></li>
+    <ul>
+      <li><a href="#fleegix.dom.getViewportWidth">fleegix.dom.getViewportWidth</a></li>
+      <li><a href="#fleegix.dom.getViewportHeight">fleegix.dom.getViewportHeight</a></li>
+      <li><a href="#fleegix.dom.center">fleegix.dom.center</a></li>
+    </ul>
+  <li><a href="#fleegix.css">CSS</a></li>
+    <ul>
+      <li><a href="#fleegix.css.addClass">fleegix.css.addClass</a></li>
+      <li><a href="#fleegix.css.removeClass">fleegix.css.removeClass</a></li>
+    </ul>
   <li><a href="#fleegix.uri">URI</a></li>
     <ul>
       <li><a href="#fleegix.uri.getQuery">fleegix.uri.getQuery</a></li>
@@ -124,7 +139,7 @@ of your Web UI.</p>
 
 <h3>Parameters</h3>
 
-<p>listenerObj <span class="dataType">(Object)</span> -- Object to add the listener to.</p>
+<p>listenerObj <span class="dataType">(Object/HTMLElement)</span> -- Object to add the listener to.</p>
 
 <p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
 will trigger execution of a function or method.</p>
@@ -132,7 +147,7 @@ will trigger execution of a function or method.</p>
 <p>someFunction <span class="dataType">(Function)</span> -- Function to execute when the triggering
 event is run.</p>
 
-<p>someObject <span class="dataType">(Object)</span> -- Object with the method you want to
+<p>someObject <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to
 execute when the triggering event is run.</p>
 
 <p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to
@@ -186,7 +201,7 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>listenerObj <span class="dataType">(Object)</span> -- Object to remove the listener from.</p>
+<p>listenerObj <span class="dataType">(Object/HTMLElement)</span> -- Object to remove the listener from.</p>
 
 <p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
 you want to stop triggering a certain function or method.</p>
@@ -194,7 +209,7 @@ you want to stop triggering a certain function or method.</p>
 <p>someFunction <span class="dataType">(Function)</span> -- Function to stop triggering when
 the triggering event is run.</p>
 
-<p>someObject <span class="dataType">(Object)</span> -- Object with the method you want to stop
+<p>someObject <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to stop
 from executing when the triggering event is run.</p>
 
 <p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to stop
@@ -806,7 +821,7 @@ visual effects for a Web app -- fade-in and fade-out.</p>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
+<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
 that you wish to apply a fadeout animation effect to.</p>
 
 <p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
@@ -842,7 +857,7 @@ fleegix.fx.fadeOut(fadeDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(Object)</span> -- DOM node (such as div or span)
+<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
 that you wish to apply a fadein animation effect to.</p>
 
 <p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
@@ -867,6 +882,168 @@ applying the effect.</p>
 
 <pre><code>var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadeIn(fadeDiv);</code></pre>
+
+<a name="fleegix.fx.blindUp"></a>
+
+<h2>fleegix.fx.blindUp</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.blindUp(domElement, [blindOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM
+node (such as div or span) that you wish to apply a window
+blind animation effect to.</p>
+
+<p>fadeOptions <span class="dataType">(Object)</span>
+-- Options for the fadein animation. Here is the list of
+possible properties to set, and the default values if they
+are not set:</p>
+<ul>
+  <li>duration: 500 -- Number of milliseconds to do the fadein
+    animatinon in.</li>
+  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
+  <li>doOnStart: null -- Function to execute as the animation starts</li>
+  <li>doAfter: null -- Function to exectute after the animation
+  <li>blindType: 'height' -- Change the actual height of the DOM
+    element during the wipe.</li>
+</ul>
+
+<h3>Description</h3>
+
+<p>Does a basic window blind/shade animation effect on
+the desired DOM element. By default the blindType is
+<code>'height'</code>, which changes the actual height
+of the element during the wipe.  Setting this value to
+<code>'clip'</code> will use a CSS clipping effect instead
+that keeps the height of the element the same.  Note that
+the clipping wipe will only work with absolute-positioned
+elements.</p>
+
+<p>If you're using the <code>'height'</code> blindType (the
+default), for optimal effect you should begin with a DOM
+element that's zero pixels in height.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var blindDiv = document.getElementById('someDiv');
+fleegix.fx.blindDown(blindDiv);</code></pre>
+
+<a name="fleegix.fx.blindDown"></a>
+
+<h2>fleegix.fx.blindDown</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.blindDown(domElement, [blindOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM
+node (such as div or span) that you wish to apply a window
+blind animation effect to.</p>
+
+<p>fadeOptions <span class="dataType">(Object)</span>
+-- Options for the fadein animation. Here is the list of
+possible properties to set, and the default values if they
+are not set:</p>
+<ul>
+  <li>duration: 500 -- Number of milliseconds to do the fadein
+    animatinon in.</li>
+  <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
+  <li>doOnStart: null -- Function to execute as the animation starts</li>
+  <li>doAfter: null -- Function to exectute after the animation
+  <li>blindType: 'height' -- Change the actual height of the DOM
+    element during the wipe.</li>
+</ul>
+
+<h3>Description</h3>
+
+<p>Does a basic window blind/shade animation effect on
+the desired DOM element. By default the blindType is
+<code>'height'</code>, which changes the actual height
+of the element during the wipe.  Setting this value to
+<code>'clip'</code> will use a CSS clipping effect instead
+that keeps the height of the element the same.  Note that
+the clipping wipe will only work with absolute-positioned
+elements.</p>
+
+<p>If you're using the <code>'height'</code> blindType (the
+default), when the animation completes, the height of the
+element will be zero pixels.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var blindDiv = document.getElementById('someDiv');
+fleegix.fx.blindUp(blindDiv);</code></pre>
+
+<a name="fleegix.fx.hex2rgb"></a>
+
+<h2>fleegix.fx.hex2rgb</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.hex2rgb(hex, [returnArray]);</p>
+
+<h3>Parameters</h3>
+
+<p>hex <span class="dataType">(String)</span> -- A hex
+string representing a color (e.g., #f00, #ccccaa).</p>
+
+<p>returnArray <span class="dataType">(Boolean)</span>
+If this param is set to <code>true</code>, the function
+will return an array of values in the form of [r, g, b].
+Otherwise, the default behavior is to the return a string
+that's readily usable in CSS (e.g,
+<code>'rgb(255, 0, 0)'</code>).</p>
+
+<h3>Description</h3>
+
+<p>Takes a string representing a color in hex format,
+and converts it to RGB format. Output range for the
+each of the RGB values is 0-255.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var rgb = fleegix.fx.hex2rgb('#99a');</code></pre>
+
+<a name="fleegix.fx.hsv2rgb"></a>
+
+<h2>fleegix.fx.hsv2rgb</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.fx.hsv2rgb(h, s ,v, [returnArray]);</p>
+
+<h3>Parameters</h3>
+
+<p>h <span class="dataType">(Number)</span> -- The hue
+value for the desired color. Input range is 0-360.</p>
+
+<p>s <span class="dataType">(Number)</span> -- The hue
+value for the desired color. Input range is 0-100.</p>
+
+<p>v <span class="dataType">(Number)</span> -- The hue
+value for the desired color. Input range is 0-100.</p>
+
+<p>returnArray <span class="dataType">(Boolean)</span>
+If this param is set to <code>true</code>, the function
+will return an array of values in the form of [r, g, b].
+Otherwise, the default behavior is to the return a string
+that's readily usable in CSS (e.g,
+<code>'rgb(255, 0, 0)'</code>).</p>
+
+<h3>Description</h3>
+
+<p>Takes three values for hue, saturation, and value
+representing a color, and converts them to RGB format. Output
+range for the each of the RGB values is 0-255.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var rgb = fleegix.fx.hsv2rgb(310, 20, 20);</code></pre>
 
 <a name="fleegix.json"></a>
 
@@ -899,6 +1076,130 @@ the JSON data format.</p>
 <pre><code>var obj = { name: 'Rush',
     members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
 var str = fleegix.json.serialize(obj);</code></pre>
+
+<a name="fleegix.dom"></a>
+
+<h1>DOM</h1>
+
+<hr/>
+
+<p>Contains a couple of useful functions for dealing with DOM
+elements.</p>
+
+<a name="fleegix.dom.getViewportWidth"></a>
+
+<h2>fleegix.dom.getViewportWidth</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.dom.getViewportWidth();</p>
+
+<h3>Description</h3>
+
+<p>Returns the width in pixels of the browser window.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var w = fleegix.dom.getViewportWidth();</code></pre>
+
+<a name="fleegix.dom.getViewportHeight"></a>
+
+<h2>fleegix.dom.getViewportHeight</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.dom.getViewportHeight();</p>
+
+<h3>Description</h3>
+
+<p>Returns the height in pixels of the browser window.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var h = fleegix.dom.getViewportHeight();</code></pre>
+
+<a name="fleegix.dom.center"></a>
+
+<h2>fleegix.dom.center</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.dom.center(someNode);</p>
+
+<h3>Parameters</h3>
+
+<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+element you wish to center both horizontally and vertically.</p>
+
+<h3>Description</h3>
+
+<p>Horizontally and vertically centers a DOM element using
+absolute positioning (for example, a div for a dialog box).</p>
+
+<h3>Examples</h3>
+
+<pre><code>var centerDiv = document.getElementById('someDiv');
+fleegix.dom.center(centerDiv);</code></pre>
+
+<a name="fleegix.css"></a>
+
+<h1>Css</h1>
+
+<hr/>
+
+<p>Contains a couple of useful functions for working with
+CSS.</p>
+
+<a name="fleegix.css.addClass"></a>
+
+<h2>fleegix.css.addClass</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.css.addClass(someNode, someClass);</p>
+
+<h3>Parameters</h3>
+
+<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+node you wish to add a CSS class to.</p>
+
+<p>someClass <span class="dataType">(String)</span> -- The CSS class
+you wish to add.</p>
+
+<h3>Description</h3>
+
+<p>Adds a CSS class to a DOM element. Multiple classes are added as
+a space-delimited list.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someDiv = document.getElementById('someDiv');
+fleegix.css.addClass(someDiv, 'someCssClass');</code></pre>
+
+<a name="fleegix.css.removeClass"></a>
+
+<h2>fleegix.css.removeClass</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.css.removeClass(someNode, someClass);</p>
+
+<h3>Parameters</h3>
+
+<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+node you wish to remove a CSS class from.</p>
+
+<p>someClass <span class="dataType">(String)</span> -- The CSS class
+you wish to remove.</p>
+
+<h3>Description</h3>
+
+<p>Removes a CSS class to a DOM element.</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someDiv = document.getElementById('someDiv');
+fleegix.css.addClass(someDiv, 'someCssClass');</code></pre>
 
 <a name="fleegix.uri"></a>
 

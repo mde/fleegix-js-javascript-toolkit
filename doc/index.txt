@@ -36,10 +36,23 @@
      Effects
      * fleegix.fx.fadeOut
      * fleegix.fx.fadeIn
+     * fleegix.fx.blindUp
+     * fleegix.fx.blindDown
+     * fleegix.fx.hex2rgb
+     * fleegix.fx.hsv2rgb
 
      JSON
 
           fleegix.json.serialize
+
+     DOM
+     * fleegix.dom.getViewportWidth
+     * fleegix.dom.getViewportHeight
+     * fleegix.dom.center
+
+     CSS
+     * fleegix.css.addClass
+     * fleegix.css.removeClass
 
      URI
      * fleegix.uri.getQuery
@@ -76,7 +89,7 @@ fleegix.event.listen
 
   Parameters
 
-   listenerObj (Object) -- Object to add the listener to.
+   listenerObj (Object/HTMLElement) -- Object to add the listener to.
 
    triggerEventName (String) -- Name of method or event which will
    trigger execution of a function or method.
@@ -84,8 +97,8 @@ fleegix.event.listen
    someFunction (Function) -- Function to execute when the triggering
    event is run.
 
-   someObject (Object) -- Object with the method you want to execute when
-   the triggering event is run.
+   someObject (Object/HTMLElement) -- Object with the method you want to
+   execute when the triggering event is run.
 
    someMethodName (String) -- Name of the method you want to execute when
    the triggering event is run.
@@ -133,7 +146,8 @@ fleegix.event.unlisten
 
   Parameters
 
-   listenerObj (Object) -- Object to remove the listener from.
+   listenerObj (Object/HTMLElement) -- Object to remove the listener
+   from.
 
    triggerEventName (String) -- Name of method or event which you want to
    stop triggering a certain function or method.
@@ -141,8 +155,8 @@ fleegix.event.unlisten
    someFunction (Function) -- Function to stop triggering when the
    triggering event is run.
 
-   someObject (Object) -- Object with the method you want to stop from
-   executing when the triggering event is run.
+   someObject (Object/HTMLElement) -- Object with the method you want to
+   stop from executing when the triggering event is run.
 
    someMethodName (String) -- Name of the method you want to stop from
    executing when the triggering event is run.
@@ -686,8 +700,8 @@ fleegix.fx.fadeOut
 
   Parameters
 
-   domElement (Object) -- DOM node (such as div or span) that you wish to
-   apply a fadeout animation effect to.
+   domElement (HTMLElement) -- DOM node (such as div or span) that you
+   wish to apply a fadeout animation effect to.
 
    fadeOptions (Object) -- Options for the fadeout animation. Here is the
    list of possible properties to set, and the default values if they are
@@ -718,8 +732,8 @@ fleegix.fx.fadeIn
 
   Parameters
 
-   domElement (Object) -- DOM node (such as div or span) that you wish to
-   apply a fadein animation effect to.
+   domElement (HTMLElement) -- DOM node (such as div or span) that you
+   wish to apply a fadein animation effect to.
 
    fadeOptions (Object) -- Options for the fadein animation. Here is the
    list of possible properties to set, and the default values if they are
@@ -741,6 +755,142 @@ fleegix.fx.fadeIn
 
 var fadeDiv = document.getElementById('someDiv');
 fleegix.fx.fadeIn(fadeDiv);
+
+fleegix.fx.blindUp
+
+  Syntax
+
+   fleegix.fx.blindUp(domElement, [blindOptions]);
+
+  Parameters
+
+   domElement (HTMLElement) -- DOM node (such as div or span) that you
+   wish to apply a window blind animation effect to.
+
+   fadeOptions (Object) -- Options for the fadein animation. Here is the
+   list of possible properties to set, and the default values if they are
+   not set:
+     * duration: 500 -- Number of milliseconds to do the fadein
+       animatinon in.
+     * trans: 'lightEaseIn' -- easing transition to use in the fade
+     * doOnStart: null -- Function to execute as the animation starts
+     * doAfter: null -- Function to exectute after the animation
+     * blindType: 'height' -- Change the actual height of the DOM element
+       during the wipe.
+
+  Description
+
+   Does a basic window blind/shade animation effect on the desired DOM
+   element. By default the blindType is 'height', which changes the
+   actual height of the element during the wipe. Setting this value to
+   'clip' will use a CSS clipping effect instead that keeps the height of
+   the element the same. Note that the clipping wipe will only work with
+   absolute-positioned elements.
+
+   If you're using the 'height' blindType (the default), for optimal
+   effect you should begin with a DOM element that's zero pixels in
+   height.
+
+  Examples
+
+var blindDiv = document.getElementById('someDiv');
+fleegix.fx.blindDown(blindDiv);
+
+fleegix.fx.blindDown
+
+  Syntax
+
+   fleegix.fx.blindDown(domElement, [blindOptions]);
+
+  Parameters
+
+   domElement (HTMLElement) -- DOM node (such as div or span) that you
+   wish to apply a window blind animation effect to.
+
+   fadeOptions (Object) -- Options for the fadein animation. Here is the
+   list of possible properties to set, and the default values if they are
+   not set:
+     * duration: 500 -- Number of milliseconds to do the fadein
+       animatinon in.
+     * trans: 'lightEaseIn' -- easing transition to use in the fade
+     * doOnStart: null -- Function to execute as the animation starts
+     * doAfter: null -- Function to exectute after the animation
+     * blindType: 'height' -- Change the actual height of the DOM element
+       during the wipe.
+
+  Description
+
+   Does a basic window blind/shade animation effect on the desired DOM
+   element. By default the blindType is 'height', which changes the
+   actual height of the element during the wipe. Setting this value to
+   'clip' will use a CSS clipping effect instead that keeps the height of
+   the element the same. Note that the clipping wipe will only work with
+   absolute-positioned elements.
+
+   If you're using the 'height' blindType (the default), when the
+   animation completes, the height of the element will be zero pixels.
+
+  Examples
+
+var blindDiv = document.getElementById('someDiv');
+fleegix.fx.blindUp(blindDiv);
+
+fleegix.fx.hex2rgb
+
+  Syntax
+
+   fleegix.fx.hex2rgb(hex, [returnArray]);
+
+  Parameters
+
+   hex (String) -- A hex string representing a color (e.g., #f00,
+   #ccccaa).
+
+   returnArray (Boolean) If this param is set to true, the function will
+   return an array of values in the form of [r, g, b]. Otherwise, the
+   default behavior is to the return a string that's readily usable in
+   CSS (e.g, 'rgb(255, 0, 0)').
+
+  Description
+
+   Takes a string representing a color in hex format, and converts it to
+   RGB format. Output range for the each of the RGB values is 0-255.
+
+  Examples
+
+var rgb = fleegix.fx.hex2rgb('#99a');
+
+fleegix.fx.hsv2rgb
+
+  Syntax
+
+   fleegix.fx.hsv2rgb(h, s ,v, [returnArray]);
+
+  Parameters
+
+   h (Number) -- The hue value for the desired color. Input range is
+   0-360.
+
+   s (Number) -- The hue value for the desired color. Input range is
+   0-100.
+
+   v (Number) -- The hue value for the desired color. Input range is
+   0-100.
+
+   returnArray (Boolean) If this param is set to true, the function will
+   return an array of values in the form of [r, g, b]. Otherwise, the
+   default behavior is to the return a string that's readily usable in
+   CSS (e.g, 'rgb(255, 0, 0)').
+
+  Description
+
+   Takes three values for hue, saturation, and value representing a
+   color, and converts them to RGB format. Output range for the each of
+   the RGB values is 0-255.
+
+  Examples
+
+var rgb = fleegix.fx.hsv2rgb(310, 20, 20);
 
                                      JSON
      _________________________________________________________________
@@ -768,6 +918,109 @@ fleegix.json.serialize
 var obj = { name: 'Rush',
     members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
 var str = fleegix.json.serialize(obj);
+
+                                      DOM
+     _________________________________________________________________
+
+   Contains a couple of useful functions for dealing with DOM elements.
+
+fleegix.dom.getViewportWidth
+
+  Syntax
+
+   fleegix.dom.getViewportWidth();
+
+  Description
+
+   Returns the width in pixels of the browser window.
+
+  Examples
+
+var w = fleegix.dom.getViewportWidth();
+
+fleegix.dom.getViewportHeight
+
+  Syntax
+
+   fleegix.dom.getViewportHeight();
+
+  Description
+
+   Returns the height in pixels of the browser window.
+
+  Examples
+
+var h = fleegix.dom.getViewportHeight();
+
+fleegix.dom.center
+
+  Syntax
+
+   fleegix.dom.center(someNode);
+
+  Parameters
+
+   someNode (HTMLElement) -- The DOM element you wish to center both
+   horizontally and vertically.
+
+  Description
+
+   Horizontally and vertically centers a DOM element using absolute
+   positioning (for example, a div for a dialog box).
+
+  Examples
+
+var centerDiv = document.getElementById('someDiv');
+fleegix.dom.center(centerDiv);
+
+                                      Css
+     _________________________________________________________________
+
+   Contains a couple of useful functions for working with CSS.
+
+fleegix.css.addClass
+
+  Syntax
+
+   fleegix.css.addClass(someNode, someClass);
+
+  Parameters
+
+   someNode (HTMLElement) -- The DOM node you wish to add a CSS class to.
+
+   someClass (String) -- The CSS class you wish to add.
+
+  Description
+
+   Adds a CSS class to a DOM element. Multiple classes are added as a
+   space-delimited list.
+
+  Examples
+
+var someDiv = document.getElementById('someDiv');
+fleegix.css.addClass(someDiv, 'someCssClass');
+
+fleegix.css.removeClass
+
+  Syntax
+
+   fleegix.css.removeClass(someNode, someClass);
+
+  Parameters
+
+   someNode (HTMLElement) -- The DOM node you wish to remove a CSS class
+   from.
+
+   someClass (String) -- The CSS class you wish to remove.
+
+  Description
+
+   Removes a CSS class to a DOM element.
+
+  Examples
+
+var someDiv = document.getElementById('someDiv');
+fleegix.css.addClass(someDiv, 'someCssClass');
 
                                       URI
      _________________________________________________________________
