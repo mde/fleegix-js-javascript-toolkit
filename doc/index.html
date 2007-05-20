@@ -177,7 +177,7 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 <h3>Syntax</h3>
 
 <p>fleegix.event.unlisten(listenerObj, triggerEventName,
-    someFunction); 
+    someFunction);
 <em>(with a simple function)</em></p>
 
 <p>fleegix.event.unlisten(listenerObj, triggerEventName,
@@ -267,7 +267,7 @@ fleegix.event.publish('sciFi' pubObj);</code></pre>
 
 <h3>Syntax</h3>
 
-<p>fleegix.event.subscribe(channelName, subscriberObj, 
+<p>fleegix.event.subscribe(channelName, subscriberObj,
     handlerMethod);</p>
 
 <h3>Parameters</h3>
@@ -297,7 +297,7 @@ a JavaScript object as the publish-event payload.<p>
   };
 }
 
-fleegix.event.subscribe('sciFi', zardoz, 'handlePublish'); 
+fleegix.event.subscribe('sciFi', zardoz, 'handlePublish');
 
 var pubObj = {
     thisProp: 'foo',
@@ -337,12 +337,12 @@ channel to stop listening.</p>
 
 <hr/>
 
-<p>The XHR module has two convenience methods for doing the
-standard GET and POST requests, as well as the ability to do
+<p>The XHR module has two convenience methods for doing
+standard GET and POST requests, and also has the ability to do
 requests with more detailed control (such as using arbitrary
 HTTP methods such as PUT, or setting authentication headers
-or the format of the response). Uses XHR-object pooling and
-request queueing.</p>
+or the format of the response). The module uses XHR-object
+pooling and request queueing.</p>
 
 <a name="fleegix.xhr.doGet"></a>
 
@@ -350,11 +350,11 @@ request queueing.</p>
 
 <h3>Syntax</h3>
 
-<p>fleegix.xhr.doGet(handlerFunction, url, 
-    [responseFormat]); 
+<p>fleegix.xhr.doGet(handlerFunction, url,
+    [responseFormat]);
 <em>(Asynchronous requests)</em></p>
 
-<p>fleegix.xhr.doGet(url, [responseFormat]); 
+<p>fleegix.xhr.doGet(url, [responseFormat]);
 <em>(Synchronous requests)</em></p>
 
 <h3>Parameters</h3>
@@ -392,7 +392,7 @@ alert(s);
 function alertStatus(resp, id) {
   alert(resp.status);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
     'object');</code></pre>
 
 <a name="fleegix.xhr.doPost"></a>
@@ -401,11 +401,11 @@ fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
 
 <h3>Syntax</h3>
 
-<p>fleegix.xhr.doPost(handlerFunction, url, dataPayload, 
-    [responseFormat]); 
+<p>fleegix.xhr.doPost(handlerFunction, url, dataPayload,
+    [responseFormat]);
 <em>(Asynchronous requests)</em></p>
 
-<p>fleegix.xhr.doPost(url, dataPayload, [responseFormat]); 
+<p>fleegix.xhr.doPost(url, dataPayload, [responseFormat]);
 <em>(Synchronous requests)</em></p>
 
 <h3>Parameters</h3>
@@ -439,7 +439,7 @@ handler function.</p>
 fleegix.xhr.doPost(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112');
 
-var s = fleegix.xhr.doPost('random_textfile.txt', 
+var s = fleegix.xhr.doPost('random_textfile.txt',
   'foo=bar&baz=2112');
 alert(s);
 
@@ -447,7 +447,7 @@ function alertStatus(resp, id) {
   alert(resp.status);
   alert('Request ID was: ' + id);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt', 
+fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112', 'object');</code></pre>
 
 <a name="fleegix.xhr.doReq"></a>
@@ -501,7 +501,7 @@ values if they are not set:</p>
     browsers like IE6</li>
   <li>timeoutSeconds: 30 -- The number of seconds until the
     request times out. (Note this doesn't include time
-    spent in the request queue -- the clock starts when 
+    spent in the request queue -- the clock starts when
     the request is picked up and sent by the XHR object.)</li>
   <li>uber: false -- Give the request priority over any
     existing queued async requests. If uber property is set to
@@ -543,7 +543,7 @@ processing (i.e., it may have already completed), returns false.</p>
 
 <h3>Examples</h3>
 
-<pre><code>var id = fleegix.doGet(handlerFunction, 
+<pre><code>var id = fleegix.doGet(handlerFunction,
   '/some_file.rbx'); // Get a request ID number
 fleegix.xhr.abort(id); // Abort the request</code></pre>
 
@@ -553,9 +553,9 @@ fleegix.xhr.abort(id); // Abort the request</code></pre>
 
 <hr/>
 
-<p>Has a basic XML parser that converts a set of same-named
-XML tags (i.e, a tag list such as a set of search results)
-into an array of JavaScript Objects.</p>
+<p>This module has a basic XML parser that converts a set of
+same-named XML tags (i.e, a tag list such as a set of search
+results) into an array of JavaScript Objects.</p>
 
 <a name="fleegix.xml.parse"></a>
 
@@ -594,7 +594,7 @@ fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');</code></pre>
 <p>The Fleegix.js forms module contains a number of helpful
 functions for working with forms, including a serialize
 function for submitting data via XHR, a restore function
-which can pre-populate a form from a its serialized data,
+which can pre-populate a form from its serialized data,
 a form-to-hash converter, and a diff method which allows you
 to compare two different forms (useful in telling what a user
 has changed in a form).</p>
@@ -609,7 +609,7 @@ has changed in a form).</p>
 
 <h3>Parameters</h3>
 
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
 serialize.</p>
 
 <p>serializeOptions <span class="dataType">(Object)</span> -- Options for how to serialize
@@ -624,7 +624,7 @@ and the default values if they are not set:</p>
     string to elemA=foo&elemB=&elemC=bar)</li>
   <li>collapseMulti: false -- take values from elements that
     can return multiple values (multi-select, checkbox groups)
-    and collapse into a single, comman-delimited value
+    and collapse into a single, comma-delimited value
     (e.g., foo=asdf,qwer,zxcv)</li>
 </ul>
 
@@ -697,7 +697,7 @@ user settings, and uses them to pre-fill the form</code></pre>
 
 <h3>Parameters</h3>
 
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to 
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
 convert to a keyword/value object.</p>
 
 <h3>Description</h3>
@@ -747,9 +747,9 @@ that you want to compare to the first one.</p>
 
 <h3>Description</h3>
 
-<p>Allows you to tell how many fields and which fields are
-different between two forms, as well as what the values are
-for each differing field for both forms.  changed field.</p>
+<p>This module allows you to tell how many fields, and which
+fields, are different between two forms -- as well as the
+original and new value for all the changed fields.</p>
 
 <p>One practical use for this method is figuring what has changed
 in a form since it initially loaded. The easy way to do this is
@@ -817,7 +817,7 @@ values if they are not set:</p>
     animatinon in.</li>
   <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
   <li>doOnStart: null -- Function to execute as the animation starts</li>
-  <li>doAfterFinished: null -- Function to exectute after the animation
+  <li>doAfter: null -- Function to exectute after the animation
     completes</li>
 </ul>
 
@@ -853,7 +853,7 @@ values if they are not set:</p>
     animatinon in.</li>
   <li>trans: 'lightEaseIn' -- easing transition to use in the fade </li>
   <li>doOnStart: null -- Function to execute as the animation starts</li>
-  <li>doAfterFinished: null -- Function to exectute after the animation
+  <li>doAfter: null -- Function to exectute after the animation
     completes</li>
 </ul>
 
@@ -896,7 +896,7 @@ the JSON data format.</p>
 
 <h3>Examples</h3>
 
-<pre><code>var obj = { name: 'Rush', 
+<pre><code>var obj = { name: 'Rush',
     members: ['Geddy', 'Neil', 'Alex'], album: 2112 };
 var str = fleegix.json.serialize(obj);</code></pre>
 
@@ -1024,8 +1024,8 @@ alert(query); => alerts 'foo=2112&bar=wowzers&foo=1001.'</code></pre>
 
 <hr/>
 
-<p>A nice, clean wrapper for getting and setting cookie values
-in the browser.</p>
+<p>The code in this module provides a nice, clean wrapper for
+getting and setting cookie values in the browser.</p>
 
 <a name="fleegix.cookie.set"></a>
 
@@ -1064,7 +1064,7 @@ the browser,</p>
 
 <pre><code>fleegix.cookie.set('loginId');
 
-fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2, 
+fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2,
   minutes: 30 });</code></pre>
 
 <a name="fleegix.cookie.get"></a>
@@ -1103,7 +1103,7 @@ for. If omitted, assumes root ('/').</p>
 
 <p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
 
-<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If 
+<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If
 omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
@@ -1140,7 +1140,7 @@ by enforcing a one-window limit.</p>
 <p>popupOptions <span class="dataType">(Object)</span> -- Options for the window to be
 opened. Here is the list of possible properties to set, and
 the default values if they are not set:</p>
-<ul> 
+<ul>
   <li>width: null -- Width of the window to open. If unset,
     the window is a full-sized window</li>
   <li>height: null -- Height of the window to open. If unset,
@@ -1165,7 +1165,7 @@ method again will simply open the new URL in the same window.</p>
 
 <h3>Examples</h3>
 
-<pre><code>fleegix.popup.open('/search_window.rbx', 
+<pre><code>fleegix.popup.open('/search_window.rbx',
   { width: 480, height: 300 });</code></pre>
 
 <a name="fleegix.popup.close"></a>
@@ -1186,11 +1186,11 @@ method again will simply open the new URL in the same window.</p>
 
 <h3>Examples</h3>
 
-<pre><code>fleegix.popup.open('/search_window.rbx', 
+<pre><code>fleegix.popup.open('/search_window.rbx',
   { width: 480, height: 300 });
 fleegix.popup.close();</code></pre>
 
-<p>Copyright 2007 Matthew Eernisse, 
+<p>Copyright 2007 Matthew Eernisse,
 <a href="mailto:mde@fleegix.org">mde@fleegix.org</a>.</p>
 
 </body>
