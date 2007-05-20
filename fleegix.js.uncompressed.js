@@ -17,6 +17,41 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 
+fleegix.dom = new function() {
+  this.getViewportWidth = function () {
+    return fleegix.dom.getViewportMeasure('Width');
+  };
+  this.getViewportHeight = function () {
+    return fleegix.dom.getViewportMeasure('Height');
+  };
+  this.getViewportMeasure = function (s) {
+    // IE
+    if (document.all) {
+      if (document.documentElement &&
+        document.documentElement['client' + s]) {
+        return document.documentElement['client' + s];
+      }
+      else {
+        return document.body['client' + s];
+      }
+    }
+    // Moz/compat
+    else {
+      return window['inner' + s];
+    }
+  };
+  this.center = function (node) {
+    var nW = node.offsetWidth;
+    var nH = node.offsetHeight;
+    var vW = fleegix.dom.getViewportWidth();
+    var vH = fleegix.dom.getViewportHeight();
+    node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
+    node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
+    return true;
+  };
+};
+
+
 fleegix.popup = new function() {
   
   var self = this;
@@ -893,7 +928,7 @@ fleegix.event = new function () {
           var ex = reg.after[i];
           // Single functions
           if (!ex.execObj) {
-            var execFunction = ex;
+            var execFunction = ex.execMethod;
             execFunction.apply(window, args);
           }
           // Methods of objects
@@ -1300,12 +1335,12 @@ fleegix.fx = new function () {
   };
   this.blindUp = function (elem, opts) {
     var o = opts || {};
-    o.blindType = o.blindType || 'clip';
+    o.blindType = o.blindType || 'height';
     return doBlind(elem, o, 'up');
   };
   this.blindDown = function (elem, opts) {
     var o = opts || {};
-    o.blindType = o.blindType || 'clip';
+    o.blindType = o.blindType || 'height';
     return doBlind(elem, o, 'down');
   };
   this.setCSSProp = function (elem, p, v) {
@@ -1330,7 +1365,7 @@ fleegix.fx = new function () {
     return true;
   };
   this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-  this.hexToRGB = function (str, returnArray) {
+  this.hex2rgb = function (str, returnArray) {
     var rgb = [];
     var h = str.match(this.hexPat);
     if (h) {
@@ -1345,6 +1380,48 @@ fleegix.fx = new function () {
     else {
       throw('"' + str + '" not a valid hex value.');
     }
+  };
+  // Credits: Based on Dojo toolkit's HSV to RGB converter, which is
+  // based on C Code in "Computer Graphics -- Principles and Practice,"
+  // Foley et al, 1996, p. 593.
+  // input h is 0-360, s and v are 0-100, output is 0-255 for each of r,g,b
+  this.hsv2rgb = function (h, s, v) {
+    if (h == 360) { h = 0; }
+    s /= 100;
+    v /= 100;
+    var r = null;
+    var g = null;
+    var b = null;
+    if (s == 0){
+      // color is on black-and-white center line
+      // achromatic: shades of gray
+      r = v;
+      g = v;
+      b = v;
+    }
+    else {
+      // chromatic color
+      var hTemp = h / 60;    // h is now IN [0,6]
+      var i = Math.floor(hTemp);  // largest integer <= h
+      var f = hTemp - i;    // fractional part of h
+
+      var p = v * (1 - s);
+      var q = v * (1 - (s * f));
+      var t = v * (1 - (s * (1 - f)));
+
+      switch(i){
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+      }
+    }
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+    return [r, g, b];
   };
   function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
@@ -1361,29 +1438,55 @@ fleegix.fx = new function () {
     var o = {};
     var s = 0;
     var e = 0;
+    // Just clip
+    if (opts.blindType == 'clip') {
+      s = dir == 'down' ? 0 : elem.offsetHeight;
+      e = dir == 'down' ? elem.offsetHeight : 0;
+      s = [0, elem.offsetWidth, s, 0];
+      e = [0, elem.offsetWidth, e, 0];
+      o.props = { clip: [s, e] };
+    }
     // Change actual height -- requires ending
     // height for down direction
-    if (opts.blindType == 'height') {
+    else {
       if (dir == 'down') {
-        if (!opts.endHeight) {
-          throw('No endHeight defined for blindDown');
+        // Allow an explicit target height to be passed
+        // to avoid touching DOM, and for speed
+        if (opts.endHeight) {
+            e = opts.endHeight;
+        }
+        // If no explicit height is passed, temporarily
+        // remove any height set and temp append to the
+        // DOM to measure end height
+        else {
+            // Remove the style
+            elem.style.height = '';
+            // Dummy DOM node
+            var d = document.createElement('div');
+            d.position = 'absolute';
+            d.style.top = '-9999999999px';
+            d.style.left = '-9999999999px';
+            // Remove from parent node, append to dummy node
+            var par = elem.parentNode;
+            var ch = par.removeChild(elem);
+            d.appendChild(ch);
+            document.body.appendChild(d);
+            // This is how high it will be
+            e = ch.offsetHeight;
+            // Remove from dummy node, set height to zero,
+            // and put it back where it was
+            elem = d.removeChild(ch);
+            var x = document.body.removeChild(d);
+            elem.style.height = '0px';
+            par.appendChild(elem);
         }
         s = 0;
-        e = opts.endHeight;
       }
       else {
         s = elem.offsetHeight;
         e = 0;
       }
       o.props = { height: [s, e] };
-    }
-    // Just clip
-    else {
-      s = dir == 'down' ? 0 : elem.offsetHeight;
-      e = dir == 'down' ? elem.offsetHeight : 0;
-      s = [0, elem.offsetWidth, s, 0];
-      e = [0, elem.offsetWidth, e, 0];
-      o.props = { clip: [s, e] };
     }
     for (p in opts) {
       o[p] = opts[p];
@@ -1459,8 +1562,8 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
   var endVal = this.props[key][1];
   var trans = this.transitions[this.trans];
   if (key.toLowerCase().indexOf('color') > -1) {
-    var arrStart = fleegix.fx.hexToRGB(startVal, true);
-    var arrEnd = fleegix.fx.hexToRGB(endVal, true);
+    var arrStart = fleegix.fx.hex2rgb(startVal, true);
+    var arrEnd = fleegix.fx.hex2rgb(endVal, true);
     var arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
       var s = arrStart[i];
@@ -1627,36 +1730,19 @@ fleegix.cookie = new function() {
 fleegix.cookie.constructor = null;
 
 
-fleegix.ui = new function() {
-  this.getViewportWidth = function () {
-    return fleegix.ui.getViewportMeasure('Width');
-  };
-  this.getViewportHeight = function () {
-    return fleegix.ui.getViewportMeasure('Height');
-  };
-  this.getViewportMeasure = function (s) {
-    // IE
-    if (document.all) {
-      if (document.documentElement && 
-        document.documentElement['client' + s]) {
-        return document.documentElement['client' + s];
-      }
-      else {
-        return document.body['client' + s];
-      }
-    }
-    // Moz/compat
-    else {
-      return window['inner' + s];
-    }
-  };
-  this.center = function (node) {
-    var nW = node.offsetWidth;
-    var nH = node.offsetHeight;
-    var vW = fleegix.ui.getViewportWidth();
-    var vH = fleegix.ui.getViewportHeight();
-    node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
-    node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
-  };
+fleegix.css = new function() {
+    this.addCssClass = function (elem, s) {
+        removeCssClass(elem, s);
+        var c = elem.className;
+        elem.className = c += ' ' + s;
+    };
+    this.removeCssClass = function (elem, s) {
+        var c = elem.className;
+        // Esc backslashes in regex pattern
+        var pat = '\\b' + s + '\\b';
+        pat = new RegExp(pat);
+        c = c.replace(pat, '');
+        elem.className = c;
+    };
 };
-fleegix.ui.constructor = null;
+

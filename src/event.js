@@ -100,7 +100,7 @@ fleegix.event = new function () {
           var ex = reg.after[i];
           // Single functions
           if (!ex.execObj) {
-            var execFunction = ex;
+            var execFunction = ex.execMethod;
             execFunction.apply(window, args);
           }
           // Methods of objects

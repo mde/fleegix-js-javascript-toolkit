@@ -45,6 +45,7 @@ fleegix.dom = new function() {
     var vH = fleegix.dom.getViewportHeight();
     node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
     node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
+    return true;
   };
 };
 
