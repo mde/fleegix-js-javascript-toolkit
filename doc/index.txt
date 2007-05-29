@@ -710,7 +710,7 @@ fleegix.fx.fadeOut
        animatinon in.
      * trans: 'lightEaseIn' -- easing transition to use in the fade
      * doOnStart: null -- Function to execute as the animation starts
-     * doAfter: null -- Function to exectute after the animation
+     * doAfterFinished: null -- Function to exectute after the animation
        completes
 
   Description
@@ -742,7 +742,7 @@ fleegix.fx.fadeIn
        animatinon in.
      * trans: 'lightEaseIn' -- easing transition to use in the fade
      * doOnStart: null -- Function to execute as the animation starts
-     * doAfter: null -- Function to exectute after the animation
+     * doAfterFinished: null -- Function to exectute after the animation
        completes
 
   Description
@@ -774,7 +774,7 @@ fleegix.fx.blindUp
        animatinon in.
      * trans: 'lightEaseIn' -- easing transition to use in the fade
      * doOnStart: null -- Function to execute as the animation starts
-     * doAfter: null -- Function to exectute after the animation
+     * doAfterFinished: null -- Function to exectute after the animation
      * blindType: 'height' -- Change the actual height of the DOM element
        during the wipe.
 
@@ -814,7 +814,7 @@ fleegix.fx.blindDown
        animatinon in.
      * trans: 'lightEaseIn' -- easing transition to use in the fade
      * doOnStart: null -- Function to execute as the animation starts
-     * doAfter: null -- Function to exectute after the animation
+     * doAfterFinished: null -- Function to exectute after the animation
      * blindType: 'height' -- Change the actual height of the DOM element
        during the wipe.
 
