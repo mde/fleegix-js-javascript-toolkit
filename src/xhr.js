@@ -461,7 +461,6 @@ fleegix.xhr = new function () {
     }
   };
   this.handleErrDefault = function (r) {
-    console.log(r);
     var errorWin;
     // Create new window and display error
     try {
