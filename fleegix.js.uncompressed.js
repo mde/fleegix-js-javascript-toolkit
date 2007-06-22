@@ -793,7 +793,6 @@ fleegix.xhr = new function () {
     }
   };
   this.handleErrDefault = function (r) {
-    console.log(r);
     var errorWin;
     // Create new window and display error
     try {
@@ -858,7 +857,11 @@ fleegix.event = new function () {
     var listenReg = tgtObj[tgtMeth] ? 
       tgtObj[tgtMeth].listenReg : null;
     
-    // Create the registry of listeners if need be
+    // Create the registry of handlers if it does not exist
+    // It will contain all the info needed to run all the attached
+    // handlers -- hanging this property on the actual handler
+    // (e.g. onclick, onmousedown, onload) to avoid adding visible
+    // properties on the object.
     // -----------------
     if (!listenReg) {
       listenReg = {};
@@ -875,6 +878,11 @@ fleegix.event = new function () {
       // Replace the original method with the executor proxy
       tgtObj[tgtMeth] = function () {
         var reg = tgtObj[tgtMeth].listenReg;
+        if (!reg) {
+            throw('Cannot execute handlers. Something' +
+                ' (likely another JavaScript library) has' +
+                ' removed the fleegix.event.listen handler registry.');
+        }
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);

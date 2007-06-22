@@ -561,7 +561,6 @@ this.idleTransporters.push(req.transporterId);
 }
 };
 this.handleErrDefault=function(r){
-console.log(r);
 var _74;
 try{
 _74=window.open("","errorWin");
@@ -619,6 +618,9 @@ _7b.orig.methCode=_79[_7a];
 _7b.after=[];
 _79[_7a]=function(){
 var reg=_79[_7a].listenReg;
+if(!reg){
+throw ("Cannot execute handlers. Something"+" (likely another JavaScript library) has"+" removed the fleegix.event.listen handler registry.");
+}
 var _7d=[];
 for(var i=0;i<arguments.length;i++){
 _7d.push(arguments[i]);
