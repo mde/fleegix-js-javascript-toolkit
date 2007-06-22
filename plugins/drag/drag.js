@@ -45,7 +45,16 @@ fleegix.drag.DragManager = new function () {
     this.raiseDraggable(containerNode.id);
   };
   this.setUpDrag = function (e) {
-    var d = this.dragMap[e.target.id];
+    var elem = e.target;
+    var d = this.dragMap[elem.id];
+    // Look up the DOM hierarchy until we find
+    //something in the map of raiseable nodes
+    while (!d && elem != document.body) {
+      if (elem.parentNode) {
+        elem = elem.parentNode;
+        d = this.dragMap[elem.id];
+      }
+    }
     if (d) {
       this.currentDraggable = d;
       this.currentDraggable.startDrag();
