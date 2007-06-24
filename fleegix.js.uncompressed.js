@@ -853,6 +853,7 @@ fleegix.event = new function () {
   this.listen = function () {
     var tgtObj = arguments[0]; // Target object for the new listener
     var tgtMeth = arguments[1]; // Method to listen for
+    if (!tgtObj) { throw('fleegix.listen called on an object that does not exist.'); }
     // Look to see if there's already a registry of listeners
     var listenReg = tgtObj[tgtMeth] ? 
       tgtObj[tgtMeth].listenReg : null;

@@ -607,6 +607,9 @@ var _78={};
 this.listen=function(){
 var _79=arguments[0];
 var _7a=arguments[1];
+if(!_79){
+throw ("fleegix.listen called on an object that does not exist.");
+}
 var _7b=_79[_7a]?_79[_7a].listenReg:null;
 if(!_7b){
 _7b={};
