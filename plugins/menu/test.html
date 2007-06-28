@@ -1,0 +1,79 @@
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Test for Fleegix.js Drag Plugin</title>
+
+<script type="text/javascript" src="../../fleegix.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+
+<script type="text/javascript">
+
+var $ = function (id) {
+  return document.getElementById(id);
+};
+
+function init() {
+  var c = $('clicker');
+  var items = [
+    new fleegix.menu.ContextMenuItem({
+      display: "Do Alert 'foo' ...",
+      handleClick: function () { alert('foo'); } }),
+    new fleegix.menu.ContextMenuItem({
+      display: "Go to Yahoo.com",
+      handleClick: function () { location = 'http://www.yahoo.com/'; } }),
+    new fleegix.menu.ContextMenuItem({
+      display: "Do Alert 'bar' ...",
+      handleClick: function () { alert('bar'); } })
+  ];
+  fleegix.menu.MenuManager.createContextMenu(c, items);
+}
+
+fleegix.event.listen(window, 'onload', init);
+
+</script>
+
+<style type="text/css">
+
+*{
+  font-family: "Lucida Grande", "Verdana", sans-serif;
+  font-size: 11px;
+}
+#container {
+    position: relative;
+    padding: 12px;
+}
+#contextMenu {
+  background-color: #fff;
+  border: 1px solid #aaa;
+}
+#contextMenu a {
+  display: block;
+  padding: 5px;
+  min-width: 114px;
+  cursor: pointer;
+}
+#contextMenu a:hover {
+  background-color: #5c8;
+  color: #fff;
+}
+
+</style>
+
+</head>
+
+<body>
+    <div id="container">
+      <div id="clicker" 
+        style="width: 300px; height: 300px; background-color: #ddd;">
+        Right-click anywhere on me to see a contextual menu.
+      </div>
+    </div>
+</body>
+
+</html>
+
+
