@@ -28,14 +28,20 @@ if (typeof fleegix.template == 'undefined') { fleegix.template = {}; }
 //    data object will still show in the template as
 //    ${ variable_name }. If set to false, those variables in
 //    the template are replaced with empty strings
+// preventCache -- Boolean, setting to true will always pull
+//    down a fresh copy of the template -- otherwise the template
+//    string gets stored in fleegix.template.markupCache so that
+//    different UI elements sharing the same template file won't
+//    all have to make the server round-trip to get their template
+//    string.
 fleegix.template.Templater = function (p) {
   var params = p || {}
   var opts = params.options || {};
   this.markup = params.markup || '';
   this.markupFile = '';
   this.data = params.data || {};
-  this.requireAllKeys = typeof opts.requireAllKeys == 'boolean' ?
-    opts.requireAllKeys : true;
+  this.requireAllKeys = typeof params.requireAllKeys == 'boolean' ?
+    params.requireAllKeys : true;
   if (!this.markup) {
     var _this = this;
     this.markupFile = params.markupFile;
