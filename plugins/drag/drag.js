@@ -110,6 +110,8 @@ fleegix.drag.DragWindow.prototype.startDrag = function () {
     parseInt(this.containerNode.style.left);
   this.clickOffsetY = d.yPos -
     parseInt(this.containerNode.style.top);
+  // Turn off text selection in IE while dragging
+  document.onselectstart = function () { return false; };
 };
 fleegix.drag.DragWindow.prototype.drag = function () {
   var d = fleegix.drag;
@@ -117,8 +119,15 @@ fleegix.drag.DragWindow.prototype.drag = function () {
     (d.xPos - this.clickOffsetX) + 'px';
   this.containerNode.style.top =
     (d.yPos - this.clickOffsetY) + 'px';
+  // Hacky way of preventing text selection in FF
+  // for the entire doc -- inserting a CSS rule for
+  // -moz-user-select for all elements or something
+  // seems like a lot of work
+  document.body.focus();
 };
 fleegix.drag.DragWindow.prototype.drop = function () {
+  // Re-enable text selection in IE
+  document.onselectstart = null;
 };
 // Event listeners for dragging, raising DragWindow, dropping
 fleegix.event.listen(document, 'onmousemove',
