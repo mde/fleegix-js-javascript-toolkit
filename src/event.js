@@ -5,9 +5,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,20 +17,31 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.event = new function () {
-  
+
   // List of handlers for event listeners
   var listenerCache = [];
   // List of channels being published to
   var channels = {};
-  
+
   this.listen = function () {
     var tgtObj = arguments[0]; // Target object for the new listener
     var tgtMeth = arguments[1]; // Method to listen for
     if (!tgtObj) { throw('fleegix.listen called on an object that does not exist.'); }
+
+    // Add dummy onmousewheel that allows us to fake
+    // old-school event registration with Firefox's
+    // XUL mousewheel event
+    if (tgtMeth == 'onmousewheel') {
+      if (window.addEventListener &&
+        typeof tgtObj.onmousewheel == 'undefined') {
+        tgtObj.onmousewheel = null;
+      }
+    }
+
     // Look to see if there's already a registry of listeners
-    var listenReg = tgtObj[tgtMeth] ? 
+    var listenReg = tgtObj[tgtMeth] ?
       tgtObj[tgtMeth].listenReg : null;
-    
+
     // Create the registry of handlers if it does not exist
     // It will contain all the info needed to run all the attached
     // handlers -- hanging this property on the actual handler
@@ -39,11 +50,11 @@ fleegix.event = new function () {
     // -----------------
     if (!listenReg) {
       listenReg = {};
-      // The original obj and method name 
+      // The original obj and method name
       listenReg.orig = {}
-      listenReg.orig.obj = tgtObj, 
+      listenReg.orig.obj = tgtObj,
       listenReg.orig.methName = tgtMeth;
-      // Preserve any existing listener 
+      // Preserve any existing listener
       if (tgtObj[tgtMeth]) {
         listenReg.orig.methCode = tgtObj[tgtMeth];
       }
@@ -72,7 +83,7 @@ fleegix.event = new function () {
           tgtObj.addEventListener) {
           // Normalize the different event models
           var ev = null;
-          // Try to find an event if we're not handed one 
+          // Try to find an event if we're not handed one
           if (!args.length) {
             try {
               switch (true) {
@@ -108,17 +119,25 @@ fleegix.event = new function () {
         // Execute all the handler functions registered
         for (var i = 0; i < reg.after.length; i++) {
           var ex = reg.after[i];
+          var f = null; // Func to execute
+          var c = null; // Execution context
           // Single functions
           if (!ex.execObj) {
-            var execFunction = ex.execMethod;
-            execFunction.apply(window, args);
+            f = ex.execMethod;
+            c = window;
           }
           // Methods of objects
           else {
-            execObj = ex.execObj;
-            execMethod = ex.execMethod;
-            // Pass args and exec in correct scope
-            execObj[execMethod].apply(execObj, args);
+            f = ex.execObj[ex.execMethod];
+            c = ex.execObj;
+          };
+          // Make sure there's something to execute
+          if (typeof f != 'function') {
+            throw(f + ' is not an executable function.');
+          }
+          // Pass args and exec in correct scope
+          else {
+            f.apply(c, args);
           }
           ev = args[0];
           // Stop propagation if needed
@@ -140,11 +159,17 @@ fleegix.event = new function () {
             }
           }
         }
-         
+
       }
       tgtObj[tgtMeth].listenReg = listenReg;
       // Add to global cache -- so we can remove listeners on unload
       listenerCache.push(tgtObj[tgtMeth].listenReg);
+      // Add XUL event for Firefox mousewheel
+      if (tgtMeth == 'onmousewheel') {
+        if (window.addEventListener) {
+          tgtObj.addEventListener('DOMMouseScroll', tgtObj.onmousewheel, false);
+        }
+      }
     }
     // Add the new handler to the listener registry
     // -----------------
@@ -163,21 +188,22 @@ fleegix.event = new function () {
     }
     for (var x in o) { r[x] = o[x] }
     listenReg.after.push(r);
-    
+
     tgtObj[tgtMeth].listenReg = listenReg;
+
   };
   this.unlisten = function () {
     var tgtObj = arguments[0]; // Obj from which to remove
     var tgtMeth = arguments[1]; // Trigger method
-    var listenReg = tgtObj[tgtMeth] ? 
+    var listenReg = tgtObj[tgtMeth] ?
       tgtObj[tgtMeth].listenReg : null;
     var remove = null;
-    
+
     // Bail out if no handlers
     if (!listenReg) {
       return false;
     }
-    
+
     // Simple function
     // Remove the handler if it's in the list
     for (var i = 0; i < listenReg.after.length; i++) {
@@ -189,7 +215,7 @@ fleegix.event = new function () {
       }
       // Object and method
       else {
-        if (ex[0] == arguments[2] && ex[1] == 
+        if (ex[0] == arguments[2] && ex[1] ==
           arguments[3]) {
           listenReg.after.splice(i, 1);
         }
@@ -236,7 +262,7 @@ fleegix.event = new function () {
         var aud = channels[unsubscr].audience;
         for (var i = 0; i < aud.length; i++) {
           if (aud[i][0] == obj) {
-             aud.splice(i, 1); 
+             aud.splice(i, 1);
           }
         }
       }
@@ -246,7 +272,7 @@ fleegix.event = new function () {
     // Make sure the channel exists
     if (channels[pub]) {
       aud = channels[pub].audience;
-      // Pass the published data to all the 
+      // Pass the published data to all the
       // obj/methods listening to the channel
       for (var i = 0; i < aud.length; i++) {
         var listenerObject = aud[i][0];
