@@ -211,7 +211,7 @@ fleegix.form.toHash = function (f, o) {
       var en = '';
       // Using Rails-/PHP-style name="foo[bar]"
       // means you can go hierarchical if you want
-      if (opts.hierarchical && (st > -1) && (sp > -1)) {
+      if (opts.hierarchical && (st > 0) && (sp > 2)) {
           sb = elem.name.substring(0, st);
           en = elem.name.substring(st + 1, sp);
           if (typeof h[sb] == 'undefined') { h[sb] = {}; }

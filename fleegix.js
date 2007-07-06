@@ -130,7 +130,7 @@ var st=elem.name.indexOf("[");
 var sp=elem.name.indexOf("]");
 var sb="";
 var en="";
-if(_1e.hierarchical&&(st>-1)&&(sp>-1)){
+if(_1e.hierarchical&&(st>0)&&(sp>2)){
 sb=elem.name.substring(0,st);
 en=elem.name.substring(st+1,sp);
 if(typeof h[sb]=="undefined"){
