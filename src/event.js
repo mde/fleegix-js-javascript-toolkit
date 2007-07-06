@@ -105,6 +105,9 @@ fleegix.event = new function () {
               ev = window.event;
             }
           }
+          else {
+            ev = args[0];
+          }
           if (ev) {
             // Set both target and srcElement
             if (typeof ev.target == 'undefined') {
@@ -112,6 +115,15 @@ fleegix.event = new function () {
             }
             if (typeof ev.srcElement == 'undefined') {
               ev.srcElement = ev.target;
+            }
+            // Handle delta differences for mousewheel
+            if (ev.type == 'DOMMouseScroll' || ev.type == 'mousewheel') {
+              if (ev.wheelDelta) {
+                ev.delta = ev.wheelDelta / 120;
+              }
+              else if (ev.detail) {
+                ev.delta = -ev.detail / 3;
+              }
             }
             args[0] = ev;
           }
