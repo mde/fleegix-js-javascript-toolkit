@@ -20,6 +20,7 @@
 */
 
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
+fleegix.form = {};
 /**
  * Serializes the data from all the inputs in a Web form
  * into a query-string style string.
@@ -34,11 +35,12 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
  *   includeEmpty: (Boolean) include keys in the string for
  *     all elements, even if they have no value set (e.g.,
  *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
+ *   pedantic: (Boolean) include the values of elements like
+ *      button or image
  * @returns query-string style String of variable-value pairs
  */
-fleegix.form = {};
 fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toHash(f);
+  var h = fleegix.form.toHash(f, o);
   var opts = o || {};
   var str = '';
   var pat = null;
@@ -81,9 +83,28 @@ fleegix.form.serialize = function (f, o) {
   return str;
 };
 
-fleegix.form.toHash = function (f) {
+/**
+ * Converts the values in an HTML form into a JS object
+ * Elements with multiple values like sets of radio buttons
+ * become arrays
+ * @param f -- HTML form element to convert into a JS object
+ * @param o -- JS Object of options:
+ *    pedantic: (Boolean) include the values of elements like
+ *      button or image
+ *    hierarchical: (Boolean) if the form is using Rails-/PHP-style
+ *      name="foo[bar]" inputs, setting this option to
+ *      true will create a hierarchy of objects in the
+ *      resulting JS object, where some of the properties
+ *      of the objects are sub-objects with values pulled
+ *      from the form. Note: this only supports one level
+ *      of nestedness
+ * hierarchical option code by Kevin Faulhaber, kjf@kjfx.net
+ * @returns JavaScript object representation of the contents
+ * of the form.
+ */
+fleegix.form.toHash = function (f, o) {
+  var opts = o || {};
   var h = {};
-
   function expandToArr(orig, val) {
     if (orig) {
       var r = null;
@@ -91,65 +112,85 @@ fleegix.form.toHash = function (f) {
         r = [];
         r.push(orig);
       }
-      else {
-        r = orig;
-      }
+      else { r = orig; }
       r.push(val);
       return r;
     }
-    else {
-      return val;
-    }
+    else { return val; }
   }
 
   for (i = 0; i < f.elements.length; i++) {
     elem = f.elements[i];
-
-    switch (elem.type) {
-      // Text fields, hidden form elements
-      case 'text':
-      case 'hidden':
-      case 'password':
-      case 'textarea':
-      case 'select-one':
-        h[elem.name] = elem.value || null;
-        break;
-
-      // Multi-option select
-      case 'select-multiple':
-        h[elem.name] = null;
-        for(var j = 0; j < elem.options.length; j++) {
-          var o = elem.options[j];
-          if(o.selected) {
-            h[elem.name] = expandToArr(h[elem.name], o.value);
+    // Elements should have a name
+    if (elem.name) {
+      var st = elem.name.indexOf('[');
+      var sp = elem.name.indexOf(']');
+      var sb = '';
+      var en = '';
+      // Using Rails-/PHP-style name="foo[bar]"
+      // means you can go hierarchical if you want
+      if (opts.hierarchical && (st > -1) && (sp > -1)) {
+          sb = elem.name.substring(0, st);
+          en = elem.name.substring(st + 1, sp);
+          if (typeof h[sb] == 'undefined') { h[sb] = {}; }
+          var c = h[sb];
+          var n = en;
+      }
+      else {
+          var c = h;
+          var n = elem.name;
+      }
+      switch (elem.type) {
+        // Text fields, hidden form elements, etc.
+        case 'text':
+        case 'hidden':
+        case 'password':
+        case 'textarea':
+        case 'select-one':
+          c[n] = elem.value || null;
+          break;
+        // Multi-option select
+        case 'select-multiple':
+          c[n] = null;
+          for(var j = 0; j < elem.options.length; j++) {
+            var o = elem.options[j];
+            if(o.selected) {
+              c[n] = expandToArr(c[n], o.value);
+            }
           }
-        }
-        break;
-
-      // Radio buttons
-      case 'radio':
-        if (typeof h[elem.name] == 'undefined') {
-          h[elem.name] = null; }
-        if (elem.checked) {
-          h[elem.name] = elem.value;
-        }
-        break;
-
-      // Checkboxes
-      case 'checkbox':
-        if (typeof h[elem.name] == 'undefined') {
-          h[elem.name] = null; }
-        if (elem.checked) {
-          h[elem.name] = expandToArr(h[elem.name], elem.value);
-        }
-        break;
-
+          break;
+        // Radio buttons
+        case 'radio':
+          if (typeof c[n] == 'undefined') {
+            c[n] = null; }
+          if (elem.checked) {
+            c[n] = elem.value;
+          }
+          break;
+        // Checkboxes
+        case 'checkbox':
+          if (typeof c[n] == 'undefined') {
+            c[n] = null; }
+          if (elem.checked) {
+            c[n] = expandToArr(c[n], elem.value);
+          }
+          break;
+        // Pedantic
+        case 'submit':
+        case 'reset':
+        case 'file':
+        case 'image':
+        case 'button':
+          if (opts.pedantic) { c[n] = elem.value || null; }
+          break;
+      }
     }
   }
   return h;
 };
 
-fleegix.form.restore = function (form, str) {
+fleegix.form.restore = function (form, str, o) {
+  var opts = o || {};
   var arr = str.split('&');
   var d = {};
   for (var i = 0; i < arr.length; i++) {
@@ -174,10 +215,10 @@ fleegix.form.restore = function (form, str) {
       val = d[elem.name];
       switch (elem.type) {
         case 'text':
-          case 'hidden':
-          case 'password':
-          case 'textarea':
-          case 'select-one':
+        case 'hidden':
+        case 'password':
+        case 'textarea':
+        case 'select-one':
           elem.value = decodeURIComponent(val);
           break;
         case 'radio':
@@ -200,6 +241,15 @@ fleegix.form.restore = function (form, str) {
                 opt.selected = true;
               }
             }
+          }
+          break;
+        case 'submit':
+        case 'reset':
+        case 'file':
+        case 'image':
+        case 'button':
+          if (opts.pedantic) {
+            elem.value = decodeURIComponent(val);
           }
           break;
       }
