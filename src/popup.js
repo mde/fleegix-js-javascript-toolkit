@@ -15,23 +15,22 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.popup = new function() {
-  
-  var self = this;
+fleegix.popup = new function () {
+  var _this = this;
   this.win = null;
-  this.open = function(url, optParam) {
+  this.open = function (url, optParam) {
     var opts = optParam || {}
     var str = '';
     var propList = {
-      'width':'', 
-      'height':'', 
-      'location':0, 
-      'menubar':0, 
-      'resizable':1, 
-      'scrollbars':0,
-      'status':0,
-      'titlebar':1,
-      'toolbar':0
+      'width': '', 
+      'height': '', 
+      'location': 0, 
+      'menubar': 0, 
+      'resizable': 1, 
+      'scrollbars': 0,
+      'status': 0,
+      'titlebar': 1,
+      'toolbar': 0
       };
     for (var prop in propList) {
       str += prop + '=';
@@ -42,25 +41,24 @@ fleegix.popup = new function() {
     if (len) {
       str = str.substr(0, len-1);
     }
-    if(!self.win || self.win.closed) {
-      self.win = window.open(url, 'thePopupWin', str);
+    if(!_this.win || _this.win.closed) {
+      _this.win = window.open(url, 'thePopupWin', str);
     }
     else {	  
-      self.win.focus(); 
-      self.win.document.location = url;
+      _this.win.focus(); 
+      _this.win.document.location = url;
     }
   };
-  this.close = function() {
-    if (self.win) {
-      self.win.window.close();
-      self.win = null;
+  this.close = function () {
+    if (_this.win) {
+      _this.win.window.close();
+      _this.win = null;
     }
   };
-  this.goURLMainWin = function(url) {
+  this.goURLMainWin = function (url) {
     location = url;
-    self.close();
+    _this.close();
   };
-}
-fleegix.popup.constructor = null;
+};
 
 
