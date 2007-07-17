@@ -642,27 +642,27 @@ fleegix.event=new function(){
 var _80=[];
 var _81={};
 this.listen=function(){
-var _82=arguments[0];
+var obj=arguments[0];
 var _83=arguments[1];
-if(!_82){
+if(!obj){
 throw ("fleegix.listen called on an object that does not exist.");
 }
 if(_83=="onmousewheel"){
-if(window.addEventListener&&typeof _82.onmousewheel=="undefined"){
-_82.onmousewheel=null;
+if(window.addEventListener&&typeof obj.onmousewheel=="undefined"){
+obj.onmousewheel=null;
 }
 }
-var _84=_82[_83]?_82[_83].listenReg:null;
+var _84=obj[_83]?obj[_83].listenReg:null;
 if(!_84){
 _84={};
 _84.orig={};
-_84.orig.obj=_82,_84.orig.methName=_83;
-if(_82[_83]){
-_84.orig.methCode=_82[_83];
+_84.orig.obj=obj,_84.orig.methName=_83;
+if(obj[_83]){
+_84.orig.methCode=obj[_83];
 }
 _84.after=[];
-_82[_83]=function(){
-var reg=_82[_83].listenReg;
+obj[_83]=function(){
+var reg=obj[_83].listenReg;
 if(!reg){
 throw ("Cannot execute handlers. Something"+" (likely another JavaScript library) has"+" removed the fleegix.event.listen handler registry.");
 }
@@ -673,19 +673,19 @@ _86.push(arguments[i]);
 if(reg.orig.methCode){
 reg.orig.methCode.apply(reg.orig.obj,_86);
 }
-if(_82.attachEvent||_82.nodeType||_82.addEventListener){
+if(obj.attachEvent||obj.nodeType||obj.addEventListener){
 var ev=null;
 if(!_86.length){
 try{
 switch(true){
-case !!(_82.ownerDocument):
-ev=_82.ownerDocument.parentWindow.event;
+case !!(obj.ownerDocument):
+ev=obj.ownerDocument.parentWindow.event;
 break;
-case !!(_82.documentElement):
-ev=_82.documentElement.ownerDocument.parentWindow.event;
+case !!(obj.documentElement):
+ev=obj.documentElement.ownerDocument.parentWindow.event;
 break;
-case !!(_82.event):
-ev=_82.event;
+case !!(obj.event):
+ev=obj.event;
 break;
 default:
 ev=window.event;
@@ -721,12 +721,12 @@ for(var i=0;i<reg.after.length;i++){
 var ex=reg.after[i];
 var f=null;
 var c=null;
-if(!ex.execObj){
-f=ex.execMethod;
+if(!ex.context){
+f=ex.method;
 c=window;
 }else{
-f=ex.execObj[ex.execMethod];
-c=ex.execObj;
+f=ex.context[ex.method];
+c=ex.context;
 }
 if(typeof f!="function"){
 throw (f+" is not an executable function.");
@@ -750,51 +750,51 @@ ev.returnValue=false;
 }
 }
 };
-_82[_83].listenReg=_84;
-_80.push(_82[_83].listenReg);
+obj[_83].listenReg=_84;
+_80.push(obj[_83].listenReg);
 if(_83=="onmousewheel"){
 if(window.addEventListener){
-_82.addEventListener("DOMMouseScroll",_82.onmousewheel,false);
+obj.addEventListener("DOMMouseScroll",obj.onmousewheel,false);
 }
 }
 }
 var r={};
 var o={};
 if(typeof arguments[2]=="function"){
-r.execMethod=arguments[2];
+r.method=arguments[2];
 o=arguments[3]||{};
 }else{
-r.execObj=arguments[2];
-r.execMethod=arguments[3];
+r.context=arguments[2];
+r.method=arguments[3];
 o=arguments[4]||{};
 }
 for(var x in o){
 r[x]=o[x];
 }
 _84.after.push(r);
-_82[_83].listenReg=_84;
+obj[_83].listenReg=_84;
 };
 this.unlisten=function(){
-var _8f=arguments[0];
+var obj=arguments[0];
 var _90=arguments[1];
-var _91=_8f[_90]?_8f[_90].listenReg:null;
+var _91=obj[_90]?obj[_90].listenReg:null;
 var _92=null;
 if(!_91){
 return false;
 }
 for(var i=0;i<_91.after.length;i++){
-var ex=_91.after[i];
+var r=_91.after[i];
 if(typeof arguments[2]=="function"){
-if(ex==arguments[2]){
+if(r.method==arguments[2]){
 _91.after.splice(i,1);
 }
 }else{
-if(ex[0]==arguments[2]&&ex[1]==arguments[3]){
+if(r.context==arguments[2]&&r.method==arguments[3]){
 _91.after.splice(i,1);
 }
 }
 }
-_8f[_90].listenReg=_91;
+obj[_90].listenReg=_91;
 };
 this.flush=function(){
 for(var i=0;i<_80.length;i++){
@@ -863,7 +863,6 @@ return null;
 return ret.id;
 };
 };
-fleegix.event.constructor=null;
 fleegix.event.listen(window,"onunload",fleegix.event,"flush");
 fleegix.xml=new function(){
 var pat=/^[\s\n\r]+|[\s\n\r]+$/g;

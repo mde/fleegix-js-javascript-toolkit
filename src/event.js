@@ -17,30 +17,29 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.event = new function () {
-
   // List of handlers for event listeners
   var listenerCache = [];
   // List of channels being published to
   var channels = {};
 
   this.listen = function () {
-    var tgtObj = arguments[0]; // Target object for the new listener
-    var tgtMeth = arguments[1]; // Method to listen for
-    if (!tgtObj) { throw('fleegix.listen called on an object that does not exist.'); }
+    var obj = arguments[0]; // Target object for the new listener
+    var meth = arguments[1]; // Method to listen for
+    if (!obj) { throw('fleegix.listen called on an object that does not exist.'); }
 
     // Add dummy onmousewheel that allows us to fake
     // old-school event registration with Firefox's
     // XUL mousewheel event
-    if (tgtMeth == 'onmousewheel') {
+    if (meth == 'onmousewheel') {
       if (window.addEventListener &&
-        typeof tgtObj.onmousewheel == 'undefined') {
-        tgtObj.onmousewheel = null;
+        typeof obj.onmousewheel == 'undefined') {
+        obj.onmousewheel = null;
       }
     }
 
     // Look to see if there's already a registry of listeners
-    var listenReg = tgtObj[tgtMeth] ?
-      tgtObj[tgtMeth].listenReg : null;
+    var listenReg = obj[meth] ?
+      obj[meth].listenReg : null;
 
     // Create the registry of handlers if it does not exist
     // It will contain all the info needed to run all the attached
@@ -52,17 +51,17 @@ fleegix.event = new function () {
       listenReg = {};
       // The original obj and method name
       listenReg.orig = {}
-      listenReg.orig.obj = tgtObj,
-      listenReg.orig.methName = tgtMeth;
+      listenReg.orig.obj = obj,
+      listenReg.orig.methName = meth;
       // Preserve any existing listener
-      if (tgtObj[tgtMeth]) {
-        listenReg.orig.methCode = tgtObj[tgtMeth];
+      if (obj[meth]) {
+        listenReg.orig.methCode = obj[meth];
       }
       // Array of handlers to execute if the method fires
       listenReg.after = [];
       // Replace the original method with the executor proxy
-      tgtObj[tgtMeth] = function () {
-        var reg = tgtObj[tgtMeth].listenReg;
+      obj[meth] = function () {
+        var reg = obj[meth].listenReg;
         if (!reg) {
             throw('Cannot execute handlers. Something' +
                 ' (likely another JavaScript library) has' +
@@ -72,29 +71,29 @@ fleegix.event = new function () {
         for (var i = 0; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
-        // Execute the original code for the trigger
-        // method if there is any -- apply arguments
-        // passed, in the right execution context
+
+        // Try to be a good citizen -- preserve existing listeners
+        // Execute with arguments passed, in the right execution context
         if (reg.orig.methCode) {
           reg.orig.methCode.apply(reg.orig.obj, args);
         }
         // DOM events
-        if (tgtObj.attachEvent || tgtObj.nodeType ||
-          tgtObj.addEventListener) {
+        if (obj.attachEvent || obj.nodeType ||
+          obj.addEventListener) {
           // Normalize the different event models
           var ev = null;
           // Try to find an event if we're not handed one
           if (!args.length) {
             try {
               switch (true) {
-                case !!(tgtObj.ownerDocument):
-                  ev = tgtObj.ownerDocument.parentWindow.event;
+                case !!(obj.ownerDocument):
+                  ev = obj.ownerDocument.parentWindow.event;
                   break;
-                case !!(tgtObj.documentElement):
-                  ev = tgtObj.documentElement.ownerDocument.parentWindow.event;
+                case !!(obj.documentElement):
+                  ev = obj.documentElement.ownerDocument.parentWindow.event;
                   break;
-                case !!(tgtObj.event):
-                  ev = tgtObj.event;
+                case !!(obj.event):
+                  ev = obj.event;
                   break;
                 default:
                   ev = window.event;
@@ -134,14 +133,14 @@ fleegix.event = new function () {
           var f = null; // Func to execute
           var c = null; // Execution context
           // Single functions
-          if (!ex.execObj) {
-            f = ex.execMethod;
+          if (!ex.context) {
+            f = ex.method;
             c = window;
           }
           // Methods of objects
           else {
-            f = ex.execObj[ex.execMethod];
-            c = ex.execObj;
+            f = ex.context[ex.method];
+            c = ex.context;
           };
           // Make sure there's something to execute
           if (typeof f != 'function') {
@@ -173,13 +172,13 @@ fleegix.event = new function () {
         }
 
       }
-      tgtObj[tgtMeth].listenReg = listenReg;
+      obj[meth].listenReg = listenReg;
       // Add to global cache -- so we can remove listeners on unload
-      listenerCache.push(tgtObj[tgtMeth].listenReg);
+      listenerCache.push(obj[meth].listenReg);
       // Add XUL event for Firefox mousewheel
-      if (tgtMeth == 'onmousewheel') {
+      if (meth == 'onmousewheel') {
         if (window.addEventListener) {
-          tgtObj.addEventListener('DOMMouseScroll', tgtObj.onmousewheel, false);
+          obj.addEventListener('DOMMouseScroll', obj.onmousewheel, false);
         }
       }
     }
@@ -189,55 +188,53 @@ fleegix.event = new function () {
     var r = {}; // package of info about what to execute
     var o = {}; // options -- stopPropagation or preventDefault
     if (typeof arguments[2] == 'function') {
-      r.execMethod = arguments[2];
+      r.method = arguments[2];
       o = arguments[3] || {};
     }
     // Object and method
     else {
-      r.execObj = arguments[2];
-      r.execMethod = arguments[3];
+      r.context = arguments[2];
+      r.method = arguments[3];
       o = arguments[4] || {};
     }
     for (var x in o) { r[x] = o[x] }
     listenReg.after.push(r);
 
-    tgtObj[tgtMeth].listenReg = listenReg;
+    obj[meth].listenReg = listenReg;
 
   };
   this.unlisten = function () {
-    var tgtObj = arguments[0]; // Obj from which to remove
-    var tgtMeth = arguments[1]; // Trigger method
-    var listenReg = tgtObj[tgtMeth] ?
-      tgtObj[tgtMeth].listenReg : null;
+    var obj = arguments[0]; // Obj from which to remove
+    var meth = arguments[1]; // Trigger method
+    var listenReg = obj[meth] ?
+      obj[meth].listenReg : null;
     var remove = null;
 
-    // Bail out if no handlers
+    // Bail out if no handlers set
     if (!listenReg) {
       return false;
     }
-
-    // Simple function
     // Remove the handler if it's in the list
     for (var i = 0; i < listenReg.after.length; i++) {
-      var ex = listenReg.after[i];
+      var r = listenReg.after[i];
+      // Simple function
       if (typeof arguments[2] == 'function') {
-        if (ex == arguments[2]) {
+        if (r.method == arguments[2]) {
           listenReg.after.splice(i, 1);
         }
       }
       // Object and method
       else {
-        if (ex[0] == arguments[2] && ex[1] ==
+        if (r.context == arguments[2] && r.method ==
           arguments[3]) {
           listenReg.after.splice(i, 1);
         }
       }
     }
-     tgtObj[tgtMeth].listenReg = listenReg;
+    obj[meth].listenReg = listenReg;
   };
   this.flush = function () {
-    // Remove all the registered listeners to avoid
-    // IE6 memleak
+    // Remove all the registered listeners
     for (var i = 0; i < listenerCache.length; i++) {
       var reg = listenerCache[i];
       removeObj = reg.orig.obj;
@@ -317,8 +314,7 @@ fleegix.event = new function () {
     }
     return ret.id;
   };
-}
-fleegix.event.constructor = null;
-// Prevent memleak in IE6
+};
+// Clean up listeners
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
