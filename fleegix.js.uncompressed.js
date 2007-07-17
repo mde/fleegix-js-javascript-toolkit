@@ -52,23 +52,22 @@ fleegix.dom = new function() {
 };
 
 
-fleegix.popup = new function() {
-  
-  var self = this;
+fleegix.popup = new function () {
+  var _this = this;
   this.win = null;
-  this.open = function(url, optParam) {
+  this.open = function (url, optParam) {
     var opts = optParam || {}
     var str = '';
     var propList = {
-      'width':'', 
-      'height':'', 
-      'location':0, 
-      'menubar':0, 
-      'resizable':1, 
-      'scrollbars':0,
-      'status':0,
-      'titlebar':1,
-      'toolbar':0
+      'width': '', 
+      'height': '', 
+      'location': 0, 
+      'menubar': 0, 
+      'resizable': 1, 
+      'scrollbars': 0,
+      'status': 0,
+      'titlebar': 1,
+      'toolbar': 0
       };
     for (var prop in propList) {
       str += prop + '=';
@@ -79,26 +78,25 @@ fleegix.popup = new function() {
     if (len) {
       str = str.substr(0, len-1);
     }
-    if(!self.win || self.win.closed) {
-      self.win = window.open(url, 'thePopupWin', str);
+    if(!_this.win || _this.win.closed) {
+      _this.win = window.open(url, 'thePopupWin', str);
     }
     else {	  
-      self.win.focus(); 
-      self.win.document.location = url;
+      _this.win.focus(); 
+      _this.win.document.location = url;
     }
   };
-  this.close = function() {
-    if (self.win) {
-      self.win.window.close();
-      self.win = null;
+  this.close = function () {
+    if (_this.win) {
+      _this.win.window.close();
+      _this.win = null;
     }
   };
-  this.goURLMainWin = function(url) {
+  this.goURLMainWin = function (url) {
     location = url;
-    self.close();
+    _this.close();
   };
-}
-fleegix.popup.constructor = null;
+};
 
 
 
@@ -982,6 +980,9 @@ fleegix.event = new function () {
               ev = window.event;
             }
           }
+          else {
+            ev = args[0];
+          }
           if (ev) {
             // Set both target and srcElement
             if (typeof ev.target == 'undefined') {
@@ -989,6 +990,15 @@ fleegix.event = new function () {
             }
             if (typeof ev.srcElement == 'undefined') {
               ev.srcElement = ev.target;
+            }
+            // Handle delta differences for mousewheel
+            if (ev.type == 'DOMMouseScroll' || ev.type == 'mousewheel') {
+              if (ev.wheelDelta) {
+                ev.delta = ev.wheelDelta / 120;
+              }
+              else if (ev.detail) {
+                ev.delta = -ev.detail / 3;
+              }
             }
             args[0] = ev;
           }
@@ -1188,154 +1198,123 @@ fleegix.event.constructor = null;
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
-fleegix.xml = new function(){
-    
-    var self = this;
-    
-    // Takes an array of XML items, transforms into an array of JS objects
-    // Call it like this: res = fleegix.xml.parse(xml, 'Item'); 
-    this.parse = function(xmlDocElem, tagItemName) {
-        var xmlElemArray = new Array;
-        var xmlElemRow;
-        var objArray = [];
-        
-        // Rows returned
-        if (xmlDocElem.hasChildNodes()) {
-            xmlElemArray = xmlDocElem.getElementsByTagName(tagItemName);
-            xmlElemRow = xmlElemArray[0];
-            // Create array of objects and set properties
-            for (var j = 0; j < xmlElemArray.length; j++) {
-                xmlElemRow = xmlElemArray[j];
-                objArray[j] = self.xmlElem2Obj(xmlElemArray[j]);
-            }
-        }
-        return objArray;
-    };
-    
-    // Transforms an XML element into a JS object
-    this.xmlElem2Obj = function(xmlElem) {
-        var ret = new Object();
-        self.setPropertiesRecursive(ret, xmlElem);
-        return ret;
-    };
-    
-    this.setPropertiesRecursive = function(obj, node) {
-        if (node.childNodes.length > 0) {
-            for (var i = 0; i < node.childNodes.length; i++) {
-                if (node.childNodes[i].nodeType == 1 &&
-                  node.childNodes[i].firstChild) {
-                    // If node has only one child
-                    // set the obj property to the value of the node
-                    if(node.childNodes[i].childNodes.length == 1) {
-                        obj[node.childNodes[i].tagName] = 
-                        node.childNodes[i].firstChild.nodeValue;
-                    }
-                    // Otherwise this obj property is an array
-                    // Recurse to set its multiple properties
-                    else {
-                        obj[node.childNodes[i].tagName] = [];
-                        // Call recursively -- rinse and repeat
-                        // ==============
-                        self.setPropertiesRecursive(
-                        obj[node.childNodes[i].tagName], 
-                        node.childNodes[i]);
-                    }
-                }
-            }
-        }
-    };
-    
-    this.cleanXMLObjText = function(xmlObj) {
-        var cleanObj = xmlObj;
-        for (var prop in cleanObj) {
-            cleanObj[prop] = cleanText(cleanObj[prop]);
-        }
-        return cleanObj;
-    };
-    
-    this.cleanText = function(str) {
-        var ret = str;
-        ret = ret.replace(/\n/g, '');
-        ret = ret.replace(/\r/g, '');
-        ret = ret.replace(/\'/g, "\\'");
-        ret = ret.replace(/\[CDATA\[/g, '');
-        ret = ret.replace(/\]]/g, '');
-        return ret;
-    };
-    
-    this.rendered2Source = function(str) {
-        // =============
-        // Convert string of markup into format which will display
-        // markup in the browser instead of rendering it
-        // =============
-        var proc = str;    
-        proc = proc.replace(/</g, '&lt;');
-        proc = proc.replace(/>/g, '&gt;');
-        return '<pre>' + proc + '</pre>';
-    };
-    
-    /*
-    Works with embedded XML document structured like this:
-    =====================
-    <div id="xmlThingDiv" style="display:none;">
-        <xml>
-            <thinglist>
-                <thingsection sectionname="First Section o' Stuff">
-                    <thingitem>
-                        <thingproperty1>Foo</thingproperty1>
-                        <thingproperty2>Bar</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                    <thingitem>
-                        <thingproperty1>Free</thingproperty1>
-                        <thingproperty2>Beer</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                </thingsection> 
-                <thingsection sectionname="Second Section o' Stuff">
-                    <thingitem>
-                        <thingproperty1>Far</thingproperty1>
-                        <thingproperty2>Boor</thingproperty2>
-                        <thingproperty3>
-                            <![CDATA[Blah blah ...]]>
-                        </thingproperty3>
-                    </thingitem>
-                </thingsection>
-            </thinglist>
-        </xml>
-    </div>
-    
-    Call the function like this:
-    var xmlElem = getXMLDocElem('xmlThingDiv', 'thinglist');
-    --------
-    xmlDivId: For IE to pull using documentElement
-    xmlNodeName: For Moz/compat to pull using getElementsByTagName
-    */
-    
-    // Returns a single, top-level XML document node
-    this.getXMLDocElem = function(xmlDivId, xmlNodeName) {
-        var xmlElemArray = [];
-        var xmlDocElem = null;
-        if (document.all) {
-                var xmlStr = document.getElementById(xmlDivId).innerHTML;
-                var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-                xmlDoc.loadXML(xmlStr);    
-                xmlDocElem = xmlDoc.documentElement;
+fleegix.xml = new function (){
+  var pat = /^[\s\n\r]+|[\s\n\r]+$/g;
+  var expandToArr = function (orig, val) {
+    if (orig) {
+      var r = null;
+      if (typeof orig == 'string') {
+        r = [];
+        r.push(orig);
+      }
+      else { r = orig; }
+      r.push(val);
+      return r;
+    }
+    else { return val; }
+  };
+  // Parses an XML doc or doc fragment into a JS obj
+  // Values for multiple same-named tags a placed in
+  // an array
+  this.parse = function (node, tagItemName) {
+    var obj = {};
+    var kids = [];
+    if (tagItemName) {
+      kids = node.getElementsByTagName(tagItemName);
+    }
+    else {
+      kids = node.childNodes;
+    }
+    for (var i = 0; i < kids.length; i++) {
+      var k = kids[i];
+      // Blow by the stupid Mozilla linebreak nodes
+      if (k.nodeType == 1) {
+        var key = k.tagName;
+        // Tags with content
+        if (k.firstChild) {
+          // Node has only one child, a text node -- this is a leaf
+          if(k.childNodes.length == 1 && k.firstChild.nodeType == 3) {
+            // Either set plain value, or if this is a same-named
+            // tag, start stuffing values into an array 
+            obj[key] = expandToArr(obj[key],
+              k.firstChild.nodeValue.replace(pat, ''));
           }
-          // Moz/compat can access elements directly
+          // Node has children -- branch node, recurse
           else {
-            xmlElemArray = 
-                window.document.body.getElementsByTagName(xmlNodeName);
-            xmlDocElem = xmlElemArray[0]; ;
+            // Rinse and repeat
+            obj[key] = this.parse(k);
           }
-          return xmlDocElem;
-    };
-}
-fleegix.xml.constructor = null;
+        }
+        // Empty tags -- create an empty entry
+        else {
+          obj[key] = expandToArr(obj[key], null);
+        }
+      }
+    }
+    return obj;
+  };
+    
+  /*
+  Works with embedded XML document structured like this:
+  =====================
+  <div id="xmlThingDiv" style="display:none;">
+    <xml>
+      <thinglist>
+        <thingsection sectionname="First Section o' Stuff">
+          <thingitem>
+            <thingproperty1>Foo</thingproperty1>
+            <thingproperty2>Bar</thingproperty2>
+            <thingproperty3>
+              <![CDATA[Blah blah ...]]>
+            </thingproperty3>
+          </thingitem>
+          <thingitem>
+            <thingproperty1>Free</thingproperty1>
+            <thingproperty2>Beer</thingproperty2>
+            <thingproperty3>
+              <![CDATA[Blah blah ...]]>
+            </thingproperty3>
+          </thingitem>
+        </thingsection>
+        <thingsection sectionname="Second Section o' Stuff">
+          <thingitem>
+            <thingproperty1>Far</thingproperty1>
+            <thingproperty2>Boor</thingproperty2>
+            <thingproperty3>
+              <![CDATA[Blah blah ...]]>
+            </thingproperty3>
+          </thingitem>
+        </thingsection>
+      </thinglist>
+    </xml>
+  </div>
+
+  Call the function like this:
+  var xml = getXMLDoc('xmlThingDiv', 'thinglist');
+  --------
+  id: For IE to pull using documentElement
+  tagName: For Moz/compat to pull using getElementsByTagName
+  */
+  // Returns a single, top-level XML document node
+  this.getXMLDoc = function (id, tagName) {
+    var arr = [];
+    var doc = null;
+    if (document.all) {
+      var str = document.getElementById(id).innerHTML;
+      doc = new ActiveXObject("Microsoft.XMLDOM");
+      doc.loadXML(str);
+      doc = doc.documentElement;
+    }
+    // Moz/compat can access elements directly
+    else {
+      arr =
+        window.document.body.getElementsByTagName(tagName);
+      doc = arr[0];
+    }
+    return doc;
+  };
+};
+
 
 fleegix.uri = new function () {
   var self = this;
