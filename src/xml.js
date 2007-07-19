@@ -32,12 +32,13 @@ fleegix.xml = new function (){
   };
   // Parses an XML doc or doc fragment into a JS obj
   // Values for multiple same-named tags a placed in
-  // an array
-  this.parse = function (node, tagItemName) {
+  // an array -- ideas for improvement to hierarchical
+  // parsing from Kevin Faulhaber (kjf@kjfx.net)
+  this.parse = function (node, tagName) {
     var obj = {};
     var kids = [];
-    if (tagItemName) {
-      kids = node.getElementsByTagName(tagItemName);
+    if (tagName) {
+      kids = node.getElementsByTagName(tagName);
     }
     else {
       kids = node.childNodes;
@@ -52,7 +53,7 @@ fleegix.xml = new function (){
           // Node has only one child, a text node -- this is a leaf
           if(k.childNodes.length == 1 && k.firstChild.nodeType == 3) {
             // Either set plain value, or if this is a same-named
-            // tag, start stuffing values into an array 
+            // tag, start stuffing values into an array
             obj[key] = expandToArr(obj[key],
               k.firstChild.nodeValue.replace(pat, ''));
           }
@@ -70,7 +71,7 @@ fleegix.xml = new function (){
     }
     return obj;
   };
-    
+
   /*
   Works with embedded XML document structured like this:
   =====================
