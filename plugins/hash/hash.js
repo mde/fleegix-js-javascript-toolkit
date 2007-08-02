@@ -35,20 +35,15 @@ fleegix.hash.Hash.prototype = new function () {
     return str;
   };
   // Interface methods
-  this.addItem = function () {
-    var a = arguments;
-    var key = '';
-    if (a.length > 1) {
-      key = a[0];
-      if (typeof key != 'string') {
-        throw('Hash only allows string keys.');
-      }
-      this.setByKey(key, a[1]);
+  this.addItem = function (key, val) {
+    if (typeof key != 'string') {
+      throw('Hash only allows string keys.');
     }
-    else {
-      key = getRandomKey();
-      this.setByKey(key, a[0]);
-    }
+    return this.setByKey(key, val);
+  };
+  this.addItemCreateKey = function (val) {
+    var key = getRandomKey();
+    this.setByKey(key, val);
     return key;
   };
   this.getItem = function (p) {
