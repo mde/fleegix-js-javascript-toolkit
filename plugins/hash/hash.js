@@ -15,7 +15,7 @@
  * limitations under the License.
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.hash = {};
+if (typeof fleegix.hash == 'undefined') { fleegix.hash = {}; }
 fleegix.hash.Hash = function (d) {
   this.count = 0;
   this.items = {}; // Hash keys and their values
