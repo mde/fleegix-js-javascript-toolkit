@@ -27,9 +27,9 @@ fleegix.date.supportedFormats = {
   'h': function (dt) { return fleegix.date.strftime(dt, '%b'); },
   // full month name according to the current locale
   'B': function (dt) { return fleegix.date.monthLong[dt.getMonth()]; },
-  // preferred date and time representation for the current locale 
+  // preferred date and time representation for the current locale
   'c': function (dt) { return fleegix.date.strftime(dt, '%a %b %d %T %Y'); },
-  // century number (the year divided by 100 and truncated 
+  // century number (the year divided by 100 and truncated
   // to an integer, range 00 to 99)
   'C': function (dt) { return fleegix.date.calcCentury(dt.getFullYear());; },
   // day of the month as a decimal number (range 01 to 31)
@@ -56,15 +56,18 @@ fleegix.date.supportedFormats = {
   'H': function (dt) { return fleegix.date.leftPad(dt.getHours(), 2, '0'); },
   // hour as a decimal number using a 12-hour clock (range
   // 01 to 12)
-  'I': function (dt) { return fleegix.date.leftPad(hrMil2Std(dt.getHours()), 2, '0'); },
+  'I': function (dt) { return fleegix.date.leftPad(
+    fleegix.date.hrMil2Std(dt.getHours()), 2, '0'); },
   // day of the year as a decimal number (range 001 to 366)
-  'j': function (dt) { return fleegix.date.leftPad(calcDays(dt), 3, '0'); },
+  'j': function (dt) { return fleegix.date.leftPad(
+    fleegix.date.calcDays(dt), 3, '0'); },
   // Hour as a decimal number using a 24-hour clock (range
   // 0 to 23 (space-padded))
   'k': function (dt) { return fleegix.date.leftPad(dt.getHours(), 2, ' '); },
   // Hour as a decimal number using a 12-hour clock (range
   // 1 to 12 (space-padded))
-  'l': function (dt) { return fleegix.date.leftPad(hrMil2Std(dt.getHours()), 2, ' '); },
+  'l': function (dt) { return fleegix.date.leftPad(
+    fleegix.date.hrMil2Std(dt.getHours()), 2, ' '); },
   // month as a decimal number (range 01 to 12)
   'm': function (dt) { return fleegix.date.leftPad((dt.getMonth()+1), 2, '0'); },
   // minute as a decimal number
@@ -93,8 +96,8 @@ fleegix.date.supportedFormats = {
   'U': function () { return fleegix.date.strftimeNotImplemented('U'); },
   // week number of the year (Monday as the first day of the
   // week) as a decimal number [01,53]. If the week containing
-  // 1 January has four or more days in the new year, then it 
-  // is considered week 1. Otherwise, it is the last week of 
+  // 1 January has four or more days in the new year, then it
+  // is considered week 1. Otherwise, it is the last week of
   // the previous year, and the next week is week 1.
   'V': function () { return fleegix.date.strftimeNotImplemented('V'); },
   // week number of the current year as a decimal number,
@@ -126,7 +129,7 @@ fleegix.date.getSupportedFormats = function () {
   for (var i in fleegix.date.supportedFormats) { str += i; }
   return str;
 }
-fleegix.date.supportedFormatsPat = new RegExp('%[' + 
+fleegix.date.supportedFormatsPat = new RegExp('%[' +
   fleegix.date.getSupportedFormats() + ']{1}', 'g');
 
 fleegix.date.weekdayLong = ['Sunday', 'Monday', 'Tuesday',
@@ -136,7 +139,7 @@ fleegix.date.weekdayShort = ['Sun', 'Mon', 'Tue', 'Wed',
 fleegix.date.monthLong = ['January', 'February', 'March',
   'April', 'May', 'June', 'July', 'August', 'September',
   'October', 'November', 'December'];
-fleegix.date.monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 
+fleegix.date.monthShort = ['Jan', 'Feb', 'Mar', 'Apr',
   'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 fleegix.date.meridian = {
   'AM': 'AM',
@@ -148,21 +151,21 @@ fleegix.date.strftime = function (dt, format) {
   var pats = [];
   var dts = [];
   var str = format;
-  
+
   // If no dt, use current date
   d = dt ? dt : new Date();
   // Allow either Date obj or UTC stamp
   d = typeof dt == 'number' ? new Date(dt) : dt;
-   
+
   // Grab all instances of expected formats into array
   while (pats = fleegix.date.supportedFormatsPat.exec(format)) {
     dts.push(pats[0]);
   }
-  
+
   // Process any hits
   for (var i = 0; i < dts.length; i++) {
     key = dts[i].replace(/%/, '');
-    str = str.replace('%' + key, 
+    str = str.replace('%' + key,
       fleegix.date.supportedFormats[key](d));
   }
   return str;
@@ -171,12 +174,6 @@ fleegix.date.strftime = function (dt, format) {
 
 fleegix.date.strftimeNotImplemented = function (s) {
   throw('fleegix.date.strftime format "' + s + '" not implemented.');
-};
-
-fleegix.date.calcCentury = function (y) {
-  var ret = parseInt(y/100);
-  ret = ret.toString();
-  return fleegix.date.leftPad(ret);
 };
 
 fleegix.date.leftPad = function (instr, len, spacer) {
@@ -189,12 +186,43 @@ fleegix.date.leftPad = function (instr, len, spacer) {
   return str;
 };
 
+/**
+ * Calculate the century to which a particular year belongs
+ * @param y Integer year number
+ * @return Integer century number
+ */
+fleegix.date.calcCentury = function (y) {
+  var ret = parseInt(y/100);
+  ret = ret.toString();
+  return fleegix.date.leftPad(ret);
+};
+
+/**
+ * Calculate the day number in the year a particular date is on
+ * @param dt JavaScript date object
+ * @return Integer day number in the year for the given date
+ */
+fleegix.date.calcDays = function(dt) {
+  var first = new Date(dt.getFullYear(), 0, 1);
+  var diff = 0;
+  var ret = 0;
+  first = first.getTime();
+  diff = (dt.getTime() - first);
+  ret = parseInt(((((diff/1000)/60)/60)/24))+1;
+  return ret;
+};
+
+/**
+ * Adjust from 0-6 base week to 1-7 base week
+ * @param d integer for day of week
+ * @return Integer day number for 1-7 base week
+ */
 fleegix.date.convertOneBase = function (d) {
   return d == 0 ? 7 : d;
 };
 
 fleegix.date.getTwoDigitYear = function () {
-  // Add a millenium to take care of years before the year 1000, 
+  // Add a millenium to take care of years before the year 1000,
   // (e.g, the year 7) since we're only taking the last two digits
   var millenYear = yr + 1000;
   var str = millenYear.toString();
@@ -202,10 +230,44 @@ fleegix.date.getTwoDigitYear = function () {
   return str
 };
 
+/**
+ * Return 'AM' or 'PM' based on hour in 24-hour format
+ * @param h Integer for hour in 24-hour format
+ * @return String of either 'AM' or 'PM' based on hour number
+ */
 fleegix.date.getMeridian = function (h) {
   return h > 11 ? fleegix.date.meridian.PM :
     fleegix.date.meridian.AM;
-}
+};
 
+/**
+ * Convert a 24-hour formatted hour to 12-hour format
+ * @param hour Integer hour number
+ * @return String for hour in 12-hour format -- may be string length of one
+ */
+fleegix.date.hrMil2Std = function (hour) {
+  var h = typeof hour == 'number' ? hour : parseInt(hour);
+  var str = h > 12 ? h - 12 : h;
+  str = str == 0 ? 12 : str;
+  return str;
+};
 
-
+/**
+ * Convert a 12-hour formatted hour with meridian flag to 24-hour format
+ * @param hour Integer hour number
+ * @param pm Boolean flag, if PM hour then set to true
+ * @return String for hour in 24-hour format
+ */
+fleegix.date.hrStd2Mil = function  (hour, pm) {
+  var h = typeof hour == 'number' ? hour : parseInt(hour);
+  var str = '';
+  // PM
+  if (pm) {
+    str = h < 12 ? (h+12) : h;
+  }
+  // AM
+  else {
+    str = h == 12 ? 0 : h;
+  }
+  return str;
+};
