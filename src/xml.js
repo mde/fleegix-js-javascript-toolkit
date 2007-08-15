@@ -20,7 +20,7 @@ fleegix.xml = new function (){
   var expandToArr = function (orig, val) {
     if (orig) {
       var r = null;
-      if (typeof orig == 'string') {
+      if (orig instanceof Array == false) {
         r = [];
         r.push(orig);
       }
@@ -60,7 +60,7 @@ fleegix.xml = new function (){
           // Node has children -- branch node, recurse
           else {
             // Rinse and repeat
-            obj[key] = this.parse(k);
+            obj[key] = expandToArr(obj[key], this.parse(k));
           }
         }
         // Empty tags -- create an empty entry
