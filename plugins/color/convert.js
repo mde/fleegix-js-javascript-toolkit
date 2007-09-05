@@ -16,11 +16,12 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.color == 'undefined') { fleegix.color = {}; }
+fleegix.color.convert = {};
 
-fleegix.color.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-fleegix.color.hex2rgb = function (str) {
+fleegix.color.convert.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
+fleegix.color.convert.hex2rgb = function (str) {
   var rgb = [];
-  var h = str.match(fleegix.color.hexPat);
+  var h = str.match(fleegix.color.convert.hexPat);
   if (h) {
     for (var i = 1; i < h.length; i++) {
       var s = h[i];
@@ -34,7 +35,7 @@ fleegix.color.hex2rgb = function (str) {
   }
 };
 
-fleegix.color.rgb2hex = function(rP, gP, bP) {
+fleegix.color.convert.rgb2hex = function(rP, gP, bP) {
   var conv = function (x) {
     x = new Number(x);
     var s = x.toString(16);
@@ -58,7 +59,7 @@ fleegix.color.rgb2hex = function(rP, gP, bP) {
 // Input is h (0-360), s (0-100), v (0-100),
 //    or [h,s,v] with same ranges
 // Output is 0-255 range for each of [r,g,b]
-fleegix.color.hsv2rgb = function (hP, sP, vP) {
+fleegix.color.convert.hsv2rgb = function (hP, sP, vP) {
   var h = null; var s = null; var v = null;
   if (hP instanceof Array) {
     h = hP[0] || 0;
@@ -104,7 +105,7 @@ fleegix.color.hsv2rgb = function (hP, sP, vP) {
 // Principles and Practice," Foley et al, 1996, p. 593.
 // Input is 0-255 for each of r,g,b or [r,g,b]
 // Output is [h (0-360), s (0-100), v (0-100)]
-fleegix.color.rgb2hsv = function(rP, gP, bP) {
+fleegix.color.convert.rgb2hsv = function(rP, gP, bP) {
   var r = null; var g = null; var b = null;
   if (rP instanceof Array) {
     r = rP[0] || 0;
