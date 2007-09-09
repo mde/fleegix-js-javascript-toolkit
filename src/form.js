@@ -314,5 +314,5 @@ fleegix.form.diff = function (formUpdated, formOrig, opts) {
     count: count,
     diffs: diffs
   };
-}
+};
 

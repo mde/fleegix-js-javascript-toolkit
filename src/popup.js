@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,11 +22,11 @@ fleegix.popup = new function () {
     var opts = optParam || {}
     var str = '';
     var propList = {
-      'width': '', 
-      'height': '', 
-      'location': 0, 
-      'menubar': 0, 
-      'resizable': 1, 
+      'width': '',
+      'height': '',
+      'location': 0,
+      'menubar': 0,
+      'resizable': 1,
       'scrollbars': 0,
       'status': 0,
       'titlebar': 1,
@@ -44,8 +44,8 @@ fleegix.popup = new function () {
     if(!_this.win || _this.win.closed) {
       _this.win = window.open(url, 'thePopupWin', str);
     }
-    else {	  
-      _this.win.focus(); 
+    else {
+      _this.win.focus();
       _this.win.document.location = url;
     }
   };
@@ -60,5 +60,4 @@ fleegix.popup = new function () {
     _this.close();
   };
 };
-
 

@@ -476,8 +476,6 @@ fleegix.xhr = new function () {
   };
 };
 
-fleegix.xhr.constructor = null;
-
 fleegix.xhr.Request = function () {
   this.id = 0;
   this.transporterId = null;

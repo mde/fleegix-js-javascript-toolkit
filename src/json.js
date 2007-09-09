@@ -64,7 +64,5 @@ fleegix.json = new function() {
         break;
     }
   };
-}
-
-fleegix.json.constructor = null;
+};
 

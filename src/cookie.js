@@ -32,7 +32,7 @@ fleegix.cookie = new function() {
     t += days ? days*24*60*60*1000 : 0;
     t += hours ? hours*60*60*1000 : 0;
     t += minutes ? minutes*60*1000 : 0;
-    
+
     if (t) {
       var dt = new Date();
       dt.setTime(dt.getTime() + t);
@@ -66,5 +66,4 @@ fleegix.cookie = new function() {
     this.set(name, '', opts);
   };
 }
-fleegix.cookie.constructor = null;
 
