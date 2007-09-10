@@ -40,7 +40,7 @@ fleegix.form = {};
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toHash(f, o);
+  var h = fleegix.form.valuesToJSObject(f, o);
   var opts = o || {};
   var str = '';
   var pat = null;
@@ -102,7 +102,7 @@ fleegix.form.serialize = function (f, o) {
  * @returns JavaScript object representation of the contents
  * of the form.
  */
-fleegix.form.toHash = function (f, o) {
+fleegix.form.valuesToJSObject= function (f, o) {
   var opts = o || {};
   var h = {};
   function expandToArr(orig, val) {
@@ -188,131 +188,5 @@ fleegix.form.toHash = function (f, o) {
   }
   return h;
 };
-
-fleegix.form.restore = function (form, str, o) {
-  var opts = o || {};
-  var arr = str.split('&');
-  var d = {};
-  for (var i = 0; i < arr.length; i++) {
-    var pair = arr[i].split('=');
-    var name = pair[0];
-    var val = pair[1];
-    if (typeof d[name] == 'undefined') {
-      d[name] = val;
-    }
-    else {
-      if (!(d[name] instanceof Array)) {
-        var t = d[name];
-        d[name] = [];
-        d[name].push(t);
-      }
-      d[name].push(val);
-    }
-  }
-  for (var i = 0; i < form.elements.length; i++) {
-    elem = form.elements[i];
-    if (typeof d[elem.name] != 'undefined') {
-      val = d[elem.name];
-      switch (elem.type) {
-        case 'text':
-        case 'hidden':
-        case 'password':
-        case 'textarea':
-        case 'select-one':
-          elem.value = decodeURIComponent(val);
-          break;
-        case 'radio':
-          if (encodeURIComponent(elem.value) == val) {
-            elem.checked = true;
-          }
-          break;
-        case 'checkbox':
-          for (var j = 0; j < val.length; j++) {
-            if (encodeURIComponent(elem.value) == val[j]) {
-              elem.checked = true;
-            }
-          }
-          break;
-        case 'select-multiple':
-          for (var h = 0; h < elem.options.length; h++) {
-            var opt = elem.options[h];
-            for (var j = 0; j < val.length; j++) {
-              if (encodeURIComponent(opt.value) == val[j]) {
-                opt.selected = true;
-              }
-            }
-          }
-          break;
-        case 'submit':
-        case 'reset':
-        case 'file':
-        case 'image':
-        case 'button':
-          if (opts.pedantic) {
-            elem.value = decodeURIComponent(val);
-          }
-          break;
-      }
-    }
-  }
-  return form;
-};
-
-fleegix.form.diff = function (formUpdated, formOrig, opts) {
-  var o = opts || {};
-  // Accept either form or hash-conversion of form
-  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.toHash(formUpdated) : formUpdated;
-  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.toHash(formOrig) : formOrig;
-  var diffs = [];
-  var count = 0;
-
-  function addDiff(n, hA, hB, secondPass) {
-    if (!diffs[n]) {
-      count++;
-      diffs[n] = secondPass? [hB[n], hA[n]] :
-        [hA[n], hB[n]];
-    }
-  }
-
-  function diffSweep(hA, hB, secondPass) {
-    for (n in hA) {
-      // Elem doesn't exist in B
-      if (typeof hB[n] == 'undefined') {
-        // If intersectionOnly flag set, ignore stuff that's
-        // not in both sets
-        if (o.intersectionOnly) { continue; };
-        // Otherwise we want the union, note the diff
-        addDiff(n, hA, hB, secondPass);
-      }
-      // Elem exists in both
-      else {
-        v = hA[n];
-        // Multi-value -- array, hA[n] actually has values
-        if (v instanceof Array) {
-          if (!hB[n] || (hB[n].toString() != v.toString())) {
-            addDiff(n, hA, hB, secondPass);
-          }
-        }
-        // Single value -- null or string
-        else {
-          if (hB[n] != v) {
-            addDiff(n, hA, hB, secondPass);
-          }
-        }
-      }
-    }
-  }
-  // First sweep check all items in updated
-  diffSweep(hUpdated, hOrig, false);
-  // Second sweep, check all items in orig
-  diffSweep(hOrig, hUpdated, true);
-
-  // Return an obj with the count and the hash of diffs
-  return {
-    count: count,
-    diffs: diffs
-  };
-};
-
+// Alias for backward compat
+fleegix.form.toHash = fleegix.form.valuesToJSObject;
