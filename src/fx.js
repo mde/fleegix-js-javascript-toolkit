@@ -55,7 +55,7 @@ fleegix.fx = new function () {
     return true;
   };
   this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-  this.hex2rgb = function (str, returnArray) {
+  this.hex2rgb = function (str) {
     var rgb = [];
     var h = str.match(this.hexPat);
     if (h) {
@@ -64,55 +64,11 @@ fleegix.fx = new function () {
         s = s.length == 1 ? s + s : s;
         rgb.push(parseInt(s, 16));
       }
-      return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
+      return rgb;
     }
     else {
       throw('"' + str + '" not a valid hex value.');
     }
-  };
-  // Credits: Based on Dojo toolkit's HSV to RGB converter, which is
-  // based on C Code in "Computer Graphics -- Principles and Practice,"
-  // Foley et al, 1996, p. 593.
-  // input h is 0-360, s and v are 0-100, output is 0-255 for each of r,g,b
-  this.hsv2rgb = function (h, s, v, returnArray) {
-    var rgb = [];
-    if (h == 360) { h = 0; }
-    s /= 100;
-    v /= 100;
-    var r = null;
-    var g = null;
-    var b = null;
-    if (s == 0){
-      // color is on black-and-white center line
-      // achromatic: shades of gray
-      r = v;
-      g = v;
-      b = v;
-    }
-    else {
-      // chromatic color
-      var hTemp = h / 60;    // h is now IN [0,6]
-      var i = Math.floor(hTemp);  // largest integer <= h
-      var f = hTemp - i;    // fractional part of h
-
-      var p = v * (1 - s);
-      var q = v * (1 - (s * f));
-      var t = v * (1 - (s * (1 - f)));
-
-      switch(i){
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-      }
-    }
-    r = Math.round(r * 255);
-    g = Math.round(g * 255);
-    b = Math.round(b * 255);
-    rgb = [r, g, b];
-    return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
   };
   function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
@@ -253,8 +209,8 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
   var endVal = this.props[key][1];
   var trans = this.transitions[this.trans];
   if (key.toLowerCase().indexOf('color') > -1) {
-    var arrStart = fleegix.fx.hex2rgb(startVal, true);
-    var arrEnd = fleegix.fx.hex2rgb(endVal, true);
+    var arrStart = fleegix.fx.hex2rgb(startVal);
+    var arrEnd = fleegix.fx.hex2rgb(endVal);
     var arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
       var s = arrStart[i];
