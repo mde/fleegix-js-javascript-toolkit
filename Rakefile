@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 $SHRINKSAFE_PATH = 'lib/custom_rhino.jar'
+$YUI_COMPRESSOR_PATH = 'lib/yuicompressor-2.1.2.jar'
 
 def get_source_file_list
   require 'find'
@@ -45,13 +46,30 @@ def concat_sourcefiles(files, filename)
 end
 
 def compress_concat(filename)
-  sh %{java -jar #{ $SHRINKSAFE_PATH } -c #{ filename }.uncompressed.js > #{ filename } 2>&1}
+  #sh %{java -jar #{ $SHRINKSAFE_PATH } -c #{ filename }.uncompressed.js > #{ filename } 2>&1}
+  sh %{java -jar #{ $YUI_COMPRESSOR_PATH } -o #{ filename } #{ filename }.uncompressed.js 2>&1}
+  sh %{tar -cvvzf #{ filename }.tgz #{ filename } 2>&1}
   true
 end
 
 desc "This builds a compressed fleegix.js or fleegix_plugins.js for production use."
 task :default do
-  if ENV['plugins_only'] == 'true'
+  profile = ENV['profile']
+  # Config is a saved profile
+  if not profile.nil? and profile.length > 0
+    require 'json'
+    file = File.new(profile)
+    file = file.readlines.join
+    conf = JSON.parse(file)
+    plugins_only = conf['plugins_only']
+    plugins = conf['plugins']
+  # Otherwise look for command params
+  else
+    plugins_only = ENV['plugins_only']
+    plugins = ENV['plugins']
+  end
+
+  if plugins_only == 'true'
     plugins_only = true
     filename = 'fleegix_plugins.js'
   else
@@ -64,7 +82,7 @@ task :default do
   else
     files = get_source_file_list
   end
-  files += get_plugin_file_list(ENV['plugins'])
+  files += get_plugin_file_list(plugins)
   puts 'Reading and concatenating source files ...'
   concat_sourcefiles(files, filename)
   puts 'Compressing concatenated file ...'
@@ -74,7 +92,7 @@ end
 
 desc "This removes any built fleegix.js files."
 task :clean do
-  %x{rm *.js 2>&1}
+  %x{rm *.js* 2>&1}
   if $?.success?
     puts 'Removes built fleegix.js files.'
   else
@@ -83,4 +101,14 @@ task :clean do
   true
 end
 
+task :foo do
+  profile = ENV['profile']
+  if not profile.nil? and profile.length > 0
+    require 'json'
+    file = File.new(profile)
+    file = file.readlines.join
+    conf = JSON.parse(file)
+    puts conf['plugins']
+  end
+end
 
