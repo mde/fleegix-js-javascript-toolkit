@@ -76,7 +76,7 @@ fleegix.fx = new function () {
     var o = {
       props: { opacity: [s, e] },
       trans: 'lightEaseIn' };
-    for (p in opts) {
+    for (var p in opts) {
       o[p] = opts[p];
     }
     return new fleegix.fx.Effecter(elem, o);
@@ -135,7 +135,7 @@ fleegix.fx = new function () {
       }
       o.props = { height: [s, e] };
     }
-    for (p in opts) {
+    for (var p in opts) {
       o[p] = opts[p];
     }
     o.trans = 'lightEaseIn';

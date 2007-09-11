@@ -280,7 +280,7 @@ fleegix.event = new function () {
   this.publish = function(pub, data) {
     // Make sure the channel exists
     if (channels[pub]) {
-      aud = channels[pub].audience;
+      var aud = channels[pub].audience;
       // Pass the published data to all the
       // obj/methods listening to the channel
       for (var i = 0; i < aud.length; i++) {

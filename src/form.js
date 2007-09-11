@@ -119,7 +119,7 @@ fleegix.form.valuesToJSObject= function (f, o) {
     else { return val; }
   }
 
-  for (i = 0; i < f.elements.length; i++) {
+  for (var i = 0; i < f.elements.length; i++) {
     elem = f.elements[i];
     // Elements should have a name
     if (elem.name) {

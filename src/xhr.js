@@ -295,6 +295,7 @@ fleegix.xhr = new function () {
     }
   };
   this.getResponseByType = function (trans, req) {
+    var r = null;
     // Set the response according to the desired format
     switch(req.responseFormat) {
       // Text
