@@ -18,10 +18,8 @@ end
 def get_plugin_file_list(param)
   plugins = []
   if not param.nil? and param.length > 0
-    plugins = param.gsub(' ', '').gsub('.js', '').split(",")
+    plugins = param.gsub(' ', '').split(",")
     plugins.each do |p|
-      p.gsub!('.', '/')
-      p.concat('.js')
       p.sub!(/^/, './plugins/')
     end
   end
