@@ -45,13 +45,13 @@ function alert(str) {
 function main(args) {
   // Upgrade passed script args to real Array
   if (!args.length) {
-    print('Usage: rhino preparse.js zoneFileDirectory exemplarCities > outputfile.json');
+    print('Usage: rhino preparse.js zoneFileDirectory [exemplarCities] > outputfile.json');
     print('Ex. >>> rhino preparse.js olson_files "Asia/Tokyo, America/New_York, Europe/London" > major_cities.json');
+    print('Ex. >>> rhino preparse.js olson_files > all_cities.json');
     return;
   }
   var baseDir = args[0];
-  var cities = args[1].replace(/ /g, '');
-  cities = cities.split(',');
+  var cities = args[1];
   eval(includeFile('date.js'));
   eval(includeFile('../../src/json.js'));
   var _tz = fleegix.date.timezone;
@@ -61,24 +61,31 @@ function main(args) {
     var zoneData = readText(baseDir + '/' + zoneFile);
     _tz.parseZones(zoneData);
   }
-  var serial = fleegix.json.serialize;
   var result = {};
-  var zones = {};
-  var rules = {};
-  for (var i = 0; i < cities.length; i++) {
-    var city = cities[i];
-    zones[city] = _tz.zones[city];
-  }
-  for (var n in zones) {
-    var zList = zones[n];
-    for (var i = 0; i < zList.length; i++) {
-      var ruleKey = zList[i][1];
-      rules[ruleKey] = _tz.rules[ruleKey];
+  if (cities) {
+    cities = cities.replace(/ /g, '').split(',');
+    var zones = {};
+    var rules = {};
+    for (var i = 0; i < cities.length; i++) {
+      var city = cities[i];
+      zones[city] = _tz.zones[city];
     }
+    for (var n in zones) {
+      var zList = zones[n];
+      for (var i = 0; i < zList.length; i++) {
+        var ruleKey = zList[i][1];
+        rules[ruleKey] = _tz.rules[ruleKey];
+      }
+    }
+    result.zones = zones;
+    result.rules = rules;
   }
-  result.zones = zones;
-  result.rules = rules;
-  print(serial(result));
+  else {
+    result.zones = _tz.zones;
+    result.rules = _tz.rules
+  }
+  result = fleegix.json.serialize(result);
+  print(result);
 }
 
 main(arguments);
