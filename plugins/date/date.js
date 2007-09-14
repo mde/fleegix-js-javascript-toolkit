@@ -468,6 +468,9 @@ fleegix.date.timezone = new function() {
   }
 
   this.zoneFileBasePath;
+  this.zoneFiles = ['africa', 'antarctica', 'asia', 
+    'australasia', 'backward', 'etcetera', 'europe', 
+    'northamerica', 'pacificnew', 'southamerica'];
   this.loadingSchemes = {
     PRELOAD_ALL: 'preloadAll',
     LAZY_LOAD: 'lazyLoad',
@@ -476,9 +479,7 @@ fleegix.date.timezone = new function() {
   this.loadingScheme = this.loadingSchemes.LAZY_LOAD;
   this.defaultZoneFile =
     this.loadingScheme == this.loadingSchemes.PRELOAD_ALL ?
-    ['africa', 'antarctica', 'asia', 'australasia', 'backward',
-    'etcetera', 'europe', 'northamerica', 'pacificnew',
-    'southamerica']: 'northamerica';
+      this.zoneFiles : 'northamerica';
   this.loadedZones = {};
   this.zones = {};
   this.rules = {};
