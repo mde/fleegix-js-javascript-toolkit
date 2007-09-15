@@ -232,7 +232,7 @@ fleegix.hash.Hash.prototype = new function () {
     }
   };
   this.sortByKey = function (s) {
-    var comp = s || fleegix.hash.sorts.ASCENDING;
+    var comp = s || fleegix.hash.sorts.ASCENDING_NOCASE;
     if (typeof compar != 'function') {
       throw('Hash sort requires a valid comparator function.');
     }
@@ -242,10 +242,10 @@ fleegix.hash.Hash.prototype = new function () {
 
 // Stock comparators for sorts
 fleegix.hash.sorts = {
-  ASCENDING: function (a, b) {
+  ASCENDING_WITH_CASE: function (a, b) {
     return (a >= b) ?  1 : -1;
   },
-  DESCENDING: function (a, b) {
+  DESCENDING_WITH_CASE: function (a, b) {
     return (a < b) ?  1 : -1;
   },
   ASCENDING_NOCASE: function (a, b) {
