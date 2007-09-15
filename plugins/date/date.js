@@ -166,7 +166,7 @@ fleegix.date.Date.prototype = {
     this.setAttribute('seconds', n);
   },
   setTime: function (n) {
-    if (isNaN(n)) { throw('Units must be a number.'); }
+    if (isNaN(n)) { throw new Error('Units must be a number.'); }
     var dt = new Date(0);
     dt.setUTCMilliseconds(n - (this.getTimezoneOffset()*60*1000));
     this.setFromDateObjProxy(dt, true);
@@ -236,7 +236,7 @@ fleegix.date.Date.prototype = {
     return dt;
   },
   setAttribute: function (unit, n) {
-    if (isNaN(n)) { throw('Units must be a number.'); }
+    if (isNaN(n)) { throw new Error('Units must be a number.'); }
     var dt = new Date(this.year, this.month, this.date,
       this.hours, this.minutes, this.seconds, this.milliseconds);
     var meth = unit == 'year' ? 'FullYear' : unit.substr(0, 1).toUpperCase() +
@@ -245,7 +245,7 @@ fleegix.date.Date.prototype = {
     this.setFromDateObjProxy(dt);
   },
   setUTCAttribute: function (unit, n) {
-    if (isNaN(n)) { throw('Units must be a number.'); }
+    if (isNaN(n)) { throw new Error('Units must be a number.'); }
     var meth = unit == 'year' ? 'FullYear' : unit.substr(0, 1).toUpperCase() +
       unit.substr(1);
     var dt = this.getUTCDateProxy();
@@ -297,7 +297,7 @@ fleegix.date.timezone = new function() {
 
   function builtInLoadZoneFile(fileName, sync) {
     if (typeof fleegix.xhr == 'undefined') {
-      throw('Please use the Fleegix.js XHR module, or define your own transport mechanism for downloading zone files.');
+      throw new Error('Please use the Fleegix.js XHR module, or define your own transport mechanism for downloading zone files.');
     }
     var url = _this.zoneFileBasePath + '/' + fileName;
     if (sync) {
@@ -337,7 +337,7 @@ fleegix.date.timezone = new function() {
       zoneList = _this.zones[t];
     }
     if (!zoneList) {
-      alert('"' + t + '" is either incorrect, or not loaded in the timezone registry.');
+      throw new Error('"' + t + '" is either incorrect, or not loaded in the timezone registry.');
     }
     for(var i = 0; i < zoneList.length; i++) {
       var z = zoneList[i];
@@ -354,7 +354,7 @@ fleegix.date.timezone = new function() {
       var d = Date.UTC(yea, mon, dat, t[1], t[2], t[3]);
       if (dt.getTime() < d) { break; }
     }
-    if (i == zoneList.length) { throw('No Zone found for "' + timezone + '" on ' + dt); }
+    if (i == zoneList.length) { throw new Error('No Zone found for "' + timezone + '" on ' + dt); }
     return zoneList[i];
 
   }
@@ -500,7 +500,7 @@ fleegix.date.timezone = new function() {
   // mechanism, so the result needs to be returned inline
   this.loadZoneFile = function (fileName, sync) {
     if (typeof this.zoneFileBasePath == 'undefined') {
-      throw('Please define a base path to your zone file directory -- fleegix.date.timezone.zoneFileBasePath.');
+      throw new Error('Please define a base path to your zone file directory -- fleegix.date.timezone.zoneFileBasePath.');
     }
     // ========================
     // Define your own transport mechanism here
@@ -508,7 +508,31 @@ fleegix.date.timezone = new function() {
     // ========================
     this.loadedZones[fileName] = true;
     return builtInLoadZoneFile(fileName, sync);
-  }
+  };
+  this.loadZoneJSONData = function (url, sync) {
+    var _this = this;
+    var processData = function (data) {
+      data = eval('('+ data +')');
+      for (var z in data.zones) {
+        _this.zones[z] = data.zones[z];
+      }
+      for (var r in data.rules) {
+        _this.rules[r] = data.rules[r];
+      }
+    }
+    if (sync) {
+      var data = fleegix.xhr.doGet(url);
+      processData(data);
+    }
+    else {
+      fleegix.xhr.doGet(processData, url);
+    }
+  };
+  this.getAllZones = function() {
+    var arr = [];
+    for (z in this.zones) { arr.push(z); }
+    return arr.sort();
+  };
   this.parseZones = function(str) {
     var s = '';
     var lines = str.split('\n');
@@ -538,7 +562,7 @@ fleegix.date.timezone = new function() {
             break;
           case 'Link':
             // Shouldn't exist
-            if (_this.zones[arr[1]]) { throw('Error with Link ' + arr[1]); }
+            if (_this.zones[arr[1]]) { throw new Error('Error with Link ' + arr[1]); }
             _this.zones[arr[1]] = arr[0];
             break;
           case 'Leap':
