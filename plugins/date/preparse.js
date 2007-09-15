@@ -1,29 +1,4 @@
 
-function isKJS() {
-  return this.exit != null;
-}
-
-function isWSN() {
-  return this.WScript != null;
-}
-function isMozillaShell() {
-  return this.quit != null;
-}
-
-function includeFile(fname) {
-    var ret = "true";
-    if (isMozillaShell() || isKJS()) {
-        load(fname);
-    }
-    else if(isWSN()) {
-        var fso = new ActiveXObject( "Scripting.FileSystemObject" );
-        var file = fso.OpenTextFile(fname, 1);
-        ret = file.ReadAll();
-        file.Close();
-    }
-    return ret;
-}
-
 function readText(uri){
   var jf = new java.io.File(uri);
   var sb = new java.lang.StringBuffer();
@@ -52,8 +27,8 @@ function main(args) {
   }
   var baseDir = args[0];
   var cities = args[1];
-  eval(includeFile('date.js'));
-  eval(includeFile('../../src/json.js'));
+  load('date.js');
+  load('../../src/json.js');
   var _tz = fleegix.date.timezone;
   _tz.loadingScheme = _tz.loadingSchemes.MANUAL_LOAD;
   for (var i = 0; i < _tz.zoneFiles.length; i++) {
