@@ -52,54 +52,6 @@ fleegix.dom = new function() {
 };
 
 
-fleegix.popup = new function () {
-  var _this = this;
-  this.win = null;
-  this.open = function (url, optParam) {
-    var opts = optParam || {}
-    var str = '';
-    var propList = {
-      'width': '', 
-      'height': '', 
-      'location': 0, 
-      'menubar': 0, 
-      'resizable': 1, 
-      'scrollbars': 0,
-      'status': 0,
-      'titlebar': 1,
-      'toolbar': 0
-      };
-    for (var prop in propList) {
-      str += prop + '=';
-      str += opts[prop] ? opts[prop] : propList[prop];
-      str += ',';
-    }
-    var len = str.length;
-    if (len) {
-      str = str.substr(0, len-1);
-    }
-    if(!_this.win || _this.win.closed) {
-      _this.win = window.open(url, 'thePopupWin', str);
-    }
-    else {	  
-      _this.win.focus(); 
-      _this.win.document.location = url;
-    }
-  };
-  this.close = function () {
-    if (_this.win) {
-      _this.win.window.close();
-      _this.win = null;
-    }
-  };
-  this.goURLMainWin = function (url) {
-    location = url;
-    _this.close();
-  };
-};
-
-
-
 fleegix.form = {};
 /**
  * Serializes the data from all the inputs in a Web form
@@ -120,7 +72,7 @@ fleegix.form = {};
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toHash(f, o);
+  var h = fleegix.form.toObject(f, o);
   var opts = o || {};
   var str = '';
   var pat = null;
@@ -182,7 +134,7 @@ fleegix.form.serialize = function (f, o) {
  * @returns JavaScript object representation of the contents
  * of the form.
  */
-fleegix.form.toHash = function (f, o) {
+fleegix.form.toObject= function (f, o) {
   var opts = o || {};
   var h = {};
   function expandToArr(orig, val) {
@@ -199,7 +151,7 @@ fleegix.form.toHash = function (f, o) {
     else { return val; }
   }
 
-  for (i = 0; i < f.elements.length; i++) {
+  for (var i = 0; i < f.elements.length; i++) {
     elem = f.elements[i];
     // Elements should have a name
     if (elem.name) {
@@ -268,134 +220,8 @@ fleegix.form.toHash = function (f, o) {
   }
   return h;
 };
-
-fleegix.form.restore = function (form, str, o) {
-  var opts = o || {};
-  var arr = str.split('&');
-  var d = {};
-  for (var i = 0; i < arr.length; i++) {
-    var pair = arr[i].split('=');
-    var name = pair[0];
-    var val = pair[1];
-    if (typeof d[name] == 'undefined') {
-      d[name] = val;
-    }
-    else {
-      if (!(d[name] instanceof Array)) {
-        var t = d[name];
-        d[name] = [];
-        d[name].push(t);
-      }
-      d[name].push(val);
-    }
-  }
-  for (var i = 0; i < form.elements.length; i++) {
-    elem = form.elements[i];
-    if (typeof d[elem.name] != 'undefined') {
-      val = d[elem.name];
-      switch (elem.type) {
-        case 'text':
-        case 'hidden':
-        case 'password':
-        case 'textarea':
-        case 'select-one':
-          elem.value = decodeURIComponent(val);
-          break;
-        case 'radio':
-          if (encodeURIComponent(elem.value) == val) {
-            elem.checked = true;
-          }
-          break;
-        case 'checkbox':
-          for (var j = 0; j < val.length; j++) {
-            if (encodeURIComponent(elem.value) == val[j]) {
-              elem.checked = true;
-            }
-          }
-          break;
-        case 'select-multiple':
-          for (var h = 0; h < elem.options.length; h++) {
-            var opt = elem.options[h];
-            for (var j = 0; j < val.length; j++) {
-              if (encodeURIComponent(opt.value) == val[j]) {
-                opt.selected = true;
-              }
-            }
-          }
-          break;
-        case 'submit':
-        case 'reset':
-        case 'file':
-        case 'image':
-        case 'button':
-          if (opts.pedantic) {
-            elem.value = decodeURIComponent(val);
-          }
-          break;
-      }
-    }
-  }
-  return form;
-};
-
-fleegix.form.diff = function (formUpdated, formOrig, opts) {
-  var o = opts || {};
-  // Accept either form or hash-conversion of form
-  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.toHash(formUpdated) : formUpdated;
-  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.toHash(formOrig) : formOrig;
-  var diffs = [];
-  var count = 0;
-
-  function addDiff(n, hA, hB, secondPass) {
-    if (!diffs[n]) {
-      count++;
-      diffs[n] = secondPass? [hB[n], hA[n]] :
-        [hA[n], hB[n]];
-    }
-  }
-
-  function diffSweep(hA, hB, secondPass) {
-    for (n in hA) {
-      // Elem doesn't exist in B
-      if (typeof hB[n] == 'undefined') {
-        // If intersectionOnly flag set, ignore stuff that's
-        // not in both sets
-        if (o.intersectionOnly) { continue; };
-        // Otherwise we want the union, note the diff
-        addDiff(n, hA, hB, secondPass);
-      }
-      // Elem exists in both
-      else {
-        v = hA[n];
-        // Multi-value -- array, hA[n] actually has values
-        if (v instanceof Array) {
-          if (!hB[n] || (hB[n].toString() != v.toString())) {
-            addDiff(n, hA, hB, secondPass);
-          }
-        }
-        // Single value -- null or string
-        else {
-          if (hB[n] != v) {
-            addDiff(n, hA, hB, secondPass);
-          }
-        }
-      }
-    }
-  }
-  // First sweep check all items in updated
-  diffSweep(hUpdated, hOrig, false);
-  // Second sweep, check all items in orig
-  diffSweep(hOrig, hUpdated, true);
-
-  // Return an obj with the count and the hash of diffs
-  return {
-    count: count,
-    diffs: diffs
-  };
-}
-
+// Alias for backward compat
+fleegix.form.toHash = fleegix.form.toObject;
 
 fleegix.xhr = new function () {
   
@@ -675,6 +501,7 @@ fleegix.xhr = new function () {
     }
   };
   this.getResponseByType = function (trans, req) {
+    var r = null;
     // Set the response according to the desired format
     switch(req.responseFormat) {
       // Text
@@ -855,8 +682,6 @@ fleegix.xhr = new function () {
     }
   };
 };
-
-fleegix.xhr.constructor = null;
 
 fleegix.xhr.Request = function () {
   this.id = 0;
@@ -1155,7 +980,7 @@ fleegix.event = new function () {
   this.publish = function(pub, data) {
     // Make sure the channel exists
     if (channels[pub]) {
-      aud = channels[pub].audience;
+      var aud = channels[pub].audience;
       // Pass the published data to all the
       // obj/methods listening to the channel
       for (var i = 0; i < aud.length; i++) {
@@ -1194,130 +1019,11 @@ fleegix.event = new function () {
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
-fleegix.xml = new function (){
-  var pat = /^[\s\n\r]+|[\s\n\r]+$/g;
-  var expandToArr = function (orig, val) {
-    if (orig) {
-      var r = null;
-      if (typeof orig == 'string') {
-        r = [];
-        r.push(orig);
-      }
-      else { r = orig; }
-      r.push(val);
-      return r;
-    }
-    else { return val; }
-  };
-  // Parses an XML doc or doc fragment into a JS obj
-  // Values for multiple same-named tags a placed in
-  // an array -- ideas for improvement to hierarchical
-  // parsing from Kevin Faulhaber (kjf@kjfx.net)
-  this.parse = function (node, tagName) {
-    var obj = {};
-    var kids = [];
-    if (tagName) {
-      kids = node.getElementsByTagName(tagName);
-    }
-    else {
-      kids = node.childNodes;
-    }
-    for (var i = 0; i < kids.length; i++) {
-      var k = kids[i];
-      // Blow by the stupid Mozilla linebreak nodes
-      if (k.nodeType == 1) {
-        var key = k.tagName;
-        // Tags with content
-        if (k.firstChild) {
-          // Node has only one child, a text node -- this is a leaf
-          if(k.childNodes.length == 1 && k.firstChild.nodeType == 3) {
-            // Either set plain value, or if this is a same-named
-            // tag, start stuffing values into an array
-            obj[key] = expandToArr(obj[key],
-              k.firstChild.nodeValue.replace(pat, ''));
-          }
-          // Node has children -- branch node, recurse
-          else {
-            // Rinse and repeat
-            obj[key] = this.parse(k);
-          }
-        }
-        // Empty tags -- create an empty entry
-        else {
-          obj[key] = expandToArr(obj[key], null);
-        }
-      }
-    }
-    return obj;
-  };
-
-  /*
-  Works with embedded XML document structured like this:
-  =====================
-  <div id="xmlThingDiv" style="display:none;">
-    <xml>
-      <thinglist>
-        <thingsection sectionname="First Section o' Stuff">
-          <thingitem>
-            <thingproperty1>Foo</thingproperty1>
-            <thingproperty2>Bar</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-          <thingitem>
-            <thingproperty1>Free</thingproperty1>
-            <thingproperty2>Beer</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-        </thingsection>
-        <thingsection sectionname="Second Section o' Stuff">
-          <thingitem>
-            <thingproperty1>Far</thingproperty1>
-            <thingproperty2>Boor</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-        </thingsection>
-      </thinglist>
-    </xml>
-  </div>
-
-  Call the function like this:
-  var xml = getXMLDoc('xmlThingDiv', 'thinglist');
-  --------
-  id: For IE to pull using documentElement
-  tagName: For Moz/compat to pull using getElementsByTagName
-  */
-  // Returns a single, top-level XML document node
-  this.getXMLDoc = function (id, tagName) {
-    var arr = [];
-    var doc = null;
-    if (document.all) {
-      var str = document.getElementById(id).innerHTML;
-      doc = new ActiveXObject("Microsoft.XMLDOM");
-      doc.loadXML(str);
-      doc = doc.documentElement;
-    }
-    // Moz/compat can access elements directly
-    else {
-      arr =
-        window.document.body.getElementsByTagName(tagName);
-      doc = arr[0];
-    }
-    return doc;
-  };
-};
-
-
 fleegix.uri = new function () {
   var self = this;
-  
+
   this.params = {};
-  
+
   this.getParamHash = function (str) {
     var q = str || self.getQuery();
     var d = {};
@@ -1356,7 +1062,7 @@ fleegix.uri = new function () {
   this.setParam = function (name, val, str) {
     var ret = null;
     // If there's a query string, set the param
-    if (str) { 
+    if (str) {
       var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
       var arr = str.match(pat);
       // If it's there, replace it
@@ -1383,8 +1089,7 @@ fleegix.uri = new function () {
     return l.split('?')[0];
   };
   this.params = this.getParamHash();
-}
-fleegix.uri.constructor = null;
+};
 
 fleegix.fx = new function () {
 
@@ -1426,7 +1131,7 @@ fleegix.fx = new function () {
     return true;
   };
   this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-  this.hex2rgb = function (str, returnArray) {
+  this.hex2rgb = function (str) {
     var rgb = [];
     var h = str.match(this.hexPat);
     if (h) {
@@ -1435,55 +1140,11 @@ fleegix.fx = new function () {
         s = s.length == 1 ? s + s : s;
         rgb.push(parseInt(s, 16));
       }
-      return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
+      return rgb;
     }
     else {
       throw('"' + str + '" not a valid hex value.');
     }
-  };
-  // Credits: Based on Dojo toolkit's HSV to RGB converter, which is
-  // based on C Code in "Computer Graphics -- Principles and Practice,"
-  // Foley et al, 1996, p. 593.
-  // input h is 0-360, s and v are 0-100, output is 0-255 for each of r,g,b
-  this.hsv2rgb = function (h, s, v, returnArray) {
-    var rgb = [];
-    if (h == 360) { h = 0; }
-    s /= 100;
-    v /= 100;
-    var r = null;
-    var g = null;
-    var b = null;
-    if (s == 0){
-      // color is on black-and-white center line
-      // achromatic: shades of gray
-      r = v;
-      g = v;
-      b = v;
-    }
-    else {
-      // chromatic color
-      var hTemp = h / 60;    // h is now IN [0,6]
-      var i = Math.floor(hTemp);  // largest integer <= h
-      var f = hTemp - i;    // fractional part of h
-
-      var p = v * (1 - s);
-      var q = v * (1 - (s * f));
-      var t = v * (1 - (s * (1 - f)));
-
-      switch(i){
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-      }
-    }
-    r = Math.round(r * 255);
-    g = Math.round(g * 255);
-    b = Math.round(b * 255);
-    rgb = [r, g, b];
-    return returnArray ? rgb : 'rgb(' + rgb.join() + ')';
   };
   function doFade(elem, opts, dir) {
     var s = dir == 'in' ? 0 : 100;
@@ -1491,7 +1152,7 @@ fleegix.fx = new function () {
     var o = {
       props: { opacity: [s, e] },
       trans: 'lightEaseIn' };
-    for (p in opts) {
+    for (var p in opts) {
       o[p] = opts[p];
     }
     return new fleegix.fx.Effecter(elem, o);
@@ -1550,7 +1211,7 @@ fleegix.fx = new function () {
       }
       o.props = { height: [s, e] };
     }
-    for (p in opts) {
+    for (var p in opts) {
       o[p] = opts[p];
     }
     o.trans = 'lightEaseIn';
@@ -1624,8 +1285,8 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
   var endVal = this.props[key][1];
   var trans = this.transitions[this.trans];
   if (key.toLowerCase().indexOf('color') > -1) {
-    var arrStart = fleegix.fx.hex2rgb(startVal, true);
-    var arrEnd = fleegix.fx.hex2rgb(endVal, true);
+    var arrStart = fleegix.fx.hex2rgb(startVal);
+    var arrEnd = fleegix.fx.hex2rgb(endVal);
     var arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
       var s = arrStart[i];
@@ -1733,9 +1394,7 @@ fleegix.json = new function() {
         break;
     }
   };
-}
-
-fleegix.json.constructor = null;
+};
 
 
 fleegix.cookie = new function() {
@@ -1755,7 +1414,7 @@ fleegix.cookie = new function() {
     t += days ? days*24*60*60*1000 : 0;
     t += hours ? hours*60*60*1000 : 0;
     t += minutes ? minutes*60*1000 : 0;
-    
+
     if (t) {
       var dt = new Date();
       dt.setTime(dt.getTime() + t);
@@ -1789,7 +1448,6 @@ fleegix.cookie = new function() {
     this.set(name, '', opts);
   };
 }
-fleegix.cookie.constructor = null;
 
 
 fleegix.css = new function() {
