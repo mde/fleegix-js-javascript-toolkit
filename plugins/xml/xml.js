@@ -71,49 +71,9 @@ fleegix.xml = new function (){
     }
     return obj;
   };
-
-  /*
-  Works with embedded XML document structured like this:
-  =====================
-  <div id="xmlThingDiv" style="display:none;">
-    <xml>
-      <thinglist>
-        <thingsection sectionname="First Section o' Stuff">
-          <thingitem>
-            <thingproperty1>Foo</thingproperty1>
-            <thingproperty2>Bar</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-          <thingitem>
-            <thingproperty1>Free</thingproperty1>
-            <thingproperty2>Beer</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-        </thingsection>
-        <thingsection sectionname="Second Section o' Stuff">
-          <thingitem>
-            <thingproperty1>Far</thingproperty1>
-            <thingproperty2>Boor</thingproperty2>
-            <thingproperty3>
-              <![CDATA[Blah blah ...]]>
-            </thingproperty3>
-          </thingitem>
-        </thingsection>
-      </thinglist>
-    </xml>
-  </div>
-
-  Call the function like this:
-  var xml = getXMLDoc('xmlThingDiv', 'thinglist');
-  --------
-  id: For IE to pull using documentElement
-  tagName: For Moz/compat to pull using getElementsByTagName
-  */
   // Returns a single, top-level XML document node
+  // Ideal for grabbing embedded XML data from a page
+  // (i.e., XML 'data islands')
   this.getXMLDoc = function (id, tagName) {
     var arr = [];
     var doc = null;
