@@ -13,9 +13,6 @@ function readText(uri){
   str += sb.toString();
   return str;
 }
-function alert(str) {
-  throw(str);
-}
 
 function main(args) {
   // Upgrade passed script args to real Array
