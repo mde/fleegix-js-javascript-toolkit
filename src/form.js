@@ -40,7 +40,7 @@ fleegix.form = {};
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.valuesToJSObject(f, o);
+  var h = fleegix.form.toObject(f, o);
   var opts = o || {};
   var str = '';
   var pat = null;
@@ -102,7 +102,7 @@ fleegix.form.serialize = function (f, o) {
  * @returns JavaScript object representation of the contents
  * of the form.
  */
-fleegix.form.valuesToJSObject= function (f, o) {
+fleegix.form.toObject= function (f, o) {
   var opts = o || {};
   var h = {};
   function expandToArr(orig, val) {
@@ -189,4 +189,4 @@ fleegix.form.valuesToJSObject= function (f, o) {
   return h;
 };
 // Alias for backward compat
-fleegix.form.toHash = fleegix.form.valuesToJSObject;
+fleegix.form.toHash = fleegix.form.toObject;

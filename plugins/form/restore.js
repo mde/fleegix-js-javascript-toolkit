@@ -75,14 +75,14 @@ fleegix.form.restore = function (form, str, o) {
         case 'reset':
         case 'file':
         case 'image':
-        CASE 'BUTTON':
-          IF (OPTS.PEDANTIC) {
-            ELEM.VALUE = DECODEURICOMPONENT(VAL);
+        case 'button':
+          if (opts.pedantic) {
+            elem.value = decodeURIComponent(val);
           }
-          BREAK;
+          break;
       }
     }
   }
-  RETURN FORM;
+  return form;
 };
 

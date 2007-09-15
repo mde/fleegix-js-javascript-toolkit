@@ -15,17 +15,17 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-if (typeof fleegix.form == 'undefined') { var fleegix.form = {}; }
-if (typeof fleegix.form.valuesToJSObject == 'undefined') {
-  throw('fleegix.form.diff depends on fleegix.form.valuesToJSObject.'); }
+if (typeof fleegix.form == 'undefined') { fleegix.form = {}; }
+if (typeof fleegix.form.toObject == 'undefined') {
+  throw('fleegix.form.diff depends on the base fleegix.form module in fleegix.js.'); }
 
 fleegix.form.diff = function (formUpdated, formOrig, opts) {
   var o = opts || {};
   // Accept either form or hash-conversion of form
-  var hUpdated = formUpdated.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.valuesToJSObject(formUpdated) : formUpdated;
-  var hOrig = formOrig.toString() == '[object HTMLFormElement]' ?
-    fleegix.form.valuesToJSObject(formOrig) : formOrig;
+  var hUpdated = formUpdated.elements ?
+    fleegix.form.toObject(formUpdated) : formUpdated;
+  var hOrig = formOrig.elements ?
+    fleegix.form.toObject(formOrig) : formOrig;
   var diffs = [];
   var count = 0;
 
