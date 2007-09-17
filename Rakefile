@@ -1,7 +1,8 @@
 #!/usr/bin/ruby
 
-$SHRINKSAFE_PATH = 'lib/custom_rhino.jar'
 $YUI_COMPRESSOR_PATH = 'lib/yuicompressor-2.1.2.jar'
+$COMPRESSION = true
+$GZIP = false
 
 def get_source_file_list
   require 'find'
@@ -44,9 +45,18 @@ def concat_sourcefiles(files, filename)
 end
 
 def compress_concat(filename)
-  #sh %{java -jar #{ $SHRINKSAFE_PATH } -c #{ filename }.uncompressed.js > #{ filename } 2>&1}
-  sh %{java -jar #{ $YUI_COMPRESSOR_PATH } -o #{ filename } #{ filename }.uncompressed.js 2>&1}
-  sh %{tar -cvvzf #{ filename }.tgz #{ filename } 2>&1}
+  msg = %x{java -jar #{ $YUI_COMPRESSOR_PATH } -o #{ filename } #{ filename }.uncompressed.js 2>&1}
+  if not $?.success?
+    puts msg
+  end
+  true
+end
+
+def gzip_compress(filename)
+  msg = %x{tar -cvvzf #{ filename }.tgz #{ filename } 2>&1}
+  if not $?.success?
+    puts msg
+  end
   true
 end
 
@@ -59,12 +69,16 @@ task :default do
     file = File.new(profile)
     file = file.readlines.join
     conf = JSON.parse(file)
-    plugins_only = conf['plugins_only']
+    plugins_only = conf['plugins_only'].to_s
     plugins = conf['plugins']
+    compression = conf['compression'].to_s
+    gzip = conf['gzip'].to_s
   # Otherwise look for command params
   else
     plugins_only = ENV['plugins_only']
     plugins = ENV['plugins']
+    compression = ENV['compression']
+    gzip = ENV['gzip']
   end
 
   if plugins_only == 'true'
@@ -74,39 +88,57 @@ task :default do
     plugins_only = false
     filename = 'fleegix.js'
   end
-  puts 'Getting list of source files ...'
+  if compression.nil?
+    compression = $COMPRESSION
+  else
+    compression = compression == 'false' ? false : true;
+  end
+  if gzip.nil?
+    gzip = $GZIP
+  else
+    gzip = gzip == 'false' ? false : true;
+  end
+
   if plugins_only
     files = []
   else
+    puts 'Getting list of base source files ...'
     files = get_source_file_list
   end
-  files += get_plugin_file_list(plugins)
+  
+  if not plugins.nil? and plugins.length > 0
+    puts 'Getting list of plugin source files ...'
+    files += get_plugin_file_list(plugins)
+  end
+  
   puts 'Reading and concatenating source files ...'
   concat_sourcefiles(files, filename)
-  puts 'Compressing concatenated file ...'
-  compress_concat(filename)
-  puts 'Built ' + filename
+  puts 'Built ' + filename + '.uncompresed.js'
+
+  if compression
+    puts 'Compressing concatenated file ...'
+    compress_concat(filename)
+    puts 'Built ' + filename
+  end
+
+  if gzip
+    puts 'Gzipping compressed file ...'
+    gzip_compress(filename)
+    puts 'Built ' + filename + '.tgz'
+  end
+  
+  puts 'Done.'
 end
 
 desc "This removes any built fleegix.js files."
 task :clean do
   %x{rm *.js* 2>&1}
   if $?.success?
-    puts 'Removes built fleegix.js files.'
+    puts 'Removed built fleegix.js files.'
   else
     puts 'No built fleegix.js files to remove.'
   end
   true
 end
 
-task :foo do
-  profile = ENV['profile']
-  if not profile.nil? and profile.length > 0
-    require 'json'
-    file = File.new(profile)
-    file = file.readlines.join
-    conf = JSON.parse(file)
-    puts conf['plugins']
-  end
-end
 
