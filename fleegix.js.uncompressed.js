@@ -1496,17 +1496,21 @@ fleegix.cookie = new function() {
 
 fleegix.css = new function() {
     this.addClass = function (elem, s) {
-        fleegix.css.removeClass(elem, s); // Don't add twice
-        var c = elem.className;
-        elem.className = c += ' ' + s;
+      fleegix.css.removeClass(elem, s); // Don't add twice
+      var c = elem.className;
+      elem.className = c += ' ' + s;
     };
     this.removeClass = function (elem, s) {
-        var c = elem.className;
-        // Esc backslashes in regex pattern
-        var pat = '\\b' + s + '\\b';
-        pat = new RegExp(pat);
-        c = c.replace(pat, '');
-        elem.className = c;
+      var c = elem.className;
+      // Esc backslashes in regex pattern
+      var pat = '\\b' + s + '\\b';
+      pat = new RegExp(pat);
+      c = c.replace(pat, '');
+      elem.className = c;
+    };
+    this.replaceClass = function (elem, oldClass, newClass) {
+      this.removeClass(elem, oldClass);
+      this.addClass(elem, newClass);
     };
 };
 

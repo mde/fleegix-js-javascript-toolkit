@@ -105,12 +105,12 @@ task :default do
     puts 'Getting list of base source files ...'
     files = get_source_file_list
   end
-  
+
   if not plugins.nil? and plugins.length > 0
     puts 'Getting list of plugin source files ...'
     files += get_plugin_file_list(plugins)
   end
-  
+
   puts 'Reading and concatenating source files ...'
   concat_sourcefiles(files, filename)
   puts 'Built ' + filename + '.uncompresed.js'
@@ -126,7 +126,7 @@ task :default do
     gzip_compress(filename)
     puts 'Built ' + filename + '.tgz'
   end
-  
+
   puts 'Done.'
 end
 

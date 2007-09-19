@@ -1,14 +1,325 @@
+2007-09-17 23:24  mde
+
+	* src/css.js: Added replaceClass convenience method to CSS module.
+
+2007-09-17 04:12  mde
+
+	* Rakefile: Some final cleanup and polishing of the build process.
+
+2007-09-16 04:58  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/string.js: Added
+	  small string module with reverse, trim, etc.
+
+2007-09-15 07:20  mde
+
+	* plugins/date/date.js: Added attributions for
+	  bugfixes/contributions.
+
+2007-09-15 07:02  mde
+
+	* plugins/date/preparse.js: Removed reimplemented 'alert' function.
+	  The alert function is no longer used in the timezone code.
+
+2007-09-15 07:00  mde
+
+	* plugins/date/preparse.js: Removed superfluous code for other
+	  scripting engines.
+
+2007-09-15 06:35  mde
+
+	* plugins/date/date.js: Added ability to load pre-parsed JSON
+	  timezone data, improved error messages.
+
+2007-09-15 02:53  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js: Updated built fleegix.js
+	  files to make newer plugin-based code available for download
+	  before release.
+
+2007-09-15 02:52  mde
+
+	* plugins/form/diff.js, plugins/form/restore.js, src/form.js:
+	  Renamed confusing method name to something simpler. Fixed
+	  form-object detection bug in diff function specific to IE.
+
+2007-09-15 02:49  mde
+
+	* plugins/hash/hash.js: Added WITH_CASE to hash.sorts ennumerables
+	  to clarify what sorts are available, fixed default sort for
+	  sortByKey to non-case-sensitive.
+
+2007-09-15 02:47  mde
+
+	* plugins/xml/xml.js: Removed large, superfluous block of comments.
+
+2007-09-14 18:02  mde
+
+	* plugins/date/preparse.js: Made the exemplar cities parameter
+	  optional for the timezone preparsing Rhino script. If the param
+	  is not passed, the script returns all the Olson data for all
+	  cities as a JSON bbject.
+
+2007-09-14 08:34  mde
+
+	* plugins/date/date.js, plugins/date/preparse.js: More work to
+	  allow the preparse.js Rhino command-line script accept args for
+	  the Olson data directory and list of exemplar cities to generate
+	  JSON data for.
+
+2007-09-13 06:00  mde
+
+	* plugins/date/preparse.js: Added Rhino script which pre-parses the
+	  zones and rules for a limited list of Olson exemplar cities.
+
+2007-09-11 02:05  mde
+
+	* src/event.js, src/form.js, src/fx.js, src/xhr.js: Fixed some
+	  undeclared variables.
+
+2007-09-11 02:05  mde
+
+	* Rakefile: Changed to force users to specify actual plugin files,
+	  since the namespaced objects won't always match up with file
+	  naming conventions.
+
+2007-09-11 01:56  mde
+
+	* Rakefile: Added code to allow saved build profiles, for building
+	  in plugins or doing plugin-only builds.
+
+2007-09-10 07:28  mde
+
+	* plugins/form/diff.js, plugins/form/restore.js: Adding the
+	  form.diff and form.restore plugin files.
+
+2007-09-10 07:27  mde
+
+	* plugins/form, plugins/popup, plugins/popup/popup.js, plugins/xml,
+	  plugins/xml/xml.js, src/form.js, src/popup.js, src/xml.js: Moved
+	  xml and popup modules, form.diff, and form.restore to plugins.
+
+2007-09-10 06:53  mde
+
+	* Rakefile: Modified Rakefile to allow plugins to be added to a
+	  built fleegix.js file, or for plugins to be built into a
+	  fleegix_plugins.js file for standalone use.
+
+2007-09-10 04:52  mde
+
+	* src/fx.js: Removed hsv2rgb conversion code that's now in
+	  color.convert plugin.
+
+2007-09-09 22:00  mde
+
+	* src/cookie.js, src/form.js, src/json.js, src/popup.js,
+	  src/uri.js, src/xhr.js: Removed some superfluous whitespace and
+	  "obj.constructor = null;" code.
+
+2007-09-05 05:12  mde
+
+	* plugins/color/convert.js: Update naming convention in
+	  color.convert module to reflect new filename.
+
+2007-09-05 05:11  mde
+
+	* plugins/color/color.js, plugins/color/convert.js: Changed name of
+	  color conversion library to make it more specific.
+
+2007-09-05 03:27  mde
+
+	* plugins/date/Date.js, plugins/date/date.js: Change filename for
+	  Date module to lowercase to avoid confusing case-insensitive
+	  OS's.
+
+2007-09-04 23:40  mde
+
+	* plugins/date/util.js: Added date.diff and date.add to date.util
+	  module.
+
+2007-09-04 23:39  mde
+
+	* plugins/date/strftime.js, plugins/date/util.js: Changed the name
+	  of the strftime plugin to accommodate other date utilities.
+
+2007-09-03 07:00  mde
+
+	* plugins/date/strip_olson_comments.rb: Added sample Ruby script
+	  for stripping the copious comments from Olson timezone data
+	  files.
+
+2007-09-01 05:55  mde
+
+	* plugins/date/Date.js: Finished work on timezone-enabled Date,
+	  including lazy-loading mechanism for zone files.
+
+2007-08-29 05:48  mde
+
+	* plugins/date/Date.js: Added timezone-enabled Date object that
+	  uses the standard Olson zone info timezone files -- API is
+	  compatible with standard JS Date.
+
+2007-08-15 20:02  mde
+
+	* src/xml.js: Fixed xml.parse array-expansion for multiple
+	  same-named tags having non-string values.
+
+2007-08-14 00:36  mde
+
+	* plugins/color, plugins/color/color.js, plugins/date/strftime.js:
+	  Removed hsv2rgb color conversion, added color plugin for basic
+	  color conversion code.
+
+2007-08-08 05:09  mde
+
+	* plugins/date, plugins/date/strftime.js: Added strftime
+	  date-formatting pluging ported from code I originally wrote for
+	  both OSAF and Dojo.
+
+2007-08-06 17:42  mde
+
+	* tests, tests/AllTests.js, tests/HashTest.js: Begin adding some
+	  test coverage, starting with the sortable hash plugin.
+
+2007-08-03 05:57  mde
+
+	* plugins/hash/hash.js: Returned to checking for existence of
+	  namespace object for plugins to avoid overwriting the namespace
+	  object if other plugins in the same namespace have already been
+	  loaded.
+
+2007-08-02 18:39  mde
+
+	* plugins/hash/hash.js: Added addItemCreateKey method to make it
+	  explicit that a single arg passed to the addItem method is a key,
+	  and the value should be set to the default.
+
+2007-08-02 04:26  mde
+
+	* plugins/hash, plugins/hash/hash.js: Added sortable Hash plugin,
+	  adapted from the Hash code written for OSAF's Chandler Server.
+
+2007-07-19 18:34  mde
+
+	* fleegix.js.uncompressed.js, src/xml.js: Some code cleanup, added
+	  attribution for ideas contributed by Kevin Faulhaber
+	  (kjf@kjfx.net) to xml module.
+
+2007-07-17 18:44  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Fixed
+	  broken event.unlisten method, did a bit of code cleanup.
+
+2007-07-17 18:26  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/xml.js: Rewrite of
+	  xml.parse to handle multiple same-named tags, and to trim text
+	  values. Copious code refactoring and cleaup.
+
+2007-07-13 05:25  mde
+
+	* src/popup.js: Cleaned up formatting in popup module, began
+	  process of changing 'self' references to '_this'.
+
+2007-07-06 06:11  mde
+
+	* src/event.js: Fixed bug where srcElement was not getting set on
+	  Firefox DOM events. Added code to calculated a unified delta for
+	  both IE and Firefox.
+
+2007-07-06 05:30  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Changed
+	  hierarchical option in form.toHash to make sure the position of
+	  square brackets in the form element names result in
+	  object/property names at least one character long.
+
+2007-07-06 05:14  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Added
+	  hierarchical option to form.toHash that creates sub-objects for
+	  the converted object's properties when using Rails-/PHP-style
+	  form elements names like name="foo[bar]". Also added pedantic
+	  option which includes form elements types like image and submit
+	  in the converted object.
+
+2007-07-05 08:00  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added
+	  mousewheel events in event.listen -- support for Firefox hacked
+	  in by wiring its XUL event to a dummy onmousescroll event on the
+	  target object.
+
+2007-07-05 05:25  mde
+
+	* plugins/drag/drag.js: Updated drag.js plugin to prevent text
+	  selection during drag for both Firefox and IE.
+
+2007-07-02 06:13  mde
+
+	* plugins/template/template.js: Changed incorrect reference to
+	  'opts' object to point to the single paraams object in
+	  template.Templater.
+
+2007-07-02 05:58  mde
+
+	* plugins/menu/test.html, plugins/template,
+	  plugins/template/template.js: Added basic JS templating plugin.
+
+2007-06-28 05:22  mde
+
+	* plugins/menu, plugins/menu/menu.js, plugins/menu/test.html: Added
+	  contextual menu plugin.
+
+2007-06-24 03:02  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added code
+	  to throw an error when event.listen is called on an object that
+	  does not exist.
+
+2007-06-22 08:27  mde
+
+	* plugins/drag/drag.js: Added code in drag.js plugin to do DOM
+	  traversal upward to find containerNode for dragging when explicit
+	  drag handle node is not specified.
+
+2007-06-22 05:00  mde
+
+	* fleegix.js, fleegix.js.uncompressed.js, plugins, plugins/drag,
+	  plugins/drag/drag.js, plugins/drag/test.html: Added plugins
+	  directory, added new drag plugin for multiple draggable windows.
+
+2007-06-14 03:56  mde
+
+	* src/xhr.js: Removed debug statement in default error handler for
+	  xhr.js.
+
+2007-05-29 17:43  mde
+
+	* doc/index.html, doc/index.txt: Fixed doc bug for fx module --
+	  should be 'doAfterFinished' property.
+
+2007-05-29 17:39  mde
+
+	* src/event.js: Added code to throw error if another toolkit
+	  removes the event.listen handler registry but still tries to
+	  execute the handler.
+
+2007-05-20 21:08  mde
+
+	* ChangeLog, fleegix.js, fleegix.js.uncompressed.js: Updated
+	  built/compressed fleegix.js files, ChangeLog in preparation for
+	  release 0.3.2.
+
 2007-05-20 21:01  mde
 
 	* doc/index.html, doc/index.txt: Added to docs: DOM and CSS
-	  sections, fx methods -- blindUp,
-	  blindDown, hex2rgb, hsv2rgb.
+	  sections, fx methods -- blindUp, blindDown, hex2rgb, hsv2rgb.
 
 2007-05-20 19:51  mde
 
 	* src/css.js: Changed redundant addCssClass/removeCssClass method
-	  names in
-	  css module to addClass/removeClass.
+	  names in css module to addClass/removeClass.
 
 2007-05-20 19:26  mde
 
@@ -18,8 +329,7 @@
 2007-05-20 18:44  mde
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/fx.js: Unified syntax
-	  and return-value formats between fx.hex2rgb
-	  and fx.hsv2rgb.
+	  and return-value formats between fx.hex2rgb and fx.hsv2rgb.
 
 2007-05-20 18:34  mde
 
@@ -29,8 +339,7 @@
 2007-05-20 17:55  mde
 
 	* ChangeLog: Added GNU-style Changelog generated by svn2cl (Arthur
-	  de Jong,
-	  arthur@ch.tudelft.nl).
+	  de Jong, arthur@ch.tudelft.nl).
 
 2007-05-20 03:24  mde
 
