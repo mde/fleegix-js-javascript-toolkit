@@ -1,5 +1,6 @@
 Fleegix.js JavaScript Toolkit
 ------------------------------------------------------------
+http://js.fleeix.org/
 
 Intro
 ------------------------
@@ -19,7 +20,7 @@ In development, you may want to use the uncompressed version
 to make debugging easy. In that case, you'd use a script block
 like this:
 
-<script type="text/javascript" 
+<script type="text/javascript"
     src="/fleegix.js.uncompressed.js">
 
 In a production environment, you'll likely want to use the
@@ -28,10 +29,10 @@ script block for that would look like this:
 
 <script type="text/javascript" src="/fleegix.js">
 
-The file is compressed with the excellent ShrinkSafe utility
-by Alex Russell (http://alex.dojotoolkit.org/shrinksafe/).
+The file is compressed with the YUI Compressor
+(http://www.julienlecomte.net/yuicompressor/).
 
-You can also use the pieces of the libarary separately. The
+You can also use the pieces of the library separately. The
 individual pieces are in the /src directory of the release. To
 use just the XHR (XMLHttpRequest) library, you'd do a script
 tag like this:
@@ -40,6 +41,16 @@ tag like this:
 
 All of the paths in these script tags assume you are placing
 the file at the root of your Web server.
+
+Plugins
+------------------------
+There are also plugins for Fleegix.js which extend its
+functionality, and can also be used standalone with other
+JavaScript toolkits.
+
+These plugins can be found in the /plugins directory of the
+Fleegix.js Subversion repository. There is also some plugin
+documentation available at http://js.fleegix.org/plugins.
 
 Compatibility
 ------------------------
@@ -51,7 +62,7 @@ known to work on the following:
   * Internet Explorer 6+
   * Safari 2
 
-It is likely to work on other standards-conformant browsers 
+It is likely to work on other standards-conformant browsers
 (e.g., Opera, OmniWeb), but has not been tested with these.
 
 Documentation

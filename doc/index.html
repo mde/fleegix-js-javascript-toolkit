@@ -56,16 +56,10 @@ module or method name for a detailed description.</p>
       <li><a href="#fleegix.xhr.doReq">fleegix.xhr.doReq</a></li>
       <li><a href="#fleegix.xhr.abort">fleegix.xhr.abort</a></li>
     </ul>
-  <li><a href="#fleegix.xml">XML</a></li>
-    <dl>
-      <dd><a href="#fleegix.xml.parse">fleegix.xml.parse</a></dd>
-    </dl>
   <li><a href="#fleegix.form">Form</a></li>
     <ul>
       <li><a href="#fleegix.form.serialize">fleegix.form.serialize</a></li>
-      <li><a href="#fleegix.form.restore">fleegix.form.restore</a></li>
-      <li><a href="#fleegix.form.toHash">fleegix.form.toHash</a></li>
-      <li><a href="#fleegix.form.diff">fleegix.form.diff</a></li>
+      <li><a href="#fleegix.form.toObject">fleegix.form.toObject</a></li>
     </ul>
   <li><a href="#fleegix.fx">Effects</a></li>
     <ul>
@@ -73,8 +67,6 @@ module or method name for a detailed description.</p>
       <li><a href="#fleegix.fx.fadeIn">fleegix.fx.fadeIn</a></li>
       <li><a href="#fleegix.fx.blindUp">fleegix.fx.blindUp</a></li>
       <li><a href="#fleegix.fx.blindDown">fleegix.fx.blindDown</a></li>
-      <li><a href="#fleegix.fx.hex2rgb">fleegix.fx.hex2rgb</a></li>
-      <li><a href="#fleegix.fx.hsv2rgb">fleegix.fx.hsv2rgb</a></li>
     </ul>
   <li><a href="#fleegix.json">JSON</a></li>
     <dl>
@@ -103,11 +95,6 @@ module or method name for a detailed description.</p>
       <li><a href="#fleegix.cookie.set">fleegix.cookie.set</a></li>
       <li><a href="#fleegix.cookie.get">fleegix.cookie.get</a></li>
       <li><a href="#fleegix.cookie.destroy">fleegix.cookie.destroy</a></li>
-    </ul>
-  <li><a href="#fleegix.popup">Popups</a></li>
-    <ul>
-      <li><a href="#fleegix.popup.open">fleegix.popup.open</a></li>
-      <li><a href="#fleegix.popup.close">fleegix.popup.close</a></li>
     </ul>
 </ul>
 
@@ -562,44 +549,6 @@ processing (i.e., it may have already completed), returns false.</p>
   '/some_file.rbx'); // Get a request ID number
 fleegix.xhr.abort(id); // Abort the request</code></pre>
 
-<a name="fleegix.xml"></a>
-
-<h1>XML</h1>
-
-<hr/>
-
-<p>This module has a basic XML parser that converts a set of
-same-named XML tags (i.e, a tag list such as a set of search
-results) into an array of JavaScript Objects.</p>
-
-<a name="fleegix.xml.parse"></a>
-
-<h2>fleegix.xml.parse</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.xml.parse(xml);</p>
-
-<h3>Parameters</h3>
-
-<p>xml <span class="dataType">(Object)</span> -- DOM-compatible Document object.</p>
-
-<h3>Description</h3>
-
-<p>Parses a list of XML tags into an equivalent array of JavaScript
-objects. Tag names are converted to property names, and tag
-values are converted to property values (all Strings).</p>
-
-<h3>Examples</h3>
-
-<pre><code>function handleUserList(xml) {
-  var users = fleegix.xml.parse(xml);
-  var userCount = users.length;
-  var firstUserUsername = users[0].username;
-}
-
-fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');</code></pre>
-
 <a name="fleegix.form"></a>
 
 <h1>Forms</h1>
@@ -662,53 +611,13 @@ var url = 'get_page.rbx?' + str;
 fleegix.xhr.doGet(handlerFunc, url);
 => Use the serialized form as a query string in a GET</code></pre>
 
-<a name="fleegix.form.restore"></a>
+<a name="fleegix.form.toObject"></a>
 
-<h2>fleegix.form.restore</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.restore(formElement, serializedString);</p>
-
-<h3>Parameters</h3>
-
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
-restore from a string.</p>
-
-<p>serializedString <span class="dataType">(String)</span> -- The query-string-style string of
-serialized form data you want to use to restore the form-element
-values.</p>
-
-<h3>Description</h3>
-
-<p>Allows you to restore a blank form to the state it was in when
-it was serialized to a string. This can be nice if you don't
-want to fill your server-side code with a bunch of conditionals
-to pre-fill a form from values in the database.</p>
-
-<h3>Examples</h3>
-
-<pre><code>function getDataAndRestore(userId) {
-  fleegix.xhr.doGet(doRestore,
-        '/get_user_settings.rbx?userId=' + userId);
-}
-
-function doRestore(str) {
-  var settingsForm = document.getElementById('settingsForm');
-  fleegix.form.restore(settingsForm, str);
-}
-
-getDataAndRestore();
-=> Pulls the original serialized form data used to save the
-user settings, and uses them to pre-fill the form</code></pre>
-
-<a name="fleegix.form.toHash"></a>
-
-<h2>fleegix.form.toHash</h2>
+<h2>fleegix.form.toObject</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.form.toHash(formElement);</p>
+<p>fleegix.form.toObject(formElement);</p>
 
 <h3>Parameters</h3>
 
@@ -730,77 +639,8 @@ in the hash.</p>
 
 <pre><code>var someForm = document.getElementById('someFormId');
 someForm.firstTextBox.value = 'foo';
-var obj = fleegix.form.toHash(someForm);
+var obj = fleegix.form.toObject(someForm);
 alert(obj.firstTextBox); => alerts 'foo.'</code></pre>
-
-<a name="fleegix.form.diff"></a>
-
-<h2>fleegix.form.diff</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.form.diff(updatedForm, originalForm, [diffOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>updatedForm <span class="dataType">(Object)</span> -- Form (or form
-converted to keyword/value object with fleegix.form.toHash)
-that you want to compare to another form.</p>
-
-<p>originalForm <span class="dataType">(Object)</span> -- Another form (or
-converted to keyword/value object with fleegix.form.toHash)
-that you want to compare to the first one.</p>
-
-<p>diffOptions <span class="dataType">(Object)</span> -- Currently only one option:</p>
-<dl>
-  <dd>intersectionOnly: false -- If this flag is set to true,
-    will only return fields that are in both forms. The
-    default behavior is to return fields as 'different'
-    if they are only in one form and not the other (i.e.,
-    a union).</dd>
-</dl>
-
-<h3>Description</h3>
-
-<p>This module allows you to tell how many fields, and which
-fields, are different between two forms -- as well as the
-original and new value for all the changed fields.</p>
-
-<p>One practical use for this method is figuring what has changed
-in a form since it initially loaded. The easy way to do this is
-to make a backup of the form values with fleegix.form.toHash,
-and then compare the updated form to the original form data
-in the backed-up object.</p>
-
-<p>This method returns an object with two properties:</p>
-<ol>
-  <li>count: The number of changed fields</li>
-  <li>diffs: a keyword/value object containing an item for each field
-     that has changed. The value of the item is an array where the
-     first item is the changed value, and the second is the original
-     value.</li>
-</ol>
-
-<h3>Examples</h3>
-
-<pre><code>// Get a ref to the form
-var someForm = document.getElementById('someFormId');
-
-// Set the value of a text box to 'foo'
-someForm.firstTextField.value = 'foo';
-
-// Make a copy of the data in the form
-var backupOfForm = fleegix.form.toHash(someForm);
-
-// Change the text box value to something else
-someForm.firstTextField.value = 'bar';
-
-// Let's see what changed
-var changes = fleegix.form.diff(someForm, backupOfForm);
-
-alert(changes.count); => alerts '1.'
-alert(changes.diffs.firstTextField[0]); => alerts 'bar.'
-alert(changes.diffs.firstTextField[1]); => alerts 'foo.'</code></pre>
 
 <a name="fleegix.fx"></a>
 
@@ -978,72 +818,6 @@ element will be zero pixels.</p>
 
 <pre><code>var blindDiv = document.getElementById('someDiv');
 fleegix.fx.blindUp(blindDiv);</code></pre>
-
-<a name="fleegix.fx.hex2rgb"></a>
-
-<h2>fleegix.fx.hex2rgb</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.fx.hex2rgb(hex, [returnArray]);</p>
-
-<h3>Parameters</h3>
-
-<p>hex <span class="dataType">(String)</span> -- A hex
-string representing a color (e.g., #f00, #ccccaa).</p>
-
-<p>returnArray <span class="dataType">(Boolean)</span>
-If this param is set to <code>true</code>, the function
-will return an array of values in the form of [r, g, b].
-Otherwise, the default behavior is to the return a string
-that's readily usable in CSS (e.g,
-<code>'rgb(255, 0, 0)'</code>).</p>
-
-<h3>Description</h3>
-
-<p>Takes a string representing a color in hex format,
-and converts it to RGB format. Output range for the
-each of the RGB values is 0-255.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var rgb = fleegix.fx.hex2rgb('#99a');</code></pre>
-
-<a name="fleegix.fx.hsv2rgb"></a>
-
-<h2>fleegix.fx.hsv2rgb</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.fx.hsv2rgb(h, s ,v, [returnArray]);</p>
-
-<h3>Parameters</h3>
-
-<p>h <span class="dataType">(Number)</span> -- The hue
-value for the desired color. Input range is 0-360.</p>
-
-<p>s <span class="dataType">(Number)</span> -- The hue
-value for the desired color. Input range is 0-100.</p>
-
-<p>v <span class="dataType">(Number)</span> -- The hue
-value for the desired color. Input range is 0-100.</p>
-
-<p>returnArray <span class="dataType">(Boolean)</span>
-If this param is set to <code>true</code>, the function
-will return an array of values in the form of [r, g, b].
-Otherwise, the default behavior is to the return a string
-that's readily usable in CSS (e.g,
-<code>'rgb(255, 0, 0)'</code>).</p>
-
-<h3>Description</h3>
-
-<p>Takes three values for hue, saturation, and value
-representing a color, and converts them to RGB format. Output
-range for the each of the RGB values is 0-255.</p>
-
-<h3>Examples</h3>
-
-<pre><code>var rgb = fleegix.fx.hsv2rgb(310, 20, 20);</code></pre>
 
 <a name="fleegix.json"></a>
 
@@ -1414,82 +1188,6 @@ omitted, assumes root ('/').</p>
 <h3>Examples</h3>
 
 <pre><code>fleegix.cookie.remove('loginId');</code></pre>
-
-<a name="fleegix.popup"></a>
-
-<h1>Popups</h1>
-
-<hr/>
-
-<p>Yes, even in the Ajax world, people still use pop-up windows.
-The Fleegix.js pop-up module gives you a simple way to invoke
-pop-up windows, but keep the amount of UI clutter to a minimum
-by enforcing a one-window limit.</p>
-
-<a name="fleegix.popup.open"></a>
-
-<h2>fleegix.popup.open</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.popup.open(url, [popupOptions]);</p>
-
-<h3>Parameters</h3>
-
-<p>url <span class="dataType">(String)</span> -- URL for the location of the popup window</p>
-
-<p>popupOptions <span class="dataType">(Object)</span> -- Options for the window to be
-opened. Here is the list of possible properties to set, and
-the default values if they are not set:</p>
-<ul>
-  <li>width: null -- Width of the window to open. If unset,
-    the window is a full-sized window</li>
-  <li>height: null -- Height of the window to open. If unset,
-    the window is a full-sized window</li>
-  <li>location: false -- Display the location bar or not</li>
-  <li>menubar: false -- Display a menubar or not</li>
-  <li>resizable: true -- Make the window resizable or not</li>
-  <li>scrollbars: false -- Include scrollbars or not</li>
-  <li>status: false -- Add a statusbar at the bottom or not</li>
-  <li>titlebar: true -- Add a titlebar at the top or not</li>
-  <li>toolbar: false -- Include a toolbar at the top or not</li>
-</ul>
-
-<h3>Description</h3>
-
-<p>Opens a popup window with the desired set of options. If no
-options are passed, it simply opens a normal new browser window.</p>
-
-<p>This implementation allows only a single popup window at a
-time, to keep things simple for end-users. Calling the open
-method again will simply open the new URL in the same window.</p>
-
-<h3>Examples</h3>
-
-<pre><code>fleegix.popup.open('/search_window.rbx',
-  { width: 480, height: 300 });</code></pre>
-
-<a name="fleegix.popup.close"></a>
-
-<h2>fleegix.popup.close</h2>
-
-<h3>Syntax</h3>
-
-<p>fleegix.popup.close();</p>
-
-<h3>Parameters</h3>
-
-<p>(None)</p>
-
-<h3>Description</h3>
-
-<p>Closes the popup window opened with fleegix.popup.open.</p>
-
-<h3>Examples</h3>
-
-<pre><code>fleegix.popup.open('/search_window.rbx',
-  { width: 480, height: 300 });
-fleegix.popup.close();</code></pre>
 
 <p>Copyright 2007 Matthew Eernisse,
 <a href="mailto:mde@fleegix.org">mde@fleegix.org</a>.</p>

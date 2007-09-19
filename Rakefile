@@ -53,7 +53,7 @@ def compress_concat(filename)
 end
 
 def gzip_compress(filename)
-  msg = %x{tar -cvvzf #{ filename }.tgz #{ filename } 2>&1}
+  msg = %x{gzip -c #{ filename } > #{ filename }.gz 2>&1}
   if not $?.success?
     puts msg
   end
@@ -124,7 +124,7 @@ task :default do
   if gzip
     puts 'Gzipping compressed file ...'
     gzip_compress(filename)
-    puts 'Built ' + filename + '.tgz'
+    puts 'Built ' + filename + '.gz'
   end
 
   puts 'Done.'
