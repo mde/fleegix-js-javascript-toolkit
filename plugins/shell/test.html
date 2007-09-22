@@ -17,9 +17,11 @@ var $ = function (id) {
   return document.getElementById(id);
 };
 
+var sh = null;
+
 function init() {
-  var sh = new fleegix.shell.Shell($('shellForm').shellInput,
-    $('shellOutput'));
+  sh = new fleegix.shell.Shell($('shellForm').shellInput,
+    $('shellOutput'), $('shellExplorer'));
 };
 
 fleegix.event.listen(window, 'onload', init);
@@ -39,6 +41,30 @@ body {
 #container {
   padding: 12px;
 }
+#shellOutput {
+  overflow: auto;
+  font-size: 10px;
+  height: 200px;
+  width: 300px;
+  border: 1px solid #aaa;
+  border-bottom: 0px;
+  font-family:'Courier New', 'Courier', monospace;
+}
+#shellInput {
+  width: 300px;
+  font-size: 14px;
+  height: 20px;
+  line-height: 20px;
+  border: 1px solid #aaa;
+}
+#shellExplorer {
+  overflow: auto;
+  font-size: 10px;
+  height: 180px;
+  width: 280px;
+  border: 1px solid #aaa;
+  font-family:'Courier New', 'Courier', monospace;
+}
 
 </style>
 
@@ -46,10 +72,18 @@ body {
 
 <body>
     <div id="container">
-      <form id="shellForm" onsubmit="return false;">
-        <div id="shellOutput" style="overflow: auto; font-size: 10px; height: 200px; width: 300px; border: 1px solid #aaa; border-bottom: 0px; font-family:'Courier New', 'Courier', monospace;"></div>
-        <input id="shellInput" name="shellInput" type="text" style="width: 300px; font-size: 14px; height: 20px; line-height: 20px; border: 1px solid #aaa;" />
-      </form>
+      <div style="float: left">
+        <form id="shellForm" onsubmit="return false;">
+          <div id="shellOutput"></div>
+          <input id="shellInput" name="shellInput" type="text"/>
+        </form>
+      </div>
+      <div style="float: left">
+        &nbsp;
+      </div>
+      <div style="float: left">
+        <div id="shellExplorer"></div>
+      </div>
     </div>
 </body>
 
