@@ -21,7 +21,7 @@ var sh = null;
 
 function init() {
   sh = new fleegix.shell.Shell($('shellForm').shellInput,
-    $('shellOutput'), $('shellExplorer'));
+    $('shellOutput'));
 };
 
 fleegix.event.listen(window, 'onload', init);
@@ -31,7 +31,6 @@ fleegix.event.listen(window, 'onload', init);
 <style type="text/css">
 
 *{
-  font-family: "Lucida Grande", "Verdana", sans-serif;
   font-size: 11px;
 }
 body {
@@ -48,7 +47,7 @@ body {
   width: 300px;
   border: 1px solid #aaa;
   border-bottom: 0px;
-  font-family:'Courier New', 'Courier', monospace;
+  font-family: "Courier New", "Courier", monospace;
 }
 #shellInput {
   width: 300px;
@@ -63,7 +62,7 @@ body {
   height: 180px;
   width: 280px;
   border: 1px solid #aaa;
-  font-family:'Courier New', 'Courier', monospace;
+  font-family: "Courier New", "Courier", monospace;
 }
 
 </style>
@@ -82,7 +81,7 @@ body {
         &nbsp;
       </div>
       <div style="float: left">
-        <div id="shellExplorer"></div>
+        <!-- <div id="shellExplorer"></div> -->
       </div>
     </div>
 </body>

@@ -27,10 +27,12 @@ fleegix.shell = new function () {
     return this.currentShell.inspect(obj);
   };
 };
-fleegix.shell.Shell = function (input, output, explorer) {
+fleegix.shell.Shell = function (input, output) {
   this.input = input;
   this.output = output;
-  this.explorer = explorer || null;
+  // For now, explorer output hard-coded to go to
+  // normal output node
+  this.explorer = output;
   this.regIndex = fleegix.shell.registerShell(this);
   this.initScroll = false;
   fleegix.event.listen(this.input, 'onkeydown', this, 'execCode');
@@ -54,6 +56,12 @@ fleegix.shell.Shell.prototype = new function () {
       fleegix.event.listen(a, 'onclick', f);
     }
     return node;
+  }
+  function shouldAutoScroll(o) {
+    return (o.scrollTop == (o.scrollHeight - o.clientHeight));
+  }
+  function isFirstAutoScrollSet(init, o) {
+    return (!init && (o.scrollHeight > o.clientHeight));
   }
   this.history = [];
   this.historyPos = 0;
@@ -87,7 +95,7 @@ fleegix.shell.Shell.prototype = new function () {
       span = createItemEntry(span, res, this);
 
       // Check if it should be auto-scrolling
-      if (this.output.scrollTop == (this.output.scrollHeight - this.output.clientHeight)) {
+      if (shouldAutoScroll(this.output)) {
         var follow = true;
       }
 
@@ -98,7 +106,7 @@ fleegix.shell.Shell.prototype = new function () {
       // Do auto scrolling if currently auto-scrolled, or if
       // setting auto-scroll for the first time
       if (follow ||
-        (!this.initScroll && (this.output.scrollHeight > this.output.clientHeight))) {
+        (isFirstAutoScrollSet(this.initScroll, this.output))) {
         this.output.scrollTop = (this.output.scrollHeight - this.output.clientHeight);
         this.initScroll = true;
       }
@@ -121,7 +129,18 @@ fleegix.shell.Shell.prototype = new function () {
     this.result = code + '<br/>' + e.message;
   };
   this.addExplorerEntry = function (node) {
+    // Check if it should be auto-scrolling
+    if (shouldAutoScroll(this.output)) {
+      var follow = true;
+    }
     this.explorer.appendChild(node);
+    // Do auto scrolling if currently auto-scrolled, or if
+    // setting auto-scroll for the first time
+    if (follow ||
+      (isFirstAutoScrollSet(this.initScroll, this.output))) {
+      this.output.scrollTop = (this.output.scrollHeight - this.output.clientHeight);
+      this.initScroll = true;
+    }
   };
   this.inspect = function (obj) {
     var _this = this;
