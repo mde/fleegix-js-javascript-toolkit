@@ -18,7 +18,7 @@
 
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.xhr = new function () {
-  
+
   var msProgId = null; // Cache the prog ID if needed
   function spawnTransporter(isSync) {
     var i = 0;
@@ -28,10 +28,10 @@ fleegix.xhr = new function () {
       'Microsoft.XMLHTTP'
     ];
     var trans = null;
-    if (window.XMLHttpRequest != null) {
+    if (window.XMLHttpRequest) {
       trans = new XMLHttpRequest();
     }
-    else if (window.ActiveXObject != null) {
+    else if (window.ActiveXObject) {
       if (msProgId) {
         trans = new ActiveXObject(msProgId);
       }
@@ -58,10 +58,10 @@ fleegix.xhr = new function () {
       }
     }
     else {
-      throw('Could not create XMLHttpRequest object.');
+      throw new Error('Could not create XMLHttpRequest object.');
     }
   }
-  
+
   // Public members
   // ================================
   // Array of XHR obj transporters, spawned as needed up to
@@ -96,7 +96,7 @@ fleegix.xhr = new function () {
   // Show exceptions for connection failures
   this.debug = false;
   this.processingWatcherId = null;
-  
+
   // Public methods
   // ================================
   this.doGet = function () {
@@ -165,10 +165,10 @@ fleegix.xhr = new function () {
     for (var p in opts) {
       req[p] = opts[p];
     }
-    
+
     req.id = this.lastReqId;
     this.lastReqId++; // Increment req ID
-    
+
     // Return request ID or response
     // Async -- handle request or queue it up
     // -------
@@ -182,10 +182,10 @@ fleegix.xhr = new function () {
       else if (this.transporters.length < this.maxTransporters) {
         transporterId = spawnTransporter();
       }
-      
+
       // If we have an XHR transporter to handle the request, do it
       // transporterId should be a number (index of XHR obj in this.transporters)
-      if (transporterId != null) {
+      if (transporterId !== null) {
         this.processReq(req, transporterId);
       }
       // No transporter available to handle the request -- queue it up
@@ -215,7 +215,7 @@ fleegix.xhr = new function () {
     var trans = null;
     var url = '';
     var resp = null;
-   
+
     // Async mode -- grab an XHR obj from the pool
     if (req.async) {
       transporterId = t;
@@ -239,12 +239,12 @@ fleegix.xhr = new function () {
     else {
       url = req.url;
     }
-    
+
     // Call 'abort' method in IE to allow reuse of the obj
     if (document.all) {
       trans.abort();
     }
-    
+
     // Set up the request
     // ==========================
     if (req.username && req.password) {
@@ -257,7 +257,7 @@ fleegix.xhr = new function () {
     if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
       trans.overrideMimeType(req.mimeType);
     }
-    
+
     // Add any custom headers that are defined
     if (req.headers.length) {
       // Set any custom headers
@@ -273,12 +273,12 @@ fleegix.xhr = new function () {
           'application/x-www-form-urlencoded');
       }
     }
-    
+
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
-    
-    if (this.processingWatcherId == null) {
+
+    if (this.processingWatcherId === null) {
       this.processingWatcherId = setTimeout(fleegix.xhr.watchProcessing, 10);
     }
     // Sync mode -- return actual result inline back to doReq
@@ -317,10 +317,10 @@ fleegix.xhr = new function () {
     var self = fleegix.xhr;
     var proc = self.processingArray;
     var d = new Date().getTime();
-    
+
     // Stop looping while processing sync requests
     // after req returns, it will start the loop back up
-    if (self.syncRequest != null) {
+    if (self.syncRequest !== null) {
       return;
     }
     else {
@@ -332,6 +332,7 @@ fleegix.xhr = new function () {
           // Aborted requests
           case (req.aborted || !trans.readyState):
             self.processingArray.splice(i, 1);
+            break;
           // Timeouts
           case isTimedOut:
             self.processingArray.splice(i, 1);
@@ -383,7 +384,7 @@ fleegix.xhr = new function () {
   this.handleResponse = function (trans, req) {
     // Grab the desired response type
     var resp = this.getResponseByType(trans, req);
-    
+
     // If we have a One True Event Handler, use that
     // Best for odd cases such as Safari's 'undefined' status
     // or 0 (zero) status from trying to load local files or chrome
@@ -401,9 +402,8 @@ fleegix.xhr = new function () {
           if (req.async) {
             // Make sure handler is defined
             if (!req.handleSuccess) {
-              throw('No response handler defined ' +
+              throw new Error('No response handler defined ' +
                 'for this request');
-              return;
             }
             else {
               req.handleSuccess(resp, req.id);
@@ -419,7 +419,7 @@ fleegix.xhr = new function () {
           // Squelch -- if you want to get local files or
           // chrome, use 'handleAll' above
           if (this.debug) {
-            throw('XMLHttpRequest HTTP status either zero or not set.');
+            throw new Error('XMLHttpRequest HTTP status either zero or not set.');
           }
         }
         // Request failed -- execute error handler
@@ -448,7 +448,7 @@ fleegix.xhr = new function () {
     // Remove from list of transporters currently in use
     // this XHR can't be aborted until it's processing again
     delete this.processingMap[req.id];
-    
+
     // Requests queued up, grab one to respond to
     if (this.requestQueue.length) {
       var nextReq = this.requestQueue.shift();
@@ -493,7 +493,7 @@ fleegix.xhr.Request = function () {
   this.handleErr = null;
   this.handleAll = null;
   this.handleTimeout = null;
-  this.responseFormat = 'text', // 'text', 'xml', 'object'
+  this.responseFormat = 'text'; // 'text', 'xml', 'object'
   this.mimeType = null;
   this.username = '';
   this.password = '';
@@ -503,7 +503,7 @@ fleegix.xhr.Request = function () {
   this.timeoutSeconds = 30; // Default to 30-sec timeout
   this.uber = false;
   this.aborted = false;
-}
+};
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };

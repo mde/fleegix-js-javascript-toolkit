@@ -17,17 +17,21 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
-    var opts = optParam || {}
+    var opts = optParam || {};
+    var path = '/';
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
     var exp = '';
     var t = 0;
     if (typeof optParam == 'object') {
-      var path = opts.path || '/';
-      var days = opts.days || 0;
-      var hours = opts.hours || 0;
-      var minutes = opts.minutes || 0;
+      path = opts.path || '/';
+      days = opts.days || 0;
+      hours = opts.hours || 0;
+      minutes = opts.minutes || 0;
     }
     else {
-      var path = optsParam || '/';
+      path = optParam || '/';
     }
     t += days ? days*24*60*60*1000 : 0;
     t += hours ? hours*60*60*1000 : 0;
@@ -52,7 +56,7 @@ fleegix.cookie = new function() {
       while (c.charAt(0) == ' ') {
         c = c.substring(1, c.length);
       }
-      if (c.indexOf(nameEq) == 0) {
+      if (c.indexOf(nameEq) === 0) {
         return c.substring(nameEq.length, c.length);
       }
     }
@@ -65,5 +69,5 @@ fleegix.cookie = new function() {
     if (path) { opts.path = path; }
     this.set(name, '', opts);
   };
-}
+};
 

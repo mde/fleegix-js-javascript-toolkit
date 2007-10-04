@@ -73,7 +73,7 @@ fleegix.form.serialize = function (f, o) {
         }
         str = str.substr(0, str.length - 1);
       }
-      str += '&'
+      str += '&';
     }
     else {
       if (opts.includeEmpty) { str += n + '=&'; }
@@ -120,25 +120,27 @@ fleegix.form.toObject= function (f, o) {
   }
 
   for (var i = 0; i < f.elements.length; i++) {
-    elem = f.elements[i];
+    var elem = f.elements[i];
     // Elements should have a name
     if (elem.name) {
       var st = elem.name.indexOf('[');
       var sp = elem.name.indexOf(']');
       var sb = '';
       var en = '';
+      var c;
+      var n;
       // Using Rails-/PHP-style name="foo[bar]"
       // means you can go hierarchical if you want
       if (opts.hierarchical && (st > 0) && (sp > 2)) {
           sb = elem.name.substring(0, st);
           en = elem.name.substring(st + 1, sp);
           if (typeof h[sb] == 'undefined') { h[sb] = {}; }
-          var c = h[sb];
-          var n = en;
+          c = h[sb];
+          n = en;
       }
       else {
-          var c = h;
-          var n = elem.name;
+          c = h;
+          n = elem.name;
       }
       switch (elem.type) {
         // Text fields, hidden form elements, etc.
@@ -153,9 +155,9 @@ fleegix.form.toObject= function (f, o) {
         case 'select-multiple':
           c[n] = null;
           for(var j = 0; j < elem.options.length; j++) {
-            var o = elem.options[j];
-            if(o.selected) {
-              c[n] = expandToArr(c[n], o.value);
+            var e = elem.options[j];
+            if(e.selected) {
+              c[n] = expandToArr(c[n], e.value);
             }
           }
           break;

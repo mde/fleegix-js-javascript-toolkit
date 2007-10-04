@@ -43,8 +43,8 @@ fleegix.dom = new function() {
     var nH = node.offsetHeight;
     var vW = fleegix.dom.getViewportWidth();
     var vH = fleegix.dom.getViewportHeight();
-    node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
-    node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
+    node.style.left = parseInt((vW/2)-(nW/2), 10) + 'px';
+    node.style.top = parseInt((vH/2)-(nH/2), 10) + 'px';
     return true;
   };
 };

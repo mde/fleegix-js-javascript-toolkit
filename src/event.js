@@ -50,8 +50,8 @@ fleegix.event = new function () {
     if (!listenReg) {
       listenReg = {};
       // The original obj and method name
-      listenReg.orig = {}
-      listenReg.orig.obj = obj,
+      listenReg.orig = {};
+      listenReg.orig.obj = obj;
       listenReg.orig.methName = meth;
       // Preserve any existing listener
       if (obj[meth]) {
@@ -78,10 +78,10 @@ fleegix.event = new function () {
           reg.orig.methCode.apply(reg.orig.obj, args);
         }
         // DOM events
+        // Normalize the different event models
+        var ev = null;
         if (obj.attachEvent || obj.nodeType ||
           obj.addEventListener) {
-          // Normalize the different event models
-          var ev = null;
           // Try to find an event if we're not handed one
           if (!args.length) {
             try {
@@ -141,7 +141,7 @@ fleegix.event = new function () {
           else {
             f = ex.context[ex.method];
             c = ex.context;
-          };
+          }
           // Make sure there's something to execute
           if (typeof f != 'function') {
             throw(f + ' is not an executable function.');
@@ -197,7 +197,7 @@ fleegix.event = new function () {
       r.method = arguments[3];
       o = arguments[4] || {};
     }
-    for (var x in o) { r[x] = o[x] }
+    for (var x in o) { r[x] = o[x]; }
     listenReg.after.push(r);
 
     obj[meth].listenReg = listenReg;
@@ -244,7 +244,7 @@ fleegix.event = new function () {
   };
   this.subscribe = function(subscr, obj, method) {
     // Make sure there's an obj param
-    if (!obj) { return };
+    if (!obj) { return; }
     // Create the channel if it doesn't exist
     if (!channels[subscr]) {
       channels[subscr] = {};
@@ -292,8 +292,8 @@ fleegix.event = new function () {
   };
   this.getSrcElementId = function(e) {
     var ret = null;
-    if (e.srcElement) ret = e.srcElement;
-    else if (e.target) ret = e.target;
+    if (e.srcElement) { ret = e.srcElement; }
+    else if (e.target) { ret = e.target; }
     // Avoid trying to use fake obj from IE on disabled
     // form elements
     if (typeof ret.id == 'undefined') {

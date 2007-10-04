@@ -22,13 +22,13 @@ fleegix.json = new function() {
     switch (typeof obj) {
       case 'object':
         // Null
-        if (obj == null) {
+        if (obj === null) {
            return 'null';
         }
         // Arrays
         else if (obj instanceof Array) {
           for (var i = 0; i < obj.length; i++) {
-            if (str) { str += ',' }
+            if (str) { str += ','; }
             str += fleegix.json.serialize(obj[i]);
           }
           return '[' + str + ']';
@@ -36,7 +36,7 @@ fleegix.json = new function() {
         // Objects
         else if (typeof obj.toString != 'undefined') {
           for (var i in obj) {
-            if (str) { str += ',' }
+            if (str) { str += ','; }
             str += '"' + i + '":';
             if (typeof obj[i] == 'undefined') {
               str += '"undefined"';
@@ -48,20 +48,16 @@ fleegix.json = new function() {
           return '{' + str + '}';
         }
         return str;
-        break;
       case 'unknown':
       case 'undefined':
       case 'function':
         return '"undefined"';
-        break;
       case 'string':
         str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
           /\r/g, '').replace(/\n/g, '\\n') + '"';
         return str;
-        break;
       default:
         return String(obj);
-        break;
     }
   };
 };

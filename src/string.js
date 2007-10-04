@@ -14,15 +14,14 @@
  * limitations under the License.
  *
 */
-if (typeof fleegix == "undefined") fleegix = {};
-
+if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.string = new function () {
   var ltr = /^\s+/; var rtr = /\s+$/; var tr = /^\s+|\s+$/g;
   this.toArray = function (str) {
     var arr = [];
-    var x = str.replace(/.|\f|\t|\n|\r$/g,
-      function (m, p) { (arr.push) ?
-      arr.push(m) : arr[arr.length] = m; });
+    for (var i = 0; i < str.length; i++) {
+      arr[i] = str.substr(i, 1);
+    }
     return arr;
   };
   this.reverse = function (str) {
@@ -38,7 +37,7 @@ fleegix.string = new function () {
   };
   this.trim = function (str, chr) {
     var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
-    return str.replace(pat, ''); 
-  }
+    return str.replace(pat, '');
+  };
 };
 
