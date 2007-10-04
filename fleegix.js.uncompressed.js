@@ -16,31 +16,14 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
-/*
- * Copyright 2007 Matthew Eernisse (mde@fleegix.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-if (typeof fleegix == "undefined") fleegix = {};
 
 fleegix.string = new function () {
   var ltr = /^\s+/; var rtr = /\s+$/; var tr = /^\s+|\s+$/g;
   this.toArray = function (str) {
     var arr = [];
-    var x = str.replace(/.|\f|\t|\n|\r$/g,
-      function (m, p) { (arr.push) ?
-      arr.push(m) : arr[arr.length] = m; });
+    for (var i = 0; i < str.length; i++) {
+      arr[i] = str.substr(i, 1);
+    }
     return arr;
   };
   this.reverse = function (str) {
@@ -56,8 +39,8 @@ fleegix.string = new function () {
   };
   this.trim = function (str, chr) {
     var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
-    return str.replace(pat, ''); 
-  }
+    return str.replace(pat, '');
+  };
 };
 
 
@@ -89,8 +72,8 @@ fleegix.dom = new function() {
     var nH = node.offsetHeight;
     var vW = fleegix.dom.getViewportWidth();
     var vH = fleegix.dom.getViewportHeight();
-    node.style.left = parseInt((vW/2)-(nW/2)) + 'px';
-    node.style.top = parseInt((vH/2)-(nH/2)) + 'px';
+    node.style.left = parseInt((vW/2)-(nW/2), 10) + 'px';
+    node.style.top = parseInt((vH/2)-(nH/2), 10) + 'px';
     return true;
   };
 };
@@ -149,7 +132,7 @@ fleegix.form.serialize = function (f, o) {
         }
         str = str.substr(0, str.length - 1);
       }
-      str += '&'
+      str += '&';
     }
     else {
       if (opts.includeEmpty) { str += n + '=&'; }
@@ -196,25 +179,27 @@ fleegix.form.toObject= function (f, o) {
   }
 
   for (var i = 0; i < f.elements.length; i++) {
-    elem = f.elements[i];
+    var elem = f.elements[i];
     // Elements should have a name
     if (elem.name) {
       var st = elem.name.indexOf('[');
       var sp = elem.name.indexOf(']');
       var sb = '';
       var en = '';
+      var c;
+      var n;
       // Using Rails-/PHP-style name="foo[bar]"
       // means you can go hierarchical if you want
       if (opts.hierarchical && (st > 0) && (sp > 2)) {
           sb = elem.name.substring(0, st);
           en = elem.name.substring(st + 1, sp);
           if (typeof h[sb] == 'undefined') { h[sb] = {}; }
-          var c = h[sb];
-          var n = en;
+          c = h[sb];
+          n = en;
       }
       else {
-          var c = h;
-          var n = elem.name;
+          c = h;
+          n = elem.name;
       }
       switch (elem.type) {
         // Text fields, hidden form elements, etc.
@@ -229,9 +214,9 @@ fleegix.form.toObject= function (f, o) {
         case 'select-multiple':
           c[n] = null;
           for(var j = 0; j < elem.options.length; j++) {
-            var o = elem.options[j];
-            if(o.selected) {
-              c[n] = expandToArr(c[n], o.value);
+            var e = elem.options[j];
+            if(e.selected) {
+              c[n] = expandToArr(c[n], e.value);
             }
           }
           break;
@@ -268,7 +253,7 @@ fleegix.form.toObject= function (f, o) {
 fleegix.form.toHash = fleegix.form.toObject;
 
 fleegix.xhr = new function () {
-  
+
   var msProgId = null; // Cache the prog ID if needed
   function spawnTransporter(isSync) {
     var i = 0;
@@ -278,10 +263,10 @@ fleegix.xhr = new function () {
       'Microsoft.XMLHTTP'
     ];
     var trans = null;
-    if (window.XMLHttpRequest != null) {
+    if (window.XMLHttpRequest) {
       trans = new XMLHttpRequest();
     }
-    else if (window.ActiveXObject != null) {
+    else if (window.ActiveXObject) {
       if (msProgId) {
         trans = new ActiveXObject(msProgId);
       }
@@ -308,10 +293,10 @@ fleegix.xhr = new function () {
       }
     }
     else {
-      throw('Could not create XMLHttpRequest object.');
+      throw new Error('Could not create XMLHttpRequest object.');
     }
   }
-  
+
   // Public members
   // ================================
   // Array of XHR obj transporters, spawned as needed up to
@@ -346,7 +331,7 @@ fleegix.xhr = new function () {
   // Show exceptions for connection failures
   this.debug = false;
   this.processingWatcherId = null;
-  
+
   // Public methods
   // ================================
   this.doGet = function () {
@@ -415,10 +400,10 @@ fleegix.xhr = new function () {
     for (var p in opts) {
       req[p] = opts[p];
     }
-    
+
     req.id = this.lastReqId;
     this.lastReqId++; // Increment req ID
-    
+
     // Return request ID or response
     // Async -- handle request or queue it up
     // -------
@@ -432,10 +417,10 @@ fleegix.xhr = new function () {
       else if (this.transporters.length < this.maxTransporters) {
         transporterId = spawnTransporter();
       }
-      
+
       // If we have an XHR transporter to handle the request, do it
       // transporterId should be a number (index of XHR obj in this.transporters)
-      if (transporterId != null) {
+      if (transporterId !== null) {
         this.processReq(req, transporterId);
       }
       // No transporter available to handle the request -- queue it up
@@ -465,7 +450,7 @@ fleegix.xhr = new function () {
     var trans = null;
     var url = '';
     var resp = null;
-   
+
     // Async mode -- grab an XHR obj from the pool
     if (req.async) {
       transporterId = t;
@@ -489,12 +474,12 @@ fleegix.xhr = new function () {
     else {
       url = req.url;
     }
-    
+
     // Call 'abort' method in IE to allow reuse of the obj
     if (document.all) {
       trans.abort();
     }
-    
+
     // Set up the request
     // ==========================
     if (req.username && req.password) {
@@ -507,7 +492,7 @@ fleegix.xhr = new function () {
     if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
       trans.overrideMimeType(req.mimeType);
     }
-    
+
     // Add any custom headers that are defined
     if (req.headers.length) {
       // Set any custom headers
@@ -523,12 +508,12 @@ fleegix.xhr = new function () {
           'application/x-www-form-urlencoded');
       }
     }
-    
+
     // Send the request, along with any data for POSTing
     // ==========================
     trans.send(req.dataPayload);
-    
-    if (this.processingWatcherId == null) {
+
+    if (this.processingWatcherId === null) {
       this.processingWatcherId = setTimeout(fleegix.xhr.watchProcessing, 10);
     }
     // Sync mode -- return actual result inline back to doReq
@@ -567,10 +552,10 @@ fleegix.xhr = new function () {
     var self = fleegix.xhr;
     var proc = self.processingArray;
     var d = new Date().getTime();
-    
+
     // Stop looping while processing sync requests
     // after req returns, it will start the loop back up
-    if (self.syncRequest != null) {
+    if (self.syncRequest !== null) {
       return;
     }
     else {
@@ -582,6 +567,7 @@ fleegix.xhr = new function () {
           // Aborted requests
           case (req.aborted || !trans.readyState):
             self.processingArray.splice(i, 1);
+            break;
           // Timeouts
           case isTimedOut:
             self.processingArray.splice(i, 1);
@@ -633,7 +619,7 @@ fleegix.xhr = new function () {
   this.handleResponse = function (trans, req) {
     // Grab the desired response type
     var resp = this.getResponseByType(trans, req);
-    
+
     // If we have a One True Event Handler, use that
     // Best for odd cases such as Safari's 'undefined' status
     // or 0 (zero) status from trying to load local files or chrome
@@ -651,9 +637,8 @@ fleegix.xhr = new function () {
           if (req.async) {
             // Make sure handler is defined
             if (!req.handleSuccess) {
-              throw('No response handler defined ' +
+              throw new Error('No response handler defined ' +
                 'for this request');
-              return;
             }
             else {
               req.handleSuccess(resp, req.id);
@@ -669,7 +654,7 @@ fleegix.xhr = new function () {
           // Squelch -- if you want to get local files or
           // chrome, use 'handleAll' above
           if (this.debug) {
-            throw('XMLHttpRequest HTTP status either zero or not set.');
+            throw new Error('XMLHttpRequest HTTP status either zero or not set.');
           }
         }
         // Request failed -- execute error handler
@@ -698,7 +683,7 @@ fleegix.xhr = new function () {
     // Remove from list of transporters currently in use
     // this XHR can't be aborted until it's processing again
     delete this.processingMap[req.id];
-    
+
     // Requests queued up, grab one to respond to
     if (this.requestQueue.length) {
       var nextReq = this.requestQueue.shift();
@@ -743,7 +728,7 @@ fleegix.xhr.Request = function () {
   this.handleErr = null;
   this.handleAll = null;
   this.handleTimeout = null;
-  this.responseFormat = 'text', // 'text', 'xml', 'object'
+  this.responseFormat = 'text'; // 'text', 'xml', 'object'
   this.mimeType = null;
   this.username = '';
   this.password = '';
@@ -753,7 +738,7 @@ fleegix.xhr.Request = function () {
   this.timeoutSeconds = 30; // Default to 30-sec timeout
   this.uber = false;
   this.aborted = false;
-}
+};
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
@@ -794,8 +779,8 @@ fleegix.event = new function () {
     if (!listenReg) {
       listenReg = {};
       // The original obj and method name
-      listenReg.orig = {}
-      listenReg.orig.obj = obj,
+      listenReg.orig = {};
+      listenReg.orig.obj = obj;
       listenReg.orig.methName = meth;
       // Preserve any existing listener
       if (obj[meth]) {
@@ -822,10 +807,10 @@ fleegix.event = new function () {
           reg.orig.methCode.apply(reg.orig.obj, args);
         }
         // DOM events
+        // Normalize the different event models
+        var ev = null;
         if (obj.attachEvent || obj.nodeType ||
           obj.addEventListener) {
-          // Normalize the different event models
-          var ev = null;
           // Try to find an event if we're not handed one
           if (!args.length) {
             try {
@@ -885,7 +870,7 @@ fleegix.event = new function () {
           else {
             f = ex.context[ex.method];
             c = ex.context;
-          };
+          }
           // Make sure there's something to execute
           if (typeof f != 'function') {
             throw(f + ' is not an executable function.');
@@ -941,7 +926,7 @@ fleegix.event = new function () {
       r.method = arguments[3];
       o = arguments[4] || {};
     }
-    for (var x in o) { r[x] = o[x] }
+    for (var x in o) { r[x] = o[x]; }
     listenReg.after.push(r);
 
     obj[meth].listenReg = listenReg;
@@ -988,7 +973,7 @@ fleegix.event = new function () {
   };
   this.subscribe = function(subscr, obj, method) {
     // Make sure there's an obj param
-    if (!obj) { return };
+    if (!obj) { return; }
     // Create the channel if it doesn't exist
     if (!channels[subscr]) {
       channels[subscr] = {};
@@ -1036,8 +1021,8 @@ fleegix.event = new function () {
   };
   this.getSrcElementId = function(e) {
     var ret = null;
-    if (e.srcElement) ret = e.srcElement;
-    else if (e.target) ret = e.target;
+    if (e.srcElement) { ret = e.srcElement; }
+    else if (e.target) { ret = e.target; }
     // Avoid trying to use fake obj from IE on disabled
     // form elements
     if (typeof ret.id == 'undefined') {
@@ -1136,71 +1121,7 @@ fleegix.uri = new function () {
 };
 
 fleegix.fx = new function () {
-
-  this.fadeOut = function (elem, opts) {
-    return doFade(elem, opts, 'out');
-  };
-  this.fadeIn = function (elem, opts) {
-    return doFade(elem, opts, 'in');
-  };
-  this.blindUp = function (elem, opts) {
-    var o = opts || {};
-    o.blindType = o.blindType || 'height';
-    return doBlind(elem, o, 'up');
-  };
-  this.blindDown = function (elem, opts) {
-    var o = opts || {};
-    o.blindType = o.blindType || 'height';
-    return doBlind(elem, o, 'down');
-  };
-  this.setCSSProp = function (elem, p, v) {
-    if (p == 'opacity') {
-      // IE uses a whole number as a percent
-      if (document.all) {
-        elem.style.filter = 'alpha(opacity=' + v + ')';
-      }
-      // Moz/compat uses a decimal value
-      else {
-        var d = v / 100;
-        elem.style.opacity = d;
-      }
-    }
-    else if (p == 'clip' || p.toLowerCase().indexOf('color') > -1) {
-      elem.style[p] = v;
-    }
-    else {
-      elem.style[p] = document.all ?
-        parseInt(v) + 'px' : v + 'px';
-    }
-    return true;
-  };
-  this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
-  this.hex2rgb = function (str) {
-    var rgb = [];
-    var h = str.match(this.hexPat);
-    if (h) {
-      for (var i = 1; i < h.length; i++) {
-        var s = h[i];
-        s = s.length == 1 ? s + s : s;
-        rgb.push(parseInt(s, 16));
-      }
-      return rgb;
-    }
-    else {
-      throw('"' + str + '" not a valid hex value.');
-    }
-  };
-  function doFade(elem, opts, dir) {
-    var s = dir == 'in' ? 0 : 100;
-    var e = dir == 'in' ? 100 : 0;
-    var o = {
-      props: { opacity: [s, e] },
-      trans: 'lightEaseIn' };
-    for (var p in opts) {
-      o[p] = opts[p];
-    }
-    return new fleegix.fx.Effecter(elem, o);
-  }
+  // Private functions
   function doBlind(elem, opts, dir) {
     var o = {};
     var s = 0;
@@ -1261,6 +1182,71 @@ fleegix.fx = new function () {
     o.trans = 'lightEaseIn';
     return new fleegix.fx.Effecter(elem, o);
   }
+  function doFade(elem, opts, dir) {
+    var s = dir == 'in' ? 0 : 100;
+    var e = dir == 'in' ? 100 : 0;
+    var o = {
+      props: { opacity: [s, e] },
+      trans: 'lightEaseIn' };
+    for (var p in opts) {
+      o[p] = opts[p];
+    }
+    return new fleegix.fx.Effecter(elem, o);
+  }
+  // Public (interface) methods
+  this.fadeOut = function (elem, opts) {
+    return doFade(elem, opts, 'out');
+  };
+  this.fadeIn = function (elem, opts) {
+    return doFade(elem, opts, 'in');
+  };
+  this.blindUp = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'height';
+    return doBlind(elem, o, 'up');
+  };
+  this.blindDown = function (elem, opts) {
+    var o = opts || {};
+    o.blindType = o.blindType || 'height';
+    return doBlind(elem, o, 'down');
+  };
+  this.setCSSProp = function (elem, p, v) {
+    if (p == 'opacity') {
+      // IE uses a whole number as a percent
+      if (document.all) {
+        elem.style.filter = 'alpha(opacity=' + v + ')';
+      }
+      // Moz/compat uses a decimal value
+      else {
+        var d = v / 100;
+        elem.style.opacity = d;
+      }
+    }
+    else if (p == 'clip' || p.toLowerCase().indexOf('color') > -1) {
+      elem.style[p] = v;
+    }
+    else {
+      elem.style[p] = document.all ?
+        parseInt(v, 10) + 'px' : v + 'px';
+    }
+    return true;
+  };
+  this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
+  this.hex2rgb = function (str) {
+    var rgb = [];
+    var h = str.match(this.hexPat);
+    if (h) {
+      for (var i = 1; i < h.length; i++) {
+        var s = h[i];
+        s = s.length == 1 ? s + s : s;
+        rgb.push(parseInt(s, 16));
+      }
+      return rgb;
+    }
+    else {
+      throw('"' + str + '" not a valid hex value.');
+    }
+  };
 };
 
 fleegix.fx.Effecter = function (elem, opts) {
@@ -1273,7 +1259,7 @@ fleegix.fx.Effecter = function (elem, opts) {
   this.timeSpent = 0;
   this.doOnStart = opts.doOnStart || null;
   this.doAfterFinished = opts.doAfterFinished || null;
-  this.autoStart = opts.autoStart == false ? false : true;
+  this.autoStart = opts.autoStart === false ? false : true;
 
   if (typeof this.transitions[this.trans] != 'function') {
     throw('"' + this.trans + '" is not a valid transition.');
@@ -1281,7 +1267,7 @@ fleegix.fx.Effecter = function (elem, opts) {
 
   this.start = function () {
     self.id = setInterval( function () {
-      self.doStep.apply(self, [elem]) },
+      self.doStep.apply(self, [elem]); },
       Math.round(1000/self.fps));
     // Run the pre-execution func if any
     if (typeof opts.doOnStart == 'function') {
@@ -1328,25 +1314,30 @@ fleegix.fx.Effecter.prototype.calcCurrVal = function (key) {
   var startVal = this.props[key][0];
   var endVal = this.props[key][1];
   var trans = this.transitions[this.trans];
+  var arrStart;
+  var arrEnd;
+  var arrCurr;
+  var s; var e;
   if (key.toLowerCase().indexOf('color') > -1) {
-    var arrStart = fleegix.fx.hex2rgb(startVal);
-    var arrEnd = fleegix.fx.hex2rgb(endVal);
-    var arrCurr = [];
+    arrStart = fleegix.fx.hex2rgb(startVal);
+    arrEnd = fleegix.fx.hex2rgb(endVal);
+    arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
-      var s = arrStart[i];
-      var e = arrEnd[i];
-      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
+      s = arrStart[i];
+      e = arrEnd[i];
+      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s),
+        this.duration), 10));
     }
     return 'rgb(' + arrCurr.join() + ')';
   }
   else if (key == 'clip') {
-    var arrStart = startVal;
-    var arrEnd = endVal;
-    var arrCurr = [];
+    arrStart = startVal;
+    arrEnd = endVal;
+    arrCurr = [];
     for (var i = 0; i < arrStart.length; i++) {
-      var s = arrStart[i];
-      var e = arrEnd[i];
-      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration)));
+      s = arrStart[i];
+      e = arrEnd[i];
+      arrCurr.push(parseInt(trans(this.timeSpent, s, (e - s), this.duration), 10));
     }
     return 'rect(' + arrCurr.join('px,') + 'px)';
   }
@@ -1371,7 +1362,7 @@ fleegix.fx.Effecter.prototype.transitions = {
     return -c *(t/=d)*(t-2) + b;
   },
   lightEaseInOut: function (t, b, c, d) {
-    if ((t/=d/2) < 1) return c/2*t*t + b;
+    if ((t/=d/2) < 1) { return c/2*t*t + b; }
     return -c/2 * ((--t)*(t-2) - 1) + b;
   },
   // 'Heavy' is cubic
@@ -1382,7 +1373,7 @@ fleegix.fx.Effecter.prototype.transitions = {
     return c*((t=t/d-1)*t*t + 1) + b;
   },
   heavyEaseInOut: function (t, b, c, d) {
-    if ((t/=d/2) < 1) return c/2*t*t*t + b;
+    if ((t/=d/2) < 1) { return c/2*t*t*t + b; }
     return c/2*((t-=2)*t*t + 2) + b;
   }
 };
@@ -1396,13 +1387,13 @@ fleegix.json = new function() {
     switch (typeof obj) {
       case 'object':
         // Null
-        if (obj == null) {
+        if (obj === null) {
            return 'null';
         }
         // Arrays
         else if (obj instanceof Array) {
           for (var i = 0; i < obj.length; i++) {
-            if (str) { str += ',' }
+            if (str) { str += ','; }
             str += fleegix.json.serialize(obj[i]);
           }
           return '[' + str + ']';
@@ -1410,7 +1401,7 @@ fleegix.json = new function() {
         // Objects
         else if (typeof obj.toString != 'undefined') {
           for (var i in obj) {
-            if (str) { str += ',' }
+            if (str) { str += ','; }
             str += '"' + i + '":';
             if (typeof obj[i] == 'undefined') {
               str += '"undefined"';
@@ -1422,20 +1413,16 @@ fleegix.json = new function() {
           return '{' + str + '}';
         }
         return str;
-        break;
       case 'unknown':
       case 'undefined':
       case 'function':
         return '"undefined"';
-        break;
       case 'string':
         str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
           /\r/g, '').replace(/\n/g, '\\n') + '"';
         return str;
-        break;
       default:
         return String(obj);
-        break;
     }
   };
 };
@@ -1443,17 +1430,21 @@ fleegix.json = new function() {
 
 fleegix.cookie = new function() {
   this.set = function(name, value, optParam) {
-    var opts = optParam || {}
+    var opts = optParam || {};
+    var path = '/';
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
     var exp = '';
     var t = 0;
     if (typeof optParam == 'object') {
-      var path = opts.path || '/';
-      var days = opts.days || 0;
-      var hours = opts.hours || 0;
-      var minutes = opts.minutes || 0;
+      path = opts.path || '/';
+      days = opts.days || 0;
+      hours = opts.hours || 0;
+      minutes = opts.minutes || 0;
     }
     else {
-      var path = optsParam || '/';
+      path = optParam || '/';
     }
     t += days ? days*24*60*60*1000 : 0;
     t += hours ? hours*60*60*1000 : 0;
@@ -1478,7 +1469,7 @@ fleegix.cookie = new function() {
       while (c.charAt(0) == ' ') {
         c = c.substring(1, c.length);
       }
-      if (c.indexOf(nameEq) == 0) {
+      if (c.indexOf(nameEq) === 0) {
         return c.substring(nameEq.length, c.length);
       }
     }
@@ -1491,7 +1482,7 @@ fleegix.cookie = new function() {
     if (path) { opts.path = path; }
     this.set(name, '', opts);
   };
-}
+};
 
 
 fleegix.css = new function() {

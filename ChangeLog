@@ -1,3 +1,14 @@
+2007-10-04 02:55  mde
+
+	* ChangeLog, plugins/hash/tests, plugins/hash/tests/hash.js: Moved
+	  tests for Hash plugin into appropriate directory.
+
+2007-10-04 02:54  mde
+
+	* src/cookie.js, src/dom.js, src/event.js, src/form.js, src/fx.js,
+	  src/json.js, src/string.js, src/xhr.js: Ran JS lint, fixed a lot
+	  of small syntax issues.
+
 2007-10-02 04:42  mde
 
 	* tests/HashTest.js, tests/cookie.js, tests/css.js,
