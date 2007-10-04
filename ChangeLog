@@ -1,3 +1,62 @@
+2007-10-02 04:42  mde
+
+	* tests/HashTest.js, tests/cookie.js, tests/css.js,
+	  tests/index.html, tests/initialize.js, tests/xhr.js,
+	  tests/xhr_response.php: Adding some basic unit tests for running
+	  under Windmill, a test stub page for running tests against, and a
+	  basic PHP page for proving XHR GET and POST against.
+
+2007-10-01 04:36  mde
+
+	* tests/AllTests.js: Removing JSUnit test runner file in
+	  preparation for moving to Windmill for unit-testing.
+
+2007-09-29 04:42  mde
+
+	* plugins/html, plugins/html/html.js: Added plugin for generating
+	  HTML form elements programmatically.
+
+2007-09-25 06:52  mde
+
+	* plugins/shell/shell.js: Fixed bug caused by undeclared variable.
+
+2007-09-25 06:41  mde
+
+	* plugins/shell/shell.js: Added property names to object explorer
+	  for shell plugin.
+
+2007-09-23 04:45  mde
+
+	* plugins/shell/shell.js, plugins/shell/test.html: Added some final
+	  polish to the shell plugin -- for now, hard-coded explorer output
+	  to the normal output node, added auto-scroll code to explorer
+	  output.
+
+2007-09-22 04:41  mde
+
+	* plugins/shell/shell.js, plugins/shell/test.html: Implemented
+	  object explorer and auto-scroll.
+
+2007-09-21 19:31  mde
+
+	* plugins/shell/test.html: Added demo page for JS shell plugin.
+
+2007-09-21 05:43  mde
+
+	* plugins/shell, plugins/shell/shell.js: Added basic JavaScript
+	  shell plugin.
+
+2007-09-19 05:05  mde
+
+	* README, Rakefile, doc/index.html, doc/index.txt: Some final
+	  polish to the RakeFile and docs for the 0.4.0 release.
+
+2007-09-19 02:29  mde
+
+	* ChangeLog, Rakefile, fleegix.js, fleegix.js.uncompressed.js:
+	  Updated built/compressed fleegix.js files, ChangeLog in
+	  preparation for release 0.4.0.
+
 2007-09-17 23:24  mde
 
 	* src/css.js: Added replaceClass convenience method to CSS module.
