@@ -14,7 +14,7 @@ fleegixTest.test_cssAddClassName = [
   { method: "waits.sleep", params: { milliseconds: 800 } },
   function () {
     var d = $('fooDiv');
-    jum.assertEquals(d.className, 'barClass');
+    jum.assertEquals('barClass', d.className);
   },
   function () {
     var d = $('fooDiv');
@@ -38,13 +38,13 @@ fleegixTest.test_cssRemoveClassName = [
   { method: "waits.sleep", params: { milliseconds: 800 } },
   function () {
     var d = $('fooDiv');
-    jum.assertEquals(d.className, 'barClass bazClass');
+    jum.assertEquals('barClass bazClass', d.className);
     fleegix.css.removeClass(d, 'barClass');
   },
   { method: "waits.sleep", params: { milliseconds: 800 } },
   function () {
     var d = $('fooDiv');
-    jum.assertEquals(d.className, 'bazClass');
+    jum.assertEquals('bazClass', d.className);
   },
   function () {
     var d = $('fooDiv');

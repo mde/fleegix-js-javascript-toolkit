@@ -3,13 +3,13 @@
 var fleegixTest = {};
 
 // Convenience functions
-$ = function (id) {
+var $ = function (id) {
   return document.getElementById(id);
 };
-_createElem = function (t) {
+var _createElem = function (t) {
   return document.createElement(t);
 };
-_createText = function (t) {
+var _createText = function (t) {
   return document.createTextNode(t);
 };
 

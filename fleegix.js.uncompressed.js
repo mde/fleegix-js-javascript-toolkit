@@ -1489,14 +1489,20 @@ fleegix.css = new function() {
     this.addClass = function (elem, s) {
       fleegix.css.removeClass(elem, s); // Don't add twice
       var c = elem.className;
-      elem.className = c += ' ' + s;
+      c += ' ' + s;
+      c = fleegix.string.trim(c);
+      elem.className = c;
     };
     this.removeClass = function (elem, s) {
       var c = elem.className;
       // Esc backslashes in regex pattern
       var pat = '\\b' + s + '\\b';
-      pat = new RegExp(pat);
+      // Do global search -- shouldn't be multiple
+      // instances of the selector, but who knows
+      pat = new RegExp(pat, 'g');
       c = c.replace(pat, '');
+      c = c.replace('  ', ' ');
+      c = fleegix.string.trim(c);
       elem.className = c;
     };
     this.replaceClass = function (elem, oldClass, newClass) {
