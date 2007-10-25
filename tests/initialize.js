@@ -1,22 +1,17 @@
 
-// Handy shortcut
-var testWin = windmill.testWindow;
-
 // Test namespace obj
-testWin.fleegixTest = {};
+var fleegixTest = {};
 
 // Convenience functions
-testWin.$ = function (id) {
-  return testWin.document.getElementById(id);
+$ = function (id) {
+  return document.getElementById(id);
 };
-testWin._createElem = function (t) {
-  return testWin.document.createElement(t);
+_createElem = function (t) {
+  return document.createElement(t);
 };
-testWin._createText = function (t) {
-  return testWin.document.createTextNode(t);
+_createText = function (t) {
+  return document.createTextNode(t);
 };
 
-windmill.jsTest.runInTestWindowScope = true;
-windmill.jsTest.registerTestNamespace('fleegixTest');
 
 

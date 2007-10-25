@@ -1,5 +1,4 @@
 
-
 fleegixTest.test_cookieSetGet = function () {
   fleegix.cookie.set('fooCookie', 'foo');
   var val = fleegix.cookie.get('fooCookie');
