@@ -330,7 +330,15 @@ fleegix.xhr = new function () {
   this.syncRequest = null;
   // Show exceptions for connection failures
   this.debug = false;
+  // The id for the setTimeout used in the the
+  // request timeout watcher
   this.processingWatcherId = null;
+  // Default number of seconds before a request times out
+  this.defaultTimeoutSeconds = 30;
+  // Possible formats for the XHR response
+  this.responseFormats = { TXT: 'text',
+   XML: 'xml',
+   OBJ: 'object' };
 
   // Public methods
   // ================================
@@ -728,14 +736,14 @@ fleegix.xhr.Request = function () {
   this.handleErr = null;
   this.handleAll = null;
   this.handleTimeout = null;
-  this.responseFormat = 'text'; // 'text', 'xml', 'object'
+  this.responseFormat = fleegix.xhr.responseFormats.TXT; // TXT, XML, OBJ
   this.mimeType = null;
   this.username = '';
   this.password = '';
   this.headers = [];
   this.preventCache = false;
   this.startTime = new Date().getTime();
-  this.timeoutSeconds = 30; // Default to 30-sec timeout
+  this.timeoutSeconds = fleegix.xhr.defaultTimeoutSeconds; // Default to 30-sec timeout
   this.uber = false;
   this.aborted = false;
 };
