@@ -51,11 +51,15 @@ fleegix.xml = new function (){
         // Tags with content
         if (k.firstChild) {
           // Node has only one child, a text node -- this is a leaf
-          if(k.childNodes.length == 1 && k.firstChild.nodeType == 3) {
-            // Either set plain value, or if this is a same-named
-            // tag, start stuffing values into an array
-            obj[key] = expandToArr(obj[key],
-              k.firstChild.nodeValue.replace(pat, ''));
+          if(k.childNodes.length == 1) {
+            var t =  k.firstChild.nodeType;
+            // Text, CDATA, comment
+            if (t == 3 || t == 4 || t == 8) {
+              // Either set plain value, or if this is a same-named
+              // tag, start stuffing values into an array
+              obj[key] = expandToArr(obj[key],
+                k.firstChild.nodeValue.replace(pat, ''));
+            }
           }
           // Node has children -- branch node, recurse
           else {

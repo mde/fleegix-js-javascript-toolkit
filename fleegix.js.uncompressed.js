@@ -1519,3 +1519,133 @@ fleegix.css = new function() {
     };
 };
 
+
+fleegix.popup = new function () {
+  var _this = this;
+  this.win = null;
+  this.open = function (url, optParam) {
+    var opts = optParam || {}
+    var str = '';
+    var propList = {
+      'width': '',
+      'height': '',
+      'location': 0,
+      'menubar': 0,
+      'resizable': 1,
+      'scrollbars': 0,
+      'status': 0,
+      'titlebar': 1,
+      'toolbar': 0
+      };
+    for (var prop in propList) {
+      str += prop + '=';
+      str += opts[prop] ? opts[prop] : propList[prop];
+      str += ',';
+    }
+    var len = str.length;
+    if (len) {
+      str = str.substr(0, len-1);
+    }
+    if(!_this.win || _this.win.closed) {
+      _this.win = window.open(url, 'thePopupWin', str);
+    }
+    else {
+      _this.win.focus();
+      _this.win.document.location = url;
+    }
+  };
+  this.close = function () {
+    if (_this.win) {
+      _this.win.window.close();
+      _this.win = null;
+    }
+  };
+  this.goURLMainWin = function (url) {
+    location = url;
+    _this.close();
+  };
+};
+
+
+fleegix.xml = new function (){
+  var pat = /^[\s\n\r]+|[\s\n\r]+$/g;
+  var expandToArr = function (orig, val) {
+    if (orig) {
+      var r = null;
+      if (orig instanceof Array == false) {
+        r = [];
+        r.push(orig);
+      }
+      else { r = orig; }
+      r.push(val);
+      return r;
+    }
+    else { return val; }
+  };
+  // Parses an XML doc or doc fragment into a JS obj
+  // Values for multiple same-named tags a placed in
+  // an array -- ideas for improvement to hierarchical
+  // parsing from Kevin Faulhaber (kjf@kjfx.net)
+  this.parse = function (node, tagName) {
+    var obj = {};
+    var kids = [];
+    if (tagName) {
+      kids = node.getElementsByTagName(tagName);
+    }
+    else {
+      kids = node.childNodes;
+    }
+    for (var i = 0; i < kids.length; i++) {
+      var k = kids[i];
+      // Blow by the stupid Mozilla linebreak nodes
+      if (k.nodeType == 1) {
+        var key = k.tagName;
+        // Tags with content
+        if (k.firstChild) {
+          // Node has only one child, a text node -- this is a leaf
+          if(k.childNodes.length == 1) {
+            var t =  k.firstChild.nodeType;
+            // Text, CDATA, comment
+            if (t == 3 || t == 4 || t == 8) {
+              // Either set plain value, or if this is a same-named
+              // tag, start stuffing values into an array
+              obj[key] = expandToArr(obj[key],
+                k.firstChild.nodeValue.replace(pat, ''));
+            }
+          }
+          // Node has children -- branch node, recurse
+          else {
+            // Rinse and repeat
+            obj[key] = expandToArr(obj[key], this.parse(k));
+          }
+        }
+        // Empty tags -- create an empty entry
+        else {
+          obj[key] = expandToArr(obj[key], null);
+        }
+      }
+    }
+    return obj;
+  };
+  // Returns a single, top-level XML document node
+  // Ideal for grabbing embedded XML data from a page
+  // (i.e., XML 'data islands')
+  this.getXMLDoc = function (id, tagName) {
+    var arr = [];
+    var doc = null;
+    if (document.all) {
+      var str = document.getElementById(id).innerHTML;
+      doc = new ActiveXObject("Microsoft.XMLDOM");
+      doc.loadXML(str);
+      doc = doc.documentElement;
+    }
+    // Moz/compat can access elements directly
+    else {
+      arr =
+        window.document.body.getElementsByTagName(tagName);
+      doc = arr[0];
+    }
+    return doc;
+  };
+};
+
