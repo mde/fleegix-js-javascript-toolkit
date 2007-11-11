@@ -65,6 +65,9 @@ fleegix.date.Date = function () {
       dt = new Date(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
     }
   }
+  this._useCache = false;
+  this._tzInfo = {};
+  this._tzAbbr = '';
   this.year = 0;
   this.month = 0;
   this.date = 0;
@@ -104,22 +107,40 @@ fleegix.date.Date.prototype = {
     return this.timezone;
   },
   getTimezoneOffset: function () {
+    var info = this.getTimezoneInfo();
+    return info.tzOffset;
+  },
+  getTimezoneAbbreviation: function () {
+    var info = this.getTimezoneInfo();
+    return info.tzAbbr;
+  },
+  getTimezoneInfo: function () {
+    var res;
     if (this.utc) {
-      off = 0;
+      res = { tzOffset: 0,
+        tzAbbr: 'UTC' };
     }
     else {
-      if (this.timezone) {
-        var dt = new Date(Date.UTC(this.year, this.month, this.date,
-          this.hours, this.minutes, this.seconds, this.milliseconds));
-        var tz = this.timezone;
-        off = fleegix.date.timezone.getOffset(dt, tz);
+      if (this._useCache) {
+        res = this._tzInfo;
       }
-      // Floating -- use local offset
       else {
-        off = this.getLocalOffset();
+        if (this.timezone) {
+          var dt = new Date(Date.UTC(this.year, this.month, this.date,
+            this.hours, this.minutes, this.seconds, this.milliseconds));
+          var tz = this.timezone;
+          res = fleegix.date.timezone.getTzInfo(dt, tz);
+        }
+        // Floating -- use local offset
+        else {
+          res = { tzOffset: this.getLocalOffset(),
+            tzAbbr: null };
+        }
+        this._tzInfo = res;
+        this._useCache = true;
       }
     }
-    return off;
+    return res;
   },
   getUTCDate: function () {
     return this.getUTCDateProxy().getUTCDate();
@@ -232,6 +253,7 @@ fleegix.date.Date.prototype = {
     this.minutes = fromUTC ? dt.getUTCMinutes() : dt.getMinutes();
     this.seconds = fromUTC ? dt.getUTCSeconds() : dt.getSeconds();
     this.milliseconds = fromUTC ? dt.getUTCMilliseconds() : dt.getMilliseconds();
+    this._useCache = false;
   },
   getUTCDateProxy: function () {
     var dt = new Date(Date.UTC(this.year, this.month, this.date,
@@ -262,6 +284,7 @@ fleegix.date.Date.prototype = {
       this.utc = true;
     }
     this.timezone = tz;
+    this._useCache = false;
   },
   civilToJulianDayNumber: function (y, m, d) {
     // Adjust for zero-based JS-style array
@@ -392,12 +415,12 @@ fleegix.date.timezone = new function() {
     for (var i = 0; i < rules.length; i++) {
       r = rules[i];
       // Only look at applicable rules -- throw out:
-      // 1. Rules with a 'to' year earlier than the year previous
+      // 1. Rules with a 'to' year earlier than the year
       // 2. Rules which are confined to the 'from' year, and are
-      //  are earlier than the year previous
+      //  are earlier than the year
       // 3. Rules where the 'from' starts after
-      if ((r[1] < (year - 1)) ||
-        (r[0] < (year - 1) && r[1] == 'only') ||
+      if ((r[1] < year) ||
+        (r[0] < year && r[1] == 'only') ||
         (r[0] > year)) {
         continue;
       };
@@ -469,6 +492,27 @@ fleegix.date.timezone = new function() {
     ret -= off
     ret = -Math.ceil(ret);
     return ret;
+  }
+  function getAbbreviation(zone, rule) {
+    var res;
+    var base = zone[2];
+    if (base.indexOf('%s') > -1) {
+      var repl;
+      if (rule) {
+        repl = rule[7];
+      }
+      // FIXME: Right now just falling back to Standard --
+      // apparently ought to use the last valid rule, 
+      // although in practice that always ought to be Standard
+      else {
+        repl = 'S';
+      }
+      res = base.replace('%s', repl);
+    }
+    else {
+      res = base;
+    }
+    return res;
   }
 
   this.zoneFileBasePath;
@@ -579,7 +623,7 @@ fleegix.date.timezone = new function() {
     }
     return true;
   };
-  this.getOffset = function(dt, tz) {
+  this.getTzInfo = function(dt, tz) {
     // Lazy-load any zones not yet loaded
     if (this.loadingScheme == this.loadingSchemes.LAZY_LOAD) {
       // Get the correct region for the zone
@@ -597,7 +641,8 @@ fleegix.date.timezone = new function() {
     if (rule) {
       off = getAdjustedOffset(off, rule);
     }
-    return off;
+    var abbr = getAbbreviation(zone, rule);
+    return { tzOffset: off, tzAbbr: abbr };
   }
 }
 
