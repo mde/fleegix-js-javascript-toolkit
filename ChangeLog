@@ -1,3 +1,104 @@
+2008-01-05 03:31  mde
+
+	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js: Updated
+	  built fleegix.js files for 0.4.1 release.
+
+2008-01-05 03:30  mde
+
+	* Rakefile: Turn on gzip option for default rake build.
+
+2008-01-05 03:26  mde
+
+	* tests/cookie.js, tests/css.js, tests/index.html,
+	  tests/initialize.js, tests/register.js, tests/xhr.js: Changed
+	  tests to work with updates to Windmill's JavaScript testing
+	  framework.
+
+2008-01-05 03:24  mde
+
+	* plugins/html/html.js: Added code for cases where user sets form
+	  field values to null or undefined instead of correctly using
+	  empty string.
+
+2008-01-05 03:23  mde
+
+	* src/event.js: Added code to deal with X-domain issues caused by
+	  on-the-fly changes to document.domain.
+
+2008-01-05 03:22  mde
+
+	* src/xhr.js: Changed code to work with Firefox's fix to XHR --
+	  hitting ESC key to cancel XHR request no longer results in an
+	  error.
+
+2007-11-11 05:00  mde
+
+	* plugins/date/date.js: Fixed a bug caused by incorrectly including
+	  previous years' rules in the list of hits for timezone parsing.
+	  Also added some smart caching, and a getTimezoneAbbreviation
+	  method.
+
+2007-10-29 05:49  mde
+
+	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
+	  plugins/xml/xml.js: Updated XML parser plugin to handle CDATA and
+	  comment nodes properly.
+
+2007-10-26 04:57  mde
+
+	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
+	  src/xhr.js: Updated fleegix.xhr to allow a configurable default
+	  request-timeout value, and changed responseFormat for requests to
+	  use an ennumerable, fleegix.xhr.responseFormats. The values in
+	  the ennumerable are the same as the original string values, so
+	  this change is backward compatible.
+
+2007-10-25 19:16  mde
+
+	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
+	  src/css.js, tests/css.js, tests/initialize.js: Fixed some issues
+	  with the spaces in multi-selector class attributes in the CSS
+	  module.
+
+2007-10-25 04:11  mde
+
+	* tests/cookie.js, tests/initialize.js, tests/register.js: Updated
+	  tests to reflect changes in the Windmill JS test framework.
+
+2007-10-18 19:02  mde
+
+	* plugins/hash/hash.js: Added workaround in random-key creation for
+	  Safari 2's buggy Math.random implementation.
+
+2007-10-17 03:00  mde
+
+	* plugins/shell/shell.js: Updated shell plugin to deal with both
+	  IE's and Safari 2's broken eval.
+
+2007-10-06 23:16  mde
+
+	* NOTICE: Added GNU-style top-level copyright NOTICE file.
+
+2007-10-06 23:15  mde
+
+	* plugins/date/date.js, plugins/html/html.js, src/form.js: Adding
+	  OSAF and SitePoint copyright attributions.
+
+2007-10-06 22:46  mde
+
+	* src/json.js: Removed erroneous copyright attribution for
+	  SitePoint in JSON serialization library.
+
+2007-10-04 03:11  mde
+
+	* fleegix.js.gz: Added gzipped fleegix.js file for 0.4.0 release.
+
+2007-10-04 03:05  mde
+
+	* ChangeLog, fleegix.js, fleegix.js.uncompressed.js: Updating both
+	  cooked and uncompressed fleegix.js files for inclusion in 0.4.0
+	  release. Also final update to ChangeLog.
+
 2007-10-04 02:55  mde
 
 	* ChangeLog, plugins/hash/tests, plugins/hash/tests/hash.js: Moved

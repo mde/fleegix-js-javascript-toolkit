@@ -60,7 +60,7 @@ known to work on the following:
 
   * Mozilla 1.5+, Firefox 1.0+
   * Internet Explorer 6+
-  * Safari 2
+  * Safari 2+
 
 It is likely to work on other standards-conformant browsers
 (e.g., Opera, OmniWeb), but has not been tested with these.
