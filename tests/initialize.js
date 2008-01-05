@@ -1,7 +1,3 @@
-
-// Test namespace obj
-var fleegixTest = {};
-
 // Convenience functions
 var $ = function (id) {
   return document.getElementById(id);
