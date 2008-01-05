@@ -2,7 +2,7 @@
 
 $YUI_COMPRESSOR_PATH = 'lib/yuicompressor-2.1.2.jar'
 $COMPRESSION = true
-$GZIP = false
+$GZIP = true 
 
 def get_source_file_list
   require 'find'
