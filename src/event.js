@@ -25,7 +25,24 @@ fleegix.event = new function () {
   this.listen = function () {
     var obj = arguments[0]; // Target object for the new listener
     var meth = arguments[1]; // Method to listen for
-    if (!obj) { throw('fleegix.listen called on an object that does not exist.'); }
+
+    // Simple function
+    var r = {}; // package of info about what to execute
+    var o = {}; // options -- stopPropagation or preventDefault
+    if (typeof arguments[2] == 'function') {
+      r.method = arguments[2];
+      o = arguments[3] || {};
+    }
+    // Object and method
+    else {
+      r.context = arguments[2];
+      r.method = arguments[3];
+      o = arguments[4] || {};
+    }
+
+    if (!obj) { 
+      throw new Error('fleegix.listen called on an object (' +
+        obj + ') that does not exist.'); }
 
     // Add dummy onmousewheel that allows us to fake
     // old-school event registration with Firefox's
@@ -37,7 +54,8 @@ fleegix.event = new function () {
       }
     }
 
-    // Look to see if there's already a registry of listeners
+    // Look to see if there's already a handler and
+    // registry of listeners
     var listenReg = obj[meth] ?
       obj[meth].listenReg : null;
 
@@ -63,9 +81,15 @@ fleegix.event = new function () {
       obj[meth] = function () {
         var reg = obj[meth].listenReg;
         if (!reg) {
-            throw('Cannot execute handlers. Something' +
-                ' (likely another JavaScript library) has' +
-                ' removed the fleegix.event.listen handler registry.');
+          if (obj['_' + meth + '_suppressErrors']) {
+            return false;
+          }
+          else {
+            throw new Error('Cannot execute handlers for ' + obj + '  "' +
+              meth + '". Something' +
+              ' (likely another JavaScript library) has' +
+              ' removed the fleegix.event.listen handler registry.');
+          }
         }
         var args = [];
         for (var i = 0; i < arguments.length; i++) {
@@ -182,24 +206,9 @@ fleegix.event = new function () {
         }
       }
     }
+    
     // Add the new handler to the listener registry
-    // -----------------
-    // Simple function
-    var r = {}; // package of info about what to execute
-    var o = {}; // options -- stopPropagation or preventDefault
-    if (typeof arguments[2] == 'function') {
-      r.method = arguments[2];
-      o = arguments[3] || {};
-    }
-    // Object and method
-    else {
-      r.context = arguments[2];
-      r.method = arguments[3];
-      o = arguments[4] || {};
-    }
-    for (var x in o) { r[x] = o[x]; }
     listenReg.after.push(r);
-
     obj[meth].listenReg = listenReg;
 
   };
@@ -313,6 +322,16 @@ fleegix.event = new function () {
       }
     }
     return ret.id;
+  };
+  // If there are known problems looking up the listener registry
+  // for a particular handler, this will allow the execution to 
+  // fail silently instead of throwing errors alerting the user
+  // that listening functions are not being triggered correctly.
+  // Used in cases where listeners are being addded to windows
+  // where document.domain is changed on the fly, which causes
+  // lookup of .listenReg to fail
+  this.suppressHandlerErrors = function (obj, meth) {
+    obj['_' + meth + '_suppressErrors'] = true;
   };
 };
 // Clean up listeners
