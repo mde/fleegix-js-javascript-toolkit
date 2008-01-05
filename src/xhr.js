@@ -19,6 +19,7 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.xhr = new function () {
 
+  var UNDEFINED_VALUE;
   var msProgId = null; // Cache the prog ID if needed
   function spawnTransporter(isSync) {
     var i = 0;
@@ -401,48 +402,55 @@ fleegix.xhr = new function () {
     }
     // Otherwise hand to either success/failure
     else {
-      // Use try-catch to avoid NS_ERROR_NOT_AVAILABLE
-      // err in Firefox for broken connections or hitting ESC
       try {
-        // Request was successful -- execute response handler
-        if ((trans.status > 199 && trans.status < 300) ||
-            trans.status == 304) {
-          if (req.async) {
-            // Make sure handler is defined
-            if (!req.handleSuccess) {
-              throw new Error('No response handler defined ' +
-                'for this request');
+        switch (true) {
+          // Request was successful -- execute response handler
+          case ((trans.status > 199 && trans.status < 300) ||
+              trans.status == 304):
+            if (req.async) {
+              // Make sure handler is defined
+              if (!req.handleSuccess) {
+                throw new Error('No response handler defined ' +
+                  'for this request');
+              }
+              else {
+                req.handleSuccess(resp, req.id);
+              }
+            }
+            // Blocking requests return the result inline on success
+            else {
+              return resp;
+            }
+            break;
+          // Status of 0 -- in FF, user may have hit ESC while processing
+          case (trans.status == 0):
+            if (this.debug) {
+              throw new Error('XMLHttpRequest HTTP status is zero.');
+            }
+            break;
+          // Status of null or undefined -- yes, null == undefined
+          case (trans.status == UNDEFINED_VALUE):
+            // Squelch -- if you want to get local files or
+            // chrome, use 'handleAll' above
+            if (this.debug) {
+              throw new Error('XMLHttpRequest HTTP status not set.');
+            }
+            break;
+          // Request failed -- execute error handler
+          default:
+            if (req.handleErr) {
+              req.handleErr(resp, req.id);
             }
             else {
-              req.handleSuccess(resp, req.id);
+              this.handleErrDefault(trans);
             }
-          }
-          // Blocking requests return the result inline on success
-          else {
-            return resp;
-          }
-        }
-        // Status of 0, undefined, null
-        else if (!trans.status) {
-          // Squelch -- if you want to get local files or
-          // chrome, use 'handleAll' above
-          if (this.debug) {
-            throw new Error('XMLHttpRequest HTTP status either zero or not set.');
-          }
-        }
-        // Request failed -- execute error handler
-        else {
-          if (req.handleErr) {
-            req.handleErr(resp, req.id);
-          }
-          else {
-            this.handleErrDefault(trans);
-          }
+            break;
         }
       }
-      // Squelch
+      // FIXME: Might be nice to try to catch NS_ERROR_NOT_AVAILABLE
+      // err in Firefox for broken connections
       catch (e) {
-        if (this.debug) { throw(e); }
+        throw e; 
       }
     }
     // Clean up, move immediately to respond to any
