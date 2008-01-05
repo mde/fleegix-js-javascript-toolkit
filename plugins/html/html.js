@@ -48,7 +48,7 @@ fleegix.html = new function () {
     }
     for (var i = 0; i < options.length; i++) {
       var opt = _createElem('option');
-      opt.value = options[i].value;
+      opt.value = options[i].value || '';
       opt.appendChild(_createText(options[i].text));
       selectElement.appendChild(opt);
       if (options[i].selected){
