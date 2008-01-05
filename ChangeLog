@@ -1,3 +1,15 @@
+2008-01-05 03:59  mde
+
+	* fleegix.js.gz: Updated gzip'd built file for 0.4.1 release.
+
+2008-01-05 03:55  mde
+
+	* tests/event.js: Added basic test for event.listen click handling.
+
+2008-01-05 03:38  mde
+
+	* ChangeLog, README: Updated doc for 0.4.1 release.
+
 2008-01-05 03:31  mde
 
 	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js: Updated
