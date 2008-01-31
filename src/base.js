@@ -16,3 +16,32 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
+fleegix.extend = function (/* Super-class constructor function */ superClass,
+  /* Sub-class constructor function */ subClass) {
+  return function () {
+    superClass.apply(this, arguments);
+    superClass.prototype.constructor.apply(this, arguments);
+    subClass.apply(this, arguments);
+  };
+};
+
+fleegix.mixin = function (/* Target obj */ target,
+  /* Obj of props or constructor */ mixin) {
+  // Create an instance if we get a constructor
+  var m;
+  if (typeof mixin == 'function') {
+    m = new mixin();
+  }
+  else {
+    m = mixin;
+  }
+  var baseObj = {};
+  for (var p in m) {
+    // Don't copy anything from Object.prototype
+		if (typeof baseObj[p] == 'undefined' || baseObjj[p] != m[p]) {
+      target[p] = m[p];
+    }
+  }
+  return target;
+};
+
