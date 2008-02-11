@@ -35,10 +35,12 @@ def concat_sourcefiles(files, filename)
   # if (typeof fleegix == 'undefined') { var fleegix = {}; }
   re = Regexp.new('\/\*.*if \(typeof fleegix == \'undefined\'\) \{ var fleegix = \{\}; \}', Regexp::MULTILINE)
   files.each do |f|
-    js_file = File.new(f)
-    js = js_file.readlines.join
-    js.sub!(re, '')
-    dist << js
+    if f != './src/base.js'
+      js_file = File.new(f)
+      js = js_file.readlines.join
+      js.sub!(re, '')
+      dist << js
+    end
   end
   dist.close
   true
