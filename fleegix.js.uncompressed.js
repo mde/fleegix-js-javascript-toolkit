@@ -16,436 +16,162 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
-
-
-fleegix.event = new function () {
-  // List of handlers for event listeners
-  var listenerCache = [];
-  // List of channels being published to
-  var channels = {};
-
-  this.listen = function () {
-    var obj = arguments[0]; // Target object for the new listener
-    var meth = arguments[1]; // Method to listen for
-
-    // Simple function
-    var r = {}; // package of info about what to execute
-    var o = {}; // options -- stopPropagation or preventDefault
-    if (typeof arguments[2] == 'function') {
-      r.method = arguments[2];
-      o = arguments[3] || {};
-    }
-    // Object and method
-    else {
-      r.context = arguments[2];
-      r.method = arguments[3];
-      o = arguments[4] || {};
-    }
-
-    if (!obj) { 
-      throw new Error('fleegix.listen called on an object (' +
-        obj + ') that does not exist.'); }
-
-    // Add dummy onmousewheel that allows us to fake
-    // old-school event registration with Firefox's
-    // XUL mousewheel event
-    if (meth == 'onmousewheel') {
-      if (window.addEventListener &&
-        typeof obj.onmousewheel == 'undefined') {
-        obj.onmousewheel = null;
-      }
-    }
-
-    // Look to see if there's already a handler and
-    // registry of listeners
-    var listenReg = obj[meth] ?
-      obj[meth].listenReg : null;
-
-    // Create the registry of handlers if it does not exist
-    // It will contain all the info needed to run all the attached
-    // handlers -- hanging this property on the actual handler
-    // (e.g. onclick, onmousedown, onload) to avoid adding visible
-    // properties on the object.
-    // -----------------
-    if (!listenReg) {
-      listenReg = {};
-      // The original obj and method name
-      listenReg.orig = {};
-      listenReg.orig.obj = obj;
-      listenReg.orig.methName = meth;
-      // Preserve any existing listener
-      if (obj[meth]) {
-        listenReg.orig.methCode = obj[meth];
-      }
-      // Array of handlers to execute if the method fires
-      listenReg.after = [];
-      // Replace the original method with the executor proxy
-      obj[meth] = function () {
-        var reg = obj[meth].listenReg;
-        if (!reg) {
-          if (obj['_' + meth + '_suppressErrors']) {
-            return false;
-          }
-          else {
-            throw new Error('Cannot execute handlers for ' + obj + '  "' +
-              meth + '". Something' +
-              ' (likely another JavaScript library) has' +
-              ' removed the fleegix.event.listen handler registry.');
-          }
-        }
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-
-        // Try to be a good citizen -- preserve existing listeners
-        // Execute with arguments passed, in the right execution context
-        if (reg.orig.methCode) {
-          reg.orig.methCode.apply(reg.orig.obj, args);
-        }
-        // DOM events
-        // Normalize the different event models
-        var ev = null;
-        if (obj.attachEvent || obj.nodeType ||
-          obj.addEventListener) {
-          // Try to find an event if we're not handed one
-          if (!args.length) {
-            try {
-              switch (true) {
-                case !!(obj.ownerDocument):
-                  ev = obj.ownerDocument.parentWindow.event;
-                  break;
-                case !!(obj.documentElement):
-                  ev = obj.documentElement.ownerDocument.parentWindow.event;
-                  break;
-                case !!(obj.event):
-                  ev = obj.event;
-                  break;
-                default:
-                  ev = window.event;
-                  break;
-              }
-            }
-            catch(e) {
-              ev = window.event;
-            }
-          }
-          else {
-            ev = args[0];
-          }
-          if (ev) {
-            // Set both target and srcElement
-            if (typeof ev.target == 'undefined') {
-              ev.target = ev.srcElement;
-            }
-            if (typeof ev.srcElement == 'undefined') {
-              ev.srcElement = ev.target;
-            }
-            // Handle delta differences for mousewheel
-            if (ev.type == 'DOMMouseScroll' || ev.type == 'mousewheel') {
-              if (ev.wheelDelta) {
-                ev.delta = ev.wheelDelta / 120;
-              }
-              else if (ev.detail) {
-                ev.delta = -ev.detail / 3;
-              }
-            }
-            args[0] = ev;
-          }
-        }
-        // Execute all the handler functions registered
-        for (var i = 0; i < reg.after.length; i++) {
-          var ex = reg.after[i];
-          var f = null; // Func to execute
-          var c = null; // Execution context
-          // Single functions
-          if (!ex.context) {
-            f = ex.method;
-            c = window;
-          }
-          // Methods of objects
-          else {
-            f = ex.context[ex.method];
-            c = ex.context;
-          }
-          // Make sure there's something to execute
-          if (typeof f != 'function') {
-            throw(f + ' is not an executable function.');
-          }
-          // Pass args and exec in correct scope
-          else {
-            f.apply(c, args);
-          }
-          ev = args[0];
-          // Stop propagation if needed
-          if (ex.stopPropagation) {
-            if (ev.stopPropagation) {
-              ev.stopPropagation();
-            }
-            else {
-              ev.cancelBubble = true;
-            }
-          }
-          // Prevent the default action if needed
-          if (ex.preventDefault) {
-            if (ev.preventDefault) {
-              ev.preventDefault();
-            }
-            else {
-              ev.returnValue = false;
-            }
-          }
-        }
-
-      }
-      obj[meth].listenReg = listenReg;
-      // Add to global cache -- so we can remove listeners on unload
-      listenerCache.push(obj[meth].listenReg);
-      // Add XUL event for Firefox mousewheel
-      if (meth == 'onmousewheel') {
-        if (window.addEventListener) {
-          obj.addEventListener('DOMMouseScroll', obj.onmousewheel, false);
-        }
-      }
-    }
-    
-    // Add the new handler to the listener registry
-    listenReg.after.push(r);
-    obj[meth].listenReg = listenReg;
-
+fleegix.extend = function (/* Super-class constructor function */ superClass,
+  /* Sub-class constructor function */ subClass) {
+  return function () {
+    superClass.apply(this, arguments);
+    superClass.prototype.constructor.apply(this, arguments);
+    subClass.apply(this, arguments);
   };
-  this.unlisten = function () {
-    var obj = arguments[0]; // Obj from which to remove
-    var meth = arguments[1]; // Trigger method
-    var listenReg = obj[meth] ?
-      obj[meth].listenReg : null;
-    var remove = null;
+};
 
-    // Bail out if no handlers set
-    if (!listenReg) {
-      return false;
+fleegix.mixin = function (/* Target obj */ target,
+  /* Obj of props or constructor */ mixin) {
+  // Create an instance if we get a constructor
+  var m;
+  if (typeof mixin == 'function') {
+    m = new mixin();
+  }
+  else {
+    m = mixin;
+  }
+  var baseObj = {};
+  for (var p in m) {
+    // Don't copy anything from Object.prototype
+		if (typeof baseObj[p] == 'undefined' || baseObjj[p] != m[p]) {
+      target[p] = m[p];
     }
-    // Remove the handler if it's in the list
-    for (var i = 0; i < listenReg.after.length; i++) {
-      var r = listenReg.after[i];
-      // Simple function
-      if (typeof arguments[2] == 'function') {
-        if (r.method == arguments[2]) {
-          listenReg.after.splice(i, 1);
-        }
-      }
-      // Object and method
-      else {
-        if (r.context == arguments[2] && r.method ==
-          arguments[3]) {
-          listenReg.after.splice(i, 1);
-        }
-      }
-    }
-    obj[meth].listenReg = listenReg;
-  };
-  this.flush = function () {
-    // Remove all the registered listeners
-    for (var i = 0; i < listenerCache.length; i++) {
-      var reg = listenerCache[i];
-      removeObj = reg.orig.obj;
-      removeMethod = reg.orig.methName;
-      removeObj[removeMethod] = null;
-    }
-  };
-  this.subscribe = function(subscr, obj, method) {
-    // Make sure there's an obj param
-    if (!obj) { return; }
-    // Create the channel if it doesn't exist
-    if (!channels[subscr]) {
-      channels[subscr] = {};
-      channels[subscr].audience = [];
-    }
-    else {
-      // Remove any previous listener method for the obj
-      this.unsubscribe(subscr, obj);
-    }
-    // Add the object and its handler to the array
-    // for the channel
-    channels[subscr].audience.push([obj, method]);
-  };
-  this.unsubscribe = function(unsubscr, obj) {
-    // If not listener obj specified, kill the
-    // entire channel
-    if (!obj) {
-      channels[unsubscr] = null;
-    }
-    // Otherwise remove the object and its handler
-    // from the array for the channel
-    else {
-      if (channels[unsubscr]) {
-        var aud = channels[unsubscr].audience;
-        for (var i = 0; i < aud.length; i++) {
-          if (aud[i][0] == obj) {
-             aud.splice(i, 1);
-          }
-        }
-      }
-    }
-  };
-  this.publish = function(pub, data) {
-    // Make sure the channel exists
-    if (channels[pub]) {
-      var aud = channels[pub].audience;
-      // Pass the published data to all the
-      // obj/methods listening to the channel
-      for (var i = 0; i < aud.length; i++) {
-        var listenerObject = aud[i][0];
-        var handlerMethod = aud[i][1];
-        listenerObject[handlerMethod](data);
-      }
-    }
-  };
-  this.getSrcElementId = function(e) {
-    var ret = null;
-    if (e.srcElement) { ret = e.srcElement; }
-    else if (e.target) { ret = e.target; }
-    // Avoid trying to use fake obj from IE on disabled
-    // form elements
-    if (typeof ret.id == 'undefined') {
-      return null;
-    }
-    // Look up the id of the elem or its parent
-    else {
-      // Look for something with an id -- not a text node
-      while (!ret.id || ret.nodeType == 3) {
-        // Bail if we run out of parents
-        if (ret.parentNode) {
-          ret = ret.parentNode;
+  }
+  return target;
+};
+
+
+fleegix.uri = new function () {
+  var self = this;
+
+  this.params = {};
+
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
         }
         else {
-          return null;
-        }
-      }
-    }
-    return ret.id;
-  };
-  // If there are known problems looking up the listener registry
-  // for a particular handler, this will allow the execution to 
-  // fail silently instead of throwing errors alerting the user
-  // that listening functions are not being triggered correctly.
-  // Used in cases where listeners are being addded to windows
-  // where document.domain is changed on the fly, which causes
-  // lookup of .listenReg to fail
-  this.suppressHandlerErrors = function (obj, meth) {
-    obj['_' + meth + '_suppressErrors'] = true;
-  };
-};
-// Clean up listeners
-fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
-
-
-fleegix.json = new function() {
-  this.serialize = function(obj) {
-    var str = '';
-    switch (typeof obj) {
-      case 'object':
-        // Null
-        if (obj === null) {
-           return 'null';
-        }
-        // Arrays
-        else if (obj instanceof Array) {
-          for (var i = 0; i < obj.length; i++) {
-            if (str) { str += ','; }
-            str += fleegix.json.serialize(obj[i]);
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
           }
-          return '[' + str + ']';
+          d[name].push(val);
         }
-        // Objects
-        else if (typeof obj.toString != 'undefined') {
-          for (var i in obj) {
-            if (str) { str += ','; }
-            str += '"' + i + '":';
-            if (typeof obj[i] == 'undefined') {
-              str += '"undefined"';
-            }
-            else {
-              str += fleegix.json.serialize(obj[i]);
-            }
-          }
-          return '{' + str + '}';
-        }
-        return str;
-      case 'unknown':
-      case 'undefined':
-      case 'function':
-        return '"undefined"';
-      case 'string':
-        str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
-          /\r/g, '').replace(/\n/g, '\\n') + '"';
-        return str;
-      default:
-        return String(obj);
+      }
     }
+    return d;
   };
-};
-
-
-fleegix.dom = new function() {
-  var getViewportMeasure = function (s) {
-    // IE
-    if (document.all) {
-      if (document.documentElement &&
-        document.documentElement['client' + s]) {
-        return document.documentElement['client' + s];
-      }
-      else {
-        return document.body['client' + s];
-      }
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
     }
-    // Moz/compat
     else {
-      return window['inner' + s];
+      p = this.params[name];
     }
+    return p;
   };
-  this.getViewportWidth = function () {
-    return getViewportMeasure('Width');
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    // If there's a query string, set the param
+    if (str) {
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      // If it's there, replace it
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+      // Otherwise append it
+      else {
+        ret = str + '&' + name + '=' + val;
+      }
+    }
+    // Otherwise create a query string with just that param
+    else {
+      ret = name + '=' + val;
+    }
+    return ret;
   };
-  this.getViewportHeight = function () {
-    return getViewportMeasure('Height');
+  this.getQuery = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[1];
   };
-  this.center = function (node) {
-    var nW = node.offsetWidth;
-    var nH = node.offsetHeight;
-    var vW = fleegix.dom.getViewportWidth();
-    var vH = fleegix.dom.getViewportHeight();
-    node.style.left = parseInt((vW/2)-(nW/2), 10) + 'px';
-    node.style.top = parseInt((vH/2)-(nH/2), 10) + 'px';
-    return true;
+  this.getBase = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[0];
   };
+  this.params = this.getParamHash();
 };
 
+fleegix.cookie = new function() {
+  this.set = function(name, value, optParam) {
+    var opts = optParam || {};
+    var path = '/';
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
+    var exp = '';
+    var t = 0;
+    if (typeof optParam == 'object') {
+      path = opts.path || '/';
+      days = opts.days || 0;
+      hours = opts.hours || 0;
+      minutes = opts.minutes || 0;
+    }
+    else {
+      path = optParam || '/';
+    }
+    t += days ? days*24*60*60*1000 : 0;
+    t += hours ? hours*60*60*1000 : 0;
+    t += minutes ? minutes*60*1000 : 0;
 
-fleegix.css = new function() {
-    this.addClass = function (elem, s) {
-      fleegix.css.removeClass(elem, s); // Don't add twice
-      var c = elem.className;
-      c += ' ' + s;
-      c = fleegix.string.trim(c);
-      elem.className = c;
-    };
-    this.removeClass = function (elem, s) {
-      var c = elem.className;
-      // Esc backslashes in regex pattern
-      var pat = '\\b' + s + '\\b';
-      // Do global search -- shouldn't be multiple
-      // instances of the selector, but who knows
-      pat = new RegExp(pat, 'g');
-      c = c.replace(pat, '');
-      c = c.replace('  ', ' ');
-      c = fleegix.string.trim(c);
-      elem.className = c;
-    };
-    this.replaceClass = function (elem, oldClass, newClass) {
-      this.removeClass(elem, oldClass);
-      this.addClass(elem, newClass);
-    };
+    if (t) {
+      var dt = new Date();
+      dt.setTime(dt.getTime() + t);
+      exp = '; expires=' + dt.toGMTString();
+    }
+    else {
+      exp = '';
+    }
+    document.cookie = name + '=' + value +
+      exp + '; path=' + path;
+  };
+  this.get = function(name) {
+    var nameEq = name + '=';
+    var arr = document.cookie.split(';');
+    for(var i = 0; i < arr.length; i++) {
+      var c = arr[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1, c.length);
+      }
+      if (c.indexOf(nameEq) === 0) {
+        return c.substring(nameEq.length, c.length);
+      }
+    }
+    return null;
+  };
+  this.create = this.set;
+  this.destroy = function(name, path) {
+    var opts = {};
+    opts.minutes = -1;
+    if (path) { opts.path = path; }
+    this.set(name, '', opts);
+  };
 };
 
 
@@ -560,6 +286,7 @@ fleegix.fx = new function () {
     }
     return true;
   };
+  this.setCssProp = this.setCSSProp; // Alias, I'm a 'tard and can't remember
   this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
   this.hex2rgb = function (str) {
     var rgb = [];
@@ -708,133 +435,660 @@ fleegix.fx.Effecter.prototype.transitions = {
 };
 
 
-fleegix.uri = new function () {
-  var self = this;
+fleegix.dom = new function() {
+  var getViewportMeasure = function (s) {
+    // IE
+    if (document.all) {
+      if (document.documentElement &&
+        document.documentElement['client' + s]) {
+        return document.documentElement['client' + s];
+      }
+      else {
+        return document.body['client' + s];
+      }
+    }
+    // Moz/compat
+    else {
+      return window['inner' + s];
+    }
+  };
+  this.getViewportWidth = function () {
+    return getViewportMeasure('Width');
+  };
+  this.getViewportHeight = function () {
+    return getViewportMeasure('Height');
+  };
+  this.center = function (node) {
+    var nW = node.offsetWidth;
+    var nH = node.offsetHeight;
+    var vW = fleegix.dom.getViewportWidth();
+    var vH = fleegix.dom.getViewportHeight();
+    node.style.left = parseInt((vW/2)-(nW/2), 10) + 'px';
+    node.style.top = parseInt((vH/2)-(nH/2), 10) + 'px';
+    return true;
+  };
+};
 
-  this.params = {};
 
-  this.getParamHash = function (str) {
-    var q = str || self.getQuery();
-    var d = {};
-    if (q) {
-      var arr = q.split('&');
-      for (var i = 0; i < arr.length; i++) {
-        var pair = arr[i].split('=');
-        var name = pair[0];
-        var val = pair[1];
-        if (typeof d[name] == 'undefined') {
-          d[name] = val;
+fleegix.json = new function() {
+  this.serialize = function(obj) {
+    var str = '';
+    switch (typeof obj) {
+      case 'object':
+        // Null
+        if (obj === null) {
+           return 'null';
+        }
+        // Arrays
+        else if (obj instanceof Array) {
+          for (var i = 0; i < obj.length; i++) {
+            if (str) { str += ','; }
+            str += fleegix.json.serialize(obj[i]);
+          }
+          return '[' + str + ']';
+        }
+        // Objects
+        else if (typeof obj.toString != 'undefined') {
+          for (var i in obj) {
+            if (str) { str += ','; }
+            str += '"' + i + '":';
+            if (typeof obj[i] == 'undefined') {
+              str += '"undefined"';
+            }
+            else {
+              str += fleegix.json.serialize(obj[i]);
+            }
+          }
+          return '{' + str + '}';
+        }
+        return str;
+      case 'unknown':
+      case 'undefined':
+      case 'function':
+        return '"undefined"';
+      case 'string':
+        str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
+          /\r/g, '').replace(/\n/g, '\\n') + '"';
+        return str;
+      default:
+        return String(obj);
+    }
+  };
+};
+
+
+fleegix.form = {};
+/**
+ * Serializes the data from all the inputs in a Web form
+ * into a query-string style string.
+ * @param docForm -- Reference to a DOM node of the form element
+ * @param formatOpts -- JS object of options for how to format
+ * the return string. Supported options:
+ *   collapseMulti: (Boolean) take values from elements that
+ *      can return multiple values (multi-select, checkbox groups)
+ *      and collapse into a single, comman-delimited value
+ *      (e.g., thisVar=asdf,qwer,zxcv)
+ *   stripTags: (Boolean) strip markup tags from any values
+ *   includeEmpty: (Boolean) include keys in the string for
+ *     all elements, even if they have no value set (e.g.,
+ *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
+ *   pedantic: (Boolean) include the values of elements like
+ *      button or image
+ * @returns query-string style String of variable-value pairs
+ */
+fleegix.form.serialize = function (f, o) {
+  var h = fleegix.form.toObject(f, o);
+  var opts = o || {};
+  var str = '';
+  var pat = null;
+
+  if (opts.stripTags) { pat = /<[^>]*>/g; }
+  for (var n in h) {
+    var s = '';
+    var v = h[n];
+    if (v) {
+      // Single val -- string
+      if (typeof v == 'string') {
+        s = opts.stripTags ? v.replace(pat, '') : v;
+        str += n + '=' + encodeURIComponent(s);
+      }
+      // Multiple vals -- array
+      else {
+        var sep = '';
+        if (opts.collapseMulti) {
+          sep = ',';
+          str += n + '=';
         }
         else {
-          if (!(d[name] instanceof Array)) {
-            var t = d[name];
-            d[name] = [];
-            d[name].push(t);
+          sep = '&';
+        }
+        for (var j = 0; j < v.length; j++) {
+          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
+            encodeURIComponent(s);
+          str += s + sep;
+        }
+        str = str.substr(0, str.length - 1);
+      }
+      str += '&';
+    }
+    else {
+      if (opts.includeEmpty) { str += n + '=&'; }
+    }
+  }
+  str = str.substr(0, str.length - 1);
+  return str;
+};
+
+/**
+ * Converts the values in an HTML form into a JS object
+ * Elements with multiple values like sets of radio buttons
+ * become arrays
+ * @param f -- HTML form element to convert into a JS object
+ * @param o -- JS Object of options:
+ *    pedantic: (Boolean) include the values of elements like
+ *      button or image
+ *    hierarchical: (Boolean) if the form is using Rails-/PHP-style
+ *      name="foo[bar]" inputs, setting this option to
+ *      true will create a hierarchy of objects in the
+ *      resulting JS object, where some of the properties
+ *      of the objects are sub-objects with values pulled
+ *      from the form. Note: this only supports one level
+ *      of nestedness
+ * hierarchical option code by Kevin Faulhaber, kjf@kjfx.net
+ * @returns JavaScript object representation of the contents
+ * of the form.
+ */
+fleegix.form.toObject= function (f, o) {
+  var opts = o || {};
+  var h = {};
+  function expandToArr(orig, val) {
+    if (orig) {
+      var r = null;
+      if (typeof orig == 'string') {
+        r = [];
+        r.push(orig);
+      }
+      else { r = orig; }
+      r.push(val);
+      return r;
+    }
+    else { return val; }
+  }
+
+  for (var i = 0; i < f.elements.length; i++) {
+    var elem = f.elements[i];
+    // Elements should have a name
+    if (elem.name) {
+      var st = elem.name.indexOf('[');
+      var sp = elem.name.indexOf(']');
+      var sb = '';
+      var en = '';
+      var c;
+      var n;
+      // Using Rails-/PHP-style name="foo[bar]"
+      // means you can go hierarchical if you want
+      if (opts.hierarchical && (st > 0) && (sp > 2)) {
+          sb = elem.name.substring(0, st);
+          en = elem.name.substring(st + 1, sp);
+          if (typeof h[sb] == 'undefined') { h[sb] = {}; }
+          c = h[sb];
+          n = en;
+      }
+      else {
+          c = h;
+          n = elem.name;
+      }
+      switch (elem.type) {
+        // Text fields, hidden form elements, etc.
+        case 'text':
+        case 'hidden':
+        case 'password':
+        case 'textarea':
+        case 'select-one':
+          c[n] = elem.value || null;
+          break;
+        // Multi-option select
+        case 'select-multiple':
+          c[n] = null;
+          for(var j = 0; j < elem.options.length; j++) {
+            var e = elem.options[j];
+            if(e.selected) {
+              c[n] = expandToArr(c[n], e.value);
+            }
           }
-          d[name].push(val);
+          break;
+        // Radio buttons
+        case 'radio':
+          if (typeof c[n] == 'undefined') {
+            c[n] = null; }
+          if (elem.checked) {
+            c[n] = elem.value;
+          }
+          break;
+        // Checkboxes
+        case 'checkbox':
+          if (typeof c[n] == 'undefined') {
+            c[n] = null; }
+          if (elem.checked) {
+            c[n] = expandToArr(c[n], elem.value);
+          }
+          break;
+        // Pedantic
+        case 'submit':
+        case 'reset':
+        case 'file':
+        case 'image':
+        case 'button':
+          if (opts.pedantic) { c[n] = elem.value || null; }
+          break;
+      }
+    }
+  }
+  return h;
+};
+// Alias for backward compat
+fleegix.form.toHash = fleegix.form.toObject;
+
+fleegix.css = new function() {
+    this.addClass = function (elem, s) {
+      fleegix.css.removeClass(elem, s); // Don't add twice
+      var c = elem.className;
+      c += ' ' + s;
+      c = fleegix.string.trim(c);
+      elem.className = c;
+    };
+    this.removeClass = function (elem, s) {
+      var c = elem.className;
+      // Esc backslashes in regex pattern
+      var pat = '\\b' + s + '\\b';
+      // Do global search -- shouldn't be multiple
+      // instances of the selector, but who knows
+      pat = new RegExp(pat, 'g');
+      c = c.replace(pat, '');
+      c = c.replace('  ', ' ');
+      c = fleegix.string.trim(c);
+      elem.className = c;
+    };
+    this.replaceClass = function (elem, oldClass, newClass) {
+      this.removeClass(elem, oldClass);
+      this.addClass(elem, newClass);
+    };
+};
+
+
+fleegix.event = new function () {
+  // List of handlers for event listeners
+  var listenerCache = [];
+  // List of channels being published to
+  var channels = {};
+
+  // If set to true the listener registry is set on
+  // the obj itself instead of being hidden on the
+  // handler function. This makes it visible/ennumerable
+  // but other toolkits' event systems will be less likely
+  // to break stuff if it's turned on
+  this.compatibilityMode = false;
+
+  this.listen = function () {
+    var obj = arguments[0]; // Target object for the new listener
+    var meth = arguments[1]; // Method to listen for
+    var compatMode = this.compatibilityMode;
+
+    // Simple function
+    var r = {}; // package of info about what to execute
+    var o = {}; // options -- stopPropagation or preventDefault
+    if (typeof arguments[2] == 'function') {
+      r.method = arguments[2];
+      o = arguments[3] || {};
+    }
+    // Object and method
+    else {
+      r.context = arguments[2];
+      r.method = arguments[3];
+      o = arguments[4] || {};
+    }
+
+    if (!obj) { 
+      throw new Error('fleegix.listen called on an object (' +
+        obj + ') that does not exist.'); }
+
+    // Add dummy onmousewheel that allows us to fake
+    // old-school event registration with Firefox's
+    // XUL mousewheel event
+    if (meth == 'onmousewheel') {
+      if (window.addEventListener &&
+        typeof obj.onmousewheel == 'undefined') {
+        obj.onmousewheel = null;
+      }
+    }
+
+    // Look to see if there's already a handler and
+    // registry of listeners
+    var listenReg;
+    if (this.compatibilityMode) {
+      if (obj[meth] && obj._fleegixEventListenReg) {
+        listenReg = obj._fleegixEventListenReg[meth];
+      }
+      else {
+        listenReg = null;
+      }
+    }
+    else {
+      listenReg = obj[meth] ? obj[meth].listenReg : null;
+    }
+    // Create the registry of handlers if it does not exist
+    // It will contain all the info needed to run all the attached
+    // handlers -- hanging this property on the actual handler
+    // (e.g. onclick, onmousedown, onload) to avoid adding visible
+    // properties on the object.
+    // -----------------
+    if (!listenReg) {
+      listenReg = {};
+      // The original obj and method name
+      listenReg.orig = {};
+      listenReg.orig.obj = obj;
+      listenReg.orig.methName = meth;
+      // Preserve any existing listener
+      if (obj[meth]) {
+        listenReg.orig.methCode = obj[meth];
+      }
+      // Array of handlers to execute if the method fires
+      listenReg.after = [];
+      // Replace the original method with the executor proxy
+      obj[meth] = function () {
+        var reg = compatMode ? obj._fleegixEventListenReg[meth] : obj[meth].listenReg;
+        if (!reg) {
+          if (obj['_' + meth + '_suppressErrors']) {
+            return false;
+          }
+          else {
+            throw new Error('Cannot execute handlers for ' + obj + '  "' +
+              meth + '". Something' +
+              ' (likely another JavaScript library) has' +
+              ' removed the fleegix.event.listen handler registry.');
+          }
+        }
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+
+        // Try to be a good citizen -- preserve existing listeners
+        // Execute with arguments passed, in the right execution context
+        if (reg.orig.methCode) {
+          reg.orig.methCode.apply(reg.orig.obj, args);
+        }
+        // DOM events
+        // Normalize the different event models
+        var ev = null;
+        if (obj.attachEvent || obj.nodeType ||
+          obj.addEventListener) {
+          // Try to find an event if we're not handed one
+          if (!args.length) {
+            try {
+              switch (true) {
+                case !!(obj.ownerDocument):
+                  ev = obj.ownerDocument.parentWindow.event;
+                  break;
+                case !!(obj.documentElement):
+                  ev = obj.documentElement.ownerDocument.parentWindow.event;
+                  break;
+                case !!(obj.event):
+                  ev = obj.event;
+                  break;
+                default:
+                  ev = window.event;
+                  break;
+              }
+            }
+            catch(e) {
+              ev = window.event;
+            }
+          }
+          else {
+            ev = args[0];
+          }
+          if (ev) {
+            // Set both target and srcElement
+            if (typeof ev.target == 'undefined') {
+              ev.target = ev.srcElement;
+            }
+            if (typeof ev.srcElement == 'undefined') {
+              ev.srcElement = ev.target;
+            }
+            // Handle delta differences for mousewheel
+            if (ev.type == 'DOMMouseScroll' || ev.type == 'mousewheel') {
+              if (ev.wheelDelta) {
+                ev.delta = ev.wheelDelta / 120;
+              }
+              else if (ev.detail) {
+                ev.delta = -ev.detail / 3;
+              }
+            }
+            args[0] = ev;
+          }
+        }
+        // Execute all the handler functions registered
+        for (var i = 0; i < reg.after.length; i++) {
+          var ex = reg.after[i];
+          var f = null; // Func to execute
+          var c = null; // Execution context
+          // Single functions
+          if (!ex.context) {
+            f = ex.method;
+            c = window;
+          }
+          // Methods of objects
+          else {
+            f = ex.context[ex.method];
+            c = ex.context;
+          }
+          // Make sure there's something to execute
+          if (typeof f != 'function') {
+            throw(f + ' is not an executable function.');
+          }
+          // Pass args and exec in correct scope
+          else {
+            f.apply(c, args);
+          }
+          ev = args[0];
+          // Stop propagation if needed
+          if (ex.stopPropagation) {
+            if (ev.stopPropagation) {
+              ev.stopPropagation();
+            }
+            else {
+              ev.cancelBubble = true;
+            }
+          }
+          // Prevent the default action if needed
+          if (ex.preventDefault) {
+            if (ev.preventDefault) {
+              ev.preventDefault();
+            }
+            else {
+              ev.returnValue = false;
+            }
+          }
+        }
+
+      }
+      if (this.compatibilityMode) {
+        if (!obj._fleegixEventListenReg) { obj._fleegixEventListenReg = {}; }
+        obj._fleegixEventListenReg[meth] = listenReg;
+      }
+      else {
+        obj[meth].listenReg = listenReg;
+      }
+      // Add to global cache -- so we can remove listeners on unload
+      listenerCache.push(listenReg);
+      // Add XUL event for Firefox mousewheel
+      if (meth == 'onmousewheel') {
+        if (window.addEventListener) {
+          obj.addEventListener('DOMMouseScroll', obj.onmousewheel, false);
         }
       }
     }
-    return d;
-  };
-  this.getParam = function (name, str) {
-    var p = null;
-    if (str) {
-      var h = this.getParamHash(str);
-      p = h[name];
+    
+    // Add the new handler to the listener registry
+    listenReg.after.push(r);
+    if (this.compatibilityMode) {
+      if (!obj._fleegixEventListenReg) { obj._fleegixEventListenReg = {}; }
+      obj._fleegixEventListenReg[meth] = listenReg;
     }
     else {
-      p = this.params[name];
+      obj[meth].listenReg = listenReg;
     }
-    return p;
   };
-  this.setParam = function (name, val, str) {
-    var ret = null;
-    // If there's a query string, set the param
-    if (str) {
-      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
-      var arr = str.match(pat);
-      // If it's there, replace it
-      if (arr) {
-        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+  this.unlisten = function () {
+    var obj = arguments[0]; // Obj from which to remove
+    var meth = arguments[1]; // Trigger method
+    var listenReg;
+    if (this.compatibilityMode) {
+      if (obj[meth] && obj._fleegixEventListenReg) {
+        listenReg = obj._fleegixEventListenReg[meth];
       }
-      // Otherwise append it
       else {
-        ret = str + '&' + name + '=' + val;
+        listenReg = null;
       }
     }
-    // Otherwise create a query string with just that param
     else {
-      ret = name + '=' + val;
+      listenReg = obj[meth] ? obj[meth].listenReg : null;
     }
-    return ret;
-  };
-  this.getQuery = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[1];
-  };
-  this.getBase = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[0];
-  };
-  this.params = this.getParamHash();
-};
+    var remove = null;
 
-fleegix.cookie = new function() {
-  this.set = function(name, value, optParam) {
-    var opts = optParam || {};
-    var path = '/';
-    var days = 0;
-    var hours = 0;
-    var minutes = 0;
-    var exp = '';
-    var t = 0;
-    if (typeof optParam == 'object') {
-      path = opts.path || '/';
-      days = opts.days || 0;
-      hours = opts.hours || 0;
-      minutes = opts.minutes || 0;
+    // Bail out if no handlers set
+    if (!listenReg) {
+      return false;
     }
-    else {
-      path = optParam || '/';
-    }
-    t += days ? days*24*60*60*1000 : 0;
-    t += hours ? hours*60*60*1000 : 0;
-    t += minutes ? minutes*60*1000 : 0;
-
-    if (t) {
-      var dt = new Date();
-      dt.setTime(dt.getTime() + t);
-      exp = '; expires=' + dt.toGMTString();
-    }
-    else {
-      exp = '';
-    }
-    document.cookie = name + '=' + value +
-      exp + '; path=' + path;
-  };
-  this.get = function(name) {
-    var nameEq = name + '=';
-    var arr = document.cookie.split(';');
-    for(var i = 0; i < arr.length; i++) {
-      var c = arr[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1, c.length);
+    // Remove the handler if it's in the list
+    for (var i = 0; i < listenReg.after.length; i++) {
+      var r = listenReg.after[i];
+      // Simple function
+      if (typeof arguments[2] == 'function') {
+        if (r.method == arguments[2]) {
+          listenReg.after.splice(i, 1);
+          break; // Only remove one instance per unlisten call
+        }
       }
-      if (c.indexOf(nameEq) === 0) {
-        return c.substring(nameEq.length, c.length);
+      // Object and method
+      else {
+        if (r.context == arguments[2] && r.method ==
+          arguments[3]) {
+          listenReg.after.splice(i, 1);
+          break; // Only remove one instance per unlisten call
+        }
       }
     }
-    return null;
+    if (this.compatibilityMode) {
+      obj._fleegixEventListenReg[meth] = listenReg;
+    }
+    else {
+      obj[meth].listenReg = listenReg;
+    }
   };
-  this.create = this.set;
-  this.destroy = function(name, path) {
-    var opts = {};
-    opts.minutes = -1;
-    if (path) { opts.path = path; }
-    this.set(name, '', opts);
+  this.flush = function () {
+    // Remove all the registered listeners
+    for (var i = 0; i < listenerCache.length; i++) {
+      var reg = listenerCache[i];
+      removeObj = reg.orig.obj;
+      removeMethod = reg.orig.methName;
+      removeObj[removeMethod] = null;
+    }
+  };
+  this.subscribe = function(subscr, obj, method) {
+    // Make sure there's an obj param
+    if (!obj) { return; }
+    // Create the channel if it doesn't exist
+    if (!channels[subscr]) {
+      channels[subscr] = {};
+      channels[subscr].audience = [];
+    }
+    else {
+      // Remove any previous listener method for the obj
+      this.unsubscribe(subscr, obj);
+    }
+    // Add the object and its handler to the array
+    // for the channel
+    channels[subscr].audience.push([obj, method]);
+  };
+  this.unsubscribe = function(unsubscr, obj) {
+    // If not listener obj specified, kill the
+    // entire channel
+    if (!obj) {
+      channels[unsubscr] = null;
+    }
+    // Otherwise remove the object and its handler
+    // from the array for the channel
+    else {
+      if (channels[unsubscr]) {
+        var aud = channels[unsubscr].audience;
+        for (var i = 0; i < aud.length; i++) {
+          if (aud[i][0] == obj) {
+             aud.splice(i, 1);
+          }
+        }
+      }
+    }
+  };
+  this.publish = function(pub, data) {
+    // Make sure the channel exists
+    if (channels[pub]) {
+      var aud = channels[pub].audience;
+      // Pass the published data to all the
+      // obj/methods listening to the channel
+      for (var i = 0; i < aud.length; i++) {
+        var listenerObject = aud[i][0];
+        var handlerMethod = aud[i][1];
+        listenerObject[handlerMethod](data);
+      }
+    }
+  };
+  // Convenience method for getting a the source
+  // element of an event or its parent based on
+  // a particular property
+  this.getSrcElementByAttribute = function(e, prop) {
+    var node;
+    if (e.srcElement) { node = e.srcElement; }
+    else if (e.target) { node = e.target; }
+    // Avoid trying to use fake obj from IE on disabled
+    // form elements
+    if (!node || typeof node[prop] == 'undefined') {
+      return null;
+    }
+    // Look up the id of the elem or its parent
+    else {
+      // Look for something with an id -- not a text node
+      while (!node[prop] || node.nodeType == 3) {
+        // Bail if we run out of parents
+        if (node.parentNode) {
+          node = node.parentNode;
+        }
+        else {
+          return null;
+        }
+      }
+    }
+    return node;
+  };
+  this.getSrcElementId = function (e) {
+    var node = this.getSrcElementByAttribute(e, 'id') || null;
+    return node.id || null;
+  };
+  // If there are known problems looking up the listener registry
+  // for a particular handler, this will allow the execution to 
+  // fail silently instead of throwing errors alerting the user
+  // that listening functions are not being triggered correctly.
+  // Used in cases where listeners are being addded to windows
+  // where document.domain is changed on the fly, which causes
+  // lookup of .listenReg to fail
+  this.suppressHandlerErrors = function (obj, meth) {
+    obj['_' + meth + '_suppressErrors'] = true;
   };
 };
+// Clean up listeners
+fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
 fleegix.xhr = new function () {
@@ -994,7 +1248,9 @@ fleegix.xhr = new function () {
     for (var p in opts) {
       req[p] = opts[p];
     }
-
+    // HTTP req method all-caps
+    req.method = req.method.toUpperCase();
+    
     req.id = this.lastReqId;
     this.lastReqId++; // Increment req ID
 
@@ -1343,181 +1599,6 @@ fleegix.xhr.Request = function () {
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
 };
-
-
-fleegix.form = {};
-/**
- * Serializes the data from all the inputs in a Web form
- * into a query-string style string.
- * @param docForm -- Reference to a DOM node of the form element
- * @param formatOpts -- JS object of options for how to format
- * the return string. Supported options:
- *   collapseMulti: (Boolean) take values from elements that
- *      can return multiple values (multi-select, checkbox groups)
- *      and collapse into a single, comman-delimited value
- *      (e.g., thisVar=asdf,qwer,zxcv)
- *   stripTags: (Boolean) strip markup tags from any values
- *   includeEmpty: (Boolean) include keys in the string for
- *     all elements, even if they have no value set (e.g.,
- *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
- *   pedantic: (Boolean) include the values of elements like
- *      button or image
- * @returns query-string style String of variable-value pairs
- */
-fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toObject(f, o);
-  var opts = o || {};
-  var str = '';
-  var pat = null;
-
-  if (opts.stripTags) { pat = /<[^>]*>/g; }
-  for (var n in h) {
-    var s = '';
-    var v = h[n];
-    if (v) {
-      // Single val -- string
-      if (typeof v == 'string') {
-        s = opts.stripTags ? v.replace(pat, '') : v;
-        str += n + '=' + encodeURIComponent(s);
-      }
-      // Multiple vals -- array
-      else {
-        var sep = '';
-        if (opts.collapseMulti) {
-          sep = ',';
-          str += n + '=';
-        }
-        else {
-          sep = '&';
-        }
-        for (var j = 0; j < v.length; j++) {
-          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
-          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
-            encodeURIComponent(s);
-          str += s + sep;
-        }
-        str = str.substr(0, str.length - 1);
-      }
-      str += '&';
-    }
-    else {
-      if (opts.includeEmpty) { str += n + '=&'; }
-    }
-  }
-  str = str.substr(0, str.length - 1);
-  return str;
-};
-
-/**
- * Converts the values in an HTML form into a JS object
- * Elements with multiple values like sets of radio buttons
- * become arrays
- * @param f -- HTML form element to convert into a JS object
- * @param o -- JS Object of options:
- *    pedantic: (Boolean) include the values of elements like
- *      button or image
- *    hierarchical: (Boolean) if the form is using Rails-/PHP-style
- *      name="foo[bar]" inputs, setting this option to
- *      true will create a hierarchy of objects in the
- *      resulting JS object, where some of the properties
- *      of the objects are sub-objects with values pulled
- *      from the form. Note: this only supports one level
- *      of nestedness
- * hierarchical option code by Kevin Faulhaber, kjf@kjfx.net
- * @returns JavaScript object representation of the contents
- * of the form.
- */
-fleegix.form.toObject= function (f, o) {
-  var opts = o || {};
-  var h = {};
-  function expandToArr(orig, val) {
-    if (orig) {
-      var r = null;
-      if (typeof orig == 'string') {
-        r = [];
-        r.push(orig);
-      }
-      else { r = orig; }
-      r.push(val);
-      return r;
-    }
-    else { return val; }
-  }
-
-  for (var i = 0; i < f.elements.length; i++) {
-    var elem = f.elements[i];
-    // Elements should have a name
-    if (elem.name) {
-      var st = elem.name.indexOf('[');
-      var sp = elem.name.indexOf(']');
-      var sb = '';
-      var en = '';
-      var c;
-      var n;
-      // Using Rails-/PHP-style name="foo[bar]"
-      // means you can go hierarchical if you want
-      if (opts.hierarchical && (st > 0) && (sp > 2)) {
-          sb = elem.name.substring(0, st);
-          en = elem.name.substring(st + 1, sp);
-          if (typeof h[sb] == 'undefined') { h[sb] = {}; }
-          c = h[sb];
-          n = en;
-      }
-      else {
-          c = h;
-          n = elem.name;
-      }
-      switch (elem.type) {
-        // Text fields, hidden form elements, etc.
-        case 'text':
-        case 'hidden':
-        case 'password':
-        case 'textarea':
-        case 'select-one':
-          c[n] = elem.value || null;
-          break;
-        // Multi-option select
-        case 'select-multiple':
-          c[n] = null;
-          for(var j = 0; j < elem.options.length; j++) {
-            var e = elem.options[j];
-            if(e.selected) {
-              c[n] = expandToArr(c[n], e.value);
-            }
-          }
-          break;
-        // Radio buttons
-        case 'radio':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
-          if (elem.checked) {
-            c[n] = elem.value;
-          }
-          break;
-        // Checkboxes
-        case 'checkbox':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
-          if (elem.checked) {
-            c[n] = expandToArr(c[n], elem.value);
-          }
-          break;
-        // Pedantic
-        case 'submit':
-        case 'reset':
-        case 'file':
-        case 'image':
-        case 'button':
-          if (opts.pedantic) { c[n] = elem.value || null; }
-          break;
-      }
-    }
-  }
-  return h;
-};
-// Alias for backward compat
-fleegix.form.toHash = fleegix.form.toObject;
-
 
 
 fleegix.string = new function () {
