@@ -126,6 +126,7 @@ fleegix.fx = new function () {
     }
     return true;
   };
+  this.setCssProp = this.setCSSProp; // Alias, I'm a 'tard and can't remember
   this.hexPat = /^[#]{0,1}([\w]{1,2})([\w]{1,2})([\w]{1,2})$/;
   this.hex2rgb = function (str) {
     var rgb = [];
