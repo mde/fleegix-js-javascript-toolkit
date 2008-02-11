@@ -174,7 +174,9 @@ fleegix.xhr = new function () {
     for (var p in opts) {
       req[p] = opts[p];
     }
-
+    // HTTP req method all-caps
+    req.method = req.method.toUpperCase();
+    
     req.id = this.lastReqId;
     this.lastReqId++; // Increment req ID
 
