@@ -402,13 +402,6 @@ fleegix.date.timezone = new function() {
       if (dt >= d) {
         ruleHits.push({ 'rule': r, 'date': d });
       }
-      // Check against previous year if rule covers that period
-      else if (r[0] < year) {
-        d.setUTCFullYear(d.getUTCFullYear()-1);
-        if (dt >= d) {
-          ruleHits.push({ 'rule': r, 'date': d });
-        }
-      }
     };
 
     if (!rules) { return null; }
