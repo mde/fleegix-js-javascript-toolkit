@@ -17,6 +17,7 @@
 
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.ui == 'undefined') { fleegix.ui = {}; }
+fleegix.ui.ContentBoxRegistry = {};
 fleegix.ui.ContentBox = function (domNode, id) {
   this.domNode = domNode || null;
   this.id = id || domNode.id;
@@ -31,7 +32,9 @@ fleegix.ui.ContentBox = function (domNode, id) {
   this.children = [];
   // Flag for init-only code that has to run
   this.hasBeenRendered = false;
-}
+  // List of ContentBoxes
+  fleegix.ui.ContentBoxRegistry[id] = this;
+};
 fleegix.ui.ContentBox.prototype = new function () {
   this.cleanup =  function () {
     this.domNode = null;
@@ -116,6 +119,7 @@ fleegix.ui.ContentBox.prototype = new function () {
   this.render = function () {
     if (typeof this.renderSelf == 'function') {
       this.renderSelf();
+      this.hasBeenRendered = true;
     };
     var ch = this.children;
     for (var i = 0; i < ch.length; i++) {
