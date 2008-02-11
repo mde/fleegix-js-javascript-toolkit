@@ -9,6 +9,18 @@
 
 <script type="text/javascript" src="../fleegix.js.uncompressed.js"></script>
 <script type="text/javascript" src="../plugins/date/util.js"></script>
+<script type="text/javascript" src="../plugins/date/date.js"></script>
+
+<script type="text/javascript">
+
+function init() {
+fleegix.date.timezone.zoneFileBasePath = '../plugins/date/tz';
+  fleegix.date.timezone.init();
+}
+
+fleegix.event.listen(window, 'onload', init);
+
+</script>
 
 <style type="text/css">
 
