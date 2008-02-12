@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Credits: Ideas included from incomplete JS implementation of Olson
+ * parser, "XMLDAte" by Philippe Goetz (philippe.goetz@wanadoo.fr)
  * Additional contributions: Preston Hunt (prestonhunt@gmail.com),
  * Dov. B Katz (dov.katz@morganstanley.com)
 */
@@ -328,7 +330,7 @@ fleegix.date.timezone = new function() {
     }
     var url = _this.zoneFileBasePath + '/' + fileName;
     if (sync) {
-      return fleegix.xhr.doReq({ 
+      return fleegix.xhr.doReq({
         url: url,
         async: false
       });
@@ -460,7 +462,6 @@ fleegix.date.timezone = new function() {
       else {
         var t = parseTimeString(r[5]);
         var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, day, t[1], t[2], t[3]));
-        d.setUTCHours(d.getUTCHours() - 24*((7 - day + d.getUTCDay()) % 7));
         if (dt < d) {
           continue;
         }
@@ -495,7 +496,7 @@ fleegix.date.timezone = new function() {
         repl = rule[7];
       }
       // FIXME: Right now just falling back to Standard --
-      // apparently ought to use the last valid rule, 
+      // apparently ought to use the last valid rule,
       // although in practice that always ought to be Standard
       else {
         repl = 'S';
@@ -509,8 +510,8 @@ fleegix.date.timezone = new function() {
   }
 
   this.zoneFileBasePath;
-  this.zoneFiles = ['africa', 'antarctica', 'asia', 
-    'australasia', 'backward', 'etcetera', 'europe', 
+  this.zoneFiles = ['africa', 'antarctica', 'asia',
+    'australasia', 'backward', 'etcetera', 'europe',
     'northamerica', 'pacificnew', 'southamerica'];
   this.loadingSchemes = {
     PRELOAD_ALL: 'preloadAll',
