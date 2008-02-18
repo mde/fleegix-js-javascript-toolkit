@@ -625,7 +625,12 @@ fleegix.date.timezone = new function() {
       if (!this.loadedZones[zoneFile]) {
         // Get the file and parse it -- use synchronous XHR
         var res = this.loadZoneFile(zoneFile, true);
-        this.parseZones(res);
+        if (res.length) {
+          this.parseZones(res);
+        }
+        else {
+          throw new Error('Error loading zone file for ' + zoneFile);
+        }
       }
     }
     var zone = getZone(dt, tz);
