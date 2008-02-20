@@ -15,21 +15,49 @@
 var $ = function (id) {
   return document.getElementById(id);
 };
+var _createElem = function (t) {
+  return document.createElement(t);
+}
+var _createText = function (t) {
+  return document.createTextNode(t);
+}
 
+
+var contextMenu;
 function init() {
-  var c = $('clicker');
-  var items = [
-    new fleegix.menu.ContextMenuItem({
-      display: "Do Alert 'foo' ...",
-      handleClick: function () { alert('foo'); } }),
-    new fleegix.menu.ContextMenuItem({
-      display: "Go to Yahoo.com",
-      handleClick: function () { location = 'http://www.yahoo.com/'; } }),
-    new fleegix.menu.ContextMenuItem({
-      display: "Do Alert 'bar' ...",
-      handleClick: function () { alert('bar'); } })
-  ];
-  fleegix.menu.MenuManager.createContextMenu(c, items);
+    // 00e62e1403e1d66dbc643ad74ac41609
+    var _menuItem = fleegix.menu.HierarchicalMenuItem;
+    var menuItems = [
+        new _menuItem({
+          display: "Do some shiz",
+          handleClick: function () { alert('Shiz!'); } }),
+        new _menuItem({
+          display: "Do some other shiz",
+          handleClick: function () { alert('More shiz!'); } }),
+        new _menuItem({
+          display: "Do some other-other shiz",
+          items: [
+            new _menuItem({
+              display: "Do yet some other shiz",
+              handleClick: function () { alert('More shiz!'); } }),
+            new _menuItem({
+              display: "Do yet some other shiz",
+              handleClick: function () { alert('More shiz!'); } })
+          ] })
+    ];
+    contextMenu = new fleegix.menu.HierarchicalMenu(
+        'testMenu', menuItems, { minWidth: 100, maxWidth: 200 });
+    var c = $('clicker');
+    fleegix.event.listen(c, 'onclick', handleClick);
+    fleegix.event.listen(c, 'oncontextmenu', handleClick);
+};
+
+function handleClick(e) {
+  if (e.button == 2) {
+      fleegix.menu.showContextMenu(e,
+        contextMenu);
+      return false;
+  }
 }
 
 fleegix.event.listen(window, 'onload', init);
@@ -42,23 +70,44 @@ fleegix.event.listen(window, 'onload', init);
   font-family: "Lucida Grande", "Verdana", sans-serif;
   font-size: 11px;
 }
+body {
+    padding: 0px;
+    margin: 0px;
+}
 #container {
-    position: relative;
-    padding: 12px;
+  padding: 12px;
 }
-#contextMenu {
-  background-color: #fff;
-  border: 1px solid #aaa;
+
+/* Contextual menu */
+.hierMenu {
+    position: absolute;
+    table-layout: fixed;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    z-Index: 999999;
 }
-#contextMenu a {
-  display: block;
-  padding: 5px;
-  min-width: 114px;
-  cursor: pointer;
+.hierMenuItem {
+    cursor: pointer;
 }
-#contextMenu a:hover {
-  background-color: #5c8;
-  color: #fff;
+.hierMenuText {
+    height: 24px;
+    line-height: 24px;
+    overflow: hidden;
+    -moz-user-select: none;
+    padding: 0px;
+    margin: 0px;
+}
+.hierMenuTextClipper {
+    margin: 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.selectedItem {
+    background-color: #659dd3 !important;
+    color: #fff !important;
+}
+.mouseoverItem {
+    background-color: #deeeff !important;
 }
 
 </style>

@@ -15,8 +15,7 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-if (typeof fleegix.menu == 'undefined') { fleegix.menu = {}; }
-fleegix.menu.HierarchicalMenuManager = new function () {
+fleegix.menu = new function () {
     // Config -- used in width calculations
     var HORIZ_MARGIN_WIDTH = 4;
     var BORDER_WIDTH = 1;
@@ -24,7 +23,6 @@ fleegix.menu.HierarchicalMenuManager = new function () {
     var MENU_OVERLAP = 2;
 
     this.displayedMenu = null;
-    this.contextMenuRegistry = {};
 
     // Private props
     this._currX = 0;
@@ -33,18 +31,11 @@ fleegix.menu.HierarchicalMenuManager = new function () {
     this._expandedItemForEachLevel = [];
     this._xPosMarksForEachLevel = [];
     this._yPosMarksForEachLevel = [];
+    this._baseNode = null;
 
-    // Public interface methods
-    this.createContextMenu = function(id, items, o) {
-        var opts = o || {};
-        var menu = new fleegix.menu.HierarchicalMenu(id, items, opts);
-        this.contextMenuRegistry[id] = menu;
-        return menu;
-    };
-    this.showContextMenu = function (e, menu) {
-        var xPos = e.clientX;
-        var yPos = e.clientY;
+    this.showFixedMenu = function (e, menu, node, xPos, yPos) {
         var items = menu.items;
+        this._baseNode = node;
         if (!items || !items.length) {
             throw new Error('Contextual menu "' + menu.id +'" has no menu items.');
         }
@@ -59,6 +50,10 @@ fleegix.menu.HierarchicalMenuManager = new function () {
         e.preventDefault();
         e.stopPropagation();
         return false;
+
+    };
+    this.showContextMenu = function (e, menu) {
+        this.showFixedMenu(e, menu, document.body, e.clientX, e.clientY);
     };
     this.hideHierarchicalMenu = function (e) {
         this._hideSubMenus(-1);
@@ -252,7 +247,7 @@ fleegix.menu.HierarchicalMenuManager = new function () {
 
         table.style.left = x + 'px';
         table.style.top = y + 'px';
-        document.body.appendChild(table);
+        this._baseNode.appendChild(table);
 
         fleegix.event.listen(table, 'onmouseover', this, 'handleMouseOver');
         fleegix.event.listen(table, 'onmouseout', this, 'handleMouseOut');
@@ -271,7 +266,7 @@ fleegix.menu.HierarchicalMenuManager = new function () {
                     this, 'handleMouseOver');
                 fleegix.event.unlisten(removeMenu, 'onclick',
                     this, 'handleClick');
-                document.body.removeChild(removeMenu);
+                this._baseNode.removeChild(removeMenu);
             }
         }
     };
@@ -420,6 +415,6 @@ fleegix.menu.HierarchicalMenu.prototype.getMenuItem =
 
 // Close menus via any click on the doc body
 fleegix.event.listen(document, 'onclick',
-    fleegix.menu.HierarchicalMenuManager,
+    fleegix.menu,
         'hideHierarchicalMenu');
 
