@@ -59,12 +59,14 @@ fleegix.html = new function () {
 
   this.setSelect = function (sel, val) {
     var index = 0;
-    for (var i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value == val) {
+    var opts = sel.options;
+    for (var i = 0; i < opts.length; i++) {
+      if (opts[i].value == val) {
         index = i;
         break;
       }
     }
+    sel.selectedIndex = index;
   };
 
   this.createInput = function (o) {
