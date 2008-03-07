@@ -25,8 +25,8 @@ fleegix.drag.DragManager = new function () {
   this.raiseMap = {};
   this.dragMap = {};
   this.currentDraggable = null;
-  this.currentZIndex = 999;
-  this.addDragWindow = function (containerNode, handleNode) {
+  this.currentZIndex = 99999;
+  this.addDragWindow = function (containerNode, handleNode, shadowNode) {
     if (!containerNode.id) {
       throw('Draggable DOM nodes must have an id'); }
     if (!handleNode) { handleNode = containerNode; }
@@ -38,7 +38,7 @@ fleegix.drag.DragManager = new function () {
     fleegix.event.listen(containerNode,
       'onmousedown', raiseDraggable);
     var d = new fleegix.drag.DragWindow({
-      containerNode: containerNode });
+      containerNode: containerNode, shadowNode: shadowNode });
     this.registry.push(d);
     this.raiseMap[containerNode.id] = d;
     this.dragMap[handleNode.id] = d;
@@ -79,6 +79,9 @@ fleegix.drag.DragManager = new function () {
     }
     this.currentZIndex++;
     d.containerNode.style.zIndex = this.currentZIndex;
+    if (d.shadowNode) {
+      d.shadowNode.style.zIndex = this.currentZIndex - 1; 
+    }
   };
   this.mouseMoveHandler = function (e) {
     var d = fleegix.drag;
@@ -99,6 +102,7 @@ fleegix.drag.DragManager = new function () {
 fleegix.drag.DragWindow = function (p) {
   var params = p || {};
   this.containerNode = null;
+  this.shadowNode = null;
   this.handleNode = null;
   this.clickOffsetX = 0;
   this.clickOffsetY = 0;
@@ -115,10 +119,14 @@ fleegix.drag.DragWindow.prototype.startDrag = function () {
 };
 fleegix.drag.DragWindow.prototype.drag = function () {
   var d = fleegix.drag;
-  this.containerNode.style.left =
-    (d.xPos - this.clickOffsetX) + 'px';
-  this.containerNode.style.top =
-    (d.yPos - this.clickOffsetY) + 'px';
+  var x = (d.xPos - this.clickOffsetX) + 'px';
+  var y = (d.yPos - this.clickOffsetY) + 'px';
+  this.containerNode.style.left = x;
+  this.containerNode.style.top = y;
+  if (this.shadowNode) {
+    this.shadowNode.style.left = x;
+    this.shadowNode.style.top = y;
+  }
   // Hacky way of preventing text selection in FF
   // for the entire doc -- inserting a CSS rule for
   // -moz-user-select for all elements or something
