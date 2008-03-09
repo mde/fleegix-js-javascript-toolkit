@@ -398,11 +398,25 @@ fleegix.date.timezone = new function() {
     var year = dt.getUTCFullYear();
     var rules = _this.rules[str];
     var ruleHits = [];
-
-    var checkForHits = function (diff, r, d, dt) {
-      d.setUTCDate(d.getUTCDate() + diff);
+    var getMonthNumber = function (r) {
+      return monthMap[r[3].substr(0, 3).toLowerCase()];
+    };
+    var checkForHits = function (incr, rule, d, dt) {
+      d.setUTCDate(d.getUTCDate() + incr);
       if (dt >= d) {
-        ruleHits.push({ 'rule': r, 'date': d });
+        ruleHits.push({ 'rule': rule, 'date': d });
+      }
+      // FIXME: Check against previous year if rule covers that period
+      // These should always be fall rules from a previous year,
+      // so the month number should be > 8 -- this is an ugly hack,
+      // but seems to work consistently and I can't think of a better
+      // way to cover all the goddamned edge cases for this -- see
+      // Asia/Jerusalem for some particularly gnarly examples
+      else if ((rule[0] < year) && (getMonthNumber(r) > 8)) {
+        d.setUTCFullYear(d.getUTCFullYear()-1);
+        if (dt >= d) {
+          ruleHits.push({ 'rule': rule, 'date': d });
+        }
       }
     };
 
@@ -419,9 +433,10 @@ fleegix.date.timezone = new function() {
         (r[0] > year)) {
         continue;
       };
-      var mon = monthMap[r[3].substr(0, 3).toLowerCase()];
+      var mon = getMonthNumber(r);
       var day = r[4];
 
+      // Not a specific date number -- have to parse to get date
       if (isNaN(day)) {
         if (day.substr(0, 4) == 'last') {
           var day = dayMap[day.substr(4,3).toLowerCase()];
@@ -430,8 +445,8 @@ fleegix.date.timezone = new function() {
           var d = new Date(Date.UTC(dt.getUTCFullYear(), mon+1, 1, t[1]-24, t[2], t[3]));
           var dtDay = d.getUTCDay();
           // Set it to the final day of the correct weekday that month
-          var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
-          checkForHits(diff, r, d, dt);
+          var incr = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
+          checkForHits(incr, r, d, dt);
         }
         else {
           day = dayMap[day.substr(0, 3).toLowerCase()];
@@ -443,8 +458,8 @@ fleegix.date.timezone = new function() {
                 parseInt(r[4].substr(5)), t[1], t[2], t[3]));
               var dtDay = d.getUTCDay();
               // Set to the first correct weekday after the stated date
-              var diff = (day < dtDay) ? (day - dtDay + 7) : (day - dtDay);
-              checkForHits(diff, r, d, dt);
+              var incr = (day < dtDay) ? (day - dtDay + 7) : (day - dtDay);
+              checkForHits(incr, r, d, dt);
             }
             else if (day.substr(3, 2) == '<=') {
               var t = parseTimeString(r[5]);
@@ -453,12 +468,13 @@ fleegix.date.timezone = new function() {
                 parseInt(r[4].substr(5)), t[1], t[2], t[3]));
               var dtDay = d.getUTCDay();
               // Set to first correct weekday before the stated date
-              var diff = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
-              checkForHits(diff, r, d, dt);
+              var incr = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
+              checkForHits(incr, r, d, dt);
             }
           }
         }
       }
+      // Numeric date
       else {
         var t = parseTimeString(r[5]);
         var d = new Date(Date.UTC(dt.getUTCFullYear(), mon, day, t[1], t[2], t[3]));
