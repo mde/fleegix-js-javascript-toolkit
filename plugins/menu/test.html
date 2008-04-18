@@ -7,7 +7,10 @@
 <head>
 <title>Test for Fleegix.js Contextual Menu Plugin</title>
 
-<script type="text/javascript" src="../../fleegix.js"></script>
+<script type="text/javascript" src="../../src/event.js"></script>
+<script type="text/javascript" src="../../src/dom.js"></script>
+<script type="text/javascript" src="../../src/css.js"></script>
+<script type="text/javascript" src="../../src/string.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 
 <script type="text/javascript">
@@ -48,19 +51,20 @@ function init() {
     contextMenu = new fleegix.menu.HierarchicalMenu(
         'testMenu', menuItems, { minWidth: 100, maxWidth: 200 });
     var c = $('clicker');
-    fleegix.event.listen(c, 'onclick', handleClick);
-    fleegix.event.listen(c, 'oncontextmenu', handleClick);
+    fleegix.event.listen(c, 'onmousedown', handleMouseDown);
+    fleegix.event.listen(c, 'oncontextmenu', function (e) { fleegix.event.annihilate(e); });
 };
 
-function handleClick(e) {
+function handleMouseDown(e) {
   if (e.button == 2) {
-      fleegix.menu.showContextMenu(e,
-        contextMenu);
-      return false;
+    fleegix.menu.showContextMenu(e,
+      contextMenu);
+    return false;
   }
 }
 
 fleegix.event.listen(window, 'onload', init);
+
 
 </script>
 
