@@ -142,7 +142,7 @@ fleegix.hash.Hash.prototype = new function () {
     }
     return false;
   };
-  this.getAllKeys = function (str) {
+  this.allKeys = function (str) {
     return this.order.join(str);
   };
   this.replaceKey = function (oldKey, newKey) {
@@ -168,17 +168,17 @@ fleegix.hash.Hash.prototype = new function () {
     var pos = this.getPos(refKey);
     this.insertAtPos(pos, key, val);
   };
-  this.pop = function () {
-    var pos = this.count-1;
-    var ret = this.items[this.order[pos]];
-    if (typeof ret != 'undefined') {
-      this.removeAtPos(pos);
-      return ret;
+  this.getPosition = function (key) {
+    var order = this.order;
+    if (typeof order.indexOf == 'function') {
+      return order.indexOf(key);
     }
     else {
-      return false;
+      for (var i = 0; i < order.length; i++) {
+        if (order[i] == key) { return i;}
+      }
     }
-  };
+  }
   this.each = function (func, o) {
     var opts = o || {};
     var len = this.order.length;
@@ -207,7 +207,7 @@ fleegix.hash.Hash.prototype = new function () {
     this.each(func, { valueOnly: true });
   };
   this.clone = function () {
-    var h = new Hash();
+    var h = new fleegix.hash.Hash();
     for (var i = 0; i < this.order.length; i++) {
       var key = this.order[i];
       var val = this.items[key];
@@ -221,6 +221,43 @@ fleegix.hash.Hash.prototype = new function () {
       var val = hNew.items[key];
       this.setItem(key, val);
     }
+  };
+  this.pop = function () {
+    var pos = this.count-1;
+    var ret = this.items[this.order[pos]];
+    if (typeof ret != 'undefined') {
+      this.removeAtPos(pos);
+      return ret;
+    }
+    else {
+      return false;
+    }
+  };
+  this.splice = function (index, numToRemove, hash) {
+    var _this = this;
+    // Removal
+    if (numToRemove > 0) {
+      // Items
+      var limit = index + numToRemove;
+      for (var i = index; i < limit; i++) {
+        delete this.items[this.order[i]];
+      }
+      // Order
+      this.order.splice(index, numToRemove);
+    }
+    // Adding 
+    if (hash) {
+      // Items
+      for (var i in hash.items) {
+        this.items[i] = hash.items[i];
+      }
+      // Order
+      var args = hash.order;
+      args.unshift(0);
+      args.unshift(index);
+      this.order.splice.apply(this.order, args);
+    }
+    this.count = this.order.length;
   };
   this.sort = function (s) {
     var c = s || fleegix.hash.sorts.ASCENDING_NOCASE;
@@ -247,6 +284,9 @@ fleegix.hash.Hash.prototype = new function () {
       throw('Hash sort requires a valid comparator function.');
     }
     this.order.sort(comp);
+  };
+  this.reverse = function () {
+    this.order.reverse();
   };
 };
 
