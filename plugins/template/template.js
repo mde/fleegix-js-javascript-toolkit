@@ -44,13 +44,15 @@ fleegix.template.Templater = function (p) {
     params.requireAllKeys : true;
   if (!this.markup) {
     var _this = this;
+    var noCache = typeof this.preventCache == 'undefined' ?
+      false : this.preventCache;
     this.markupFile = params.markupFile;
     var s = fleegix.template.markupCache[this.markupFile];
-    if (!s || this.preventCache) {
+    if (!s || noCache) {
       var p = {
         url: this.markupFile,
         method: 'GET',
-        preventCache: true,
+        preventCache: noCache,
         async: false
       };
       s = fleegix.xhr.doReq(p);
@@ -71,12 +73,14 @@ fleegix.template.Templater.prototype.getTemplatedMarkup =
   var subPat = /[${} ]/g
   var str = this.markup;
   var match = str.match(pat);
-  for (var i = 0; i < match.length; i++) {
-    m = match[i];
-    key = m.replace(subPat, '');
-    var data = this.data[key] ? this.data[key] : '';
-    if (data || !this.requireAllKeys) {
-      str = str.replace(m, data);
+  if (match) {
+    for (var i = 0; i < match.length; i++) {
+      m = match[i];
+      key = m.replace(subPat, '');
+      var data = this.data[key] ? this.data[key] : '';
+      if (data || !this.requireAllKeys) {
+        str = str.replace(m, data);
+      }
     }
   }
   return str;
