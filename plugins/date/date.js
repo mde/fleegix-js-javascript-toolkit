@@ -361,7 +361,7 @@ fleegix.date.timezone = new function() {
     var t = tz;
     var zoneList = _this.zones[t];
     // Follow links to get to an acutal zone
-    while (typeof(zones) == "string") {
+    while (typeof zoneList == "string") {
       t = zoneList;
       zoneList = _this.zones[t];
     }
