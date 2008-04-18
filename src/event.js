@@ -193,21 +193,11 @@ fleegix.event = new function () {
           ev = args[0];
           // Stop propagation if needed
           if (ex.stopPropagation) {
-            if (ev.stopPropagation) {
-              ev.stopPropagation();
-            }
-            else {
-              ev.cancelBubble = true;
-            }
+            this.stopPropagation(ev);
           }
           // Prevent the default action if needed
           if (ex.preventDefault) {
-            if (ev.preventDefault) {
-              ev.preventDefault();
-            }
-            else {
-              ev.returnValue = false;
-            }
+            this.preventDefault(ev);
           }
         }
 
@@ -373,6 +363,28 @@ fleegix.event = new function () {
   this.getSrcElementId = function (e) {
     var node = this.getSrcElementByAttribute(e, 'id') || null;
     return node.id || null;
+  };
+  this.annihilate = function (e) {
+    this.stopPropagation(e);
+    this.preventDefault(e);
+  };
+  this.stopPropagation = function (e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    else {
+      e.cancelBubble = true;
+    }
+    return e;
+  };
+  this.preventDefault = function (e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    else {
+      e.returnValue = false;
+    }
+    return e;
   };
   // If there are known problems looking up the listener registry
   // for a particular handler, this will allow the execution to 
