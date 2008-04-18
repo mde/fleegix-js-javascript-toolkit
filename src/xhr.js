@@ -101,6 +101,9 @@ fleegix.xhr = new function () {
   this.processingWatcherId = null;
   // Default number of seconds before a request times out
   this.defaultTimeoutSeconds = 30;
+  // If set to true, use the default err handler for sync requests
+  // If false, failures always hand back the whole request object
+  this.useDefaultErrHandlerForSync = true;
   // Possible formats for the XHR response
   this.responseFormats = { TXT: 'text',
    XML: 'xml',
@@ -176,7 +179,7 @@ fleegix.xhr = new function () {
     }
     // HTTP req method all-caps
     req.method = req.method.toUpperCase();
-    
+
     req.id = this.lastReqId;
     this.lastReqId++; // Increment req ID
 
@@ -270,16 +273,23 @@ fleegix.xhr = new function () {
     }
 
     // Add any custom headers that are defined
-    if (req.headers.length) {
-      // Set any custom headers
-      for (var i = 0; i < req.headers.length; i++) {
-        var headArr = req.headers[i].split(': ');
-        trans.setRequestHeader(headArr[i], headArr[1]);
-      }
+    for (var h in req.headers) {
+      trans.setRequestHeader(h, req.headers[h]);
     }
     // Otherwise set correct content-type for POST
-    else {
-      if (req.method == 'POST') {
+    if (req.method == 'POST' || req.method == 'PUT') {
+      // Firefox throws out the content-length
+      // if this is not present
+      if (!req.dataPayload) {
+        req.dataPayload = '';
+      }
+      // Set content-length for picky servers
+      var contentLength = typeof req.dataPayload == 'string' ?
+        req.dataPayload.length : 0;
+      trans.setRequestHeader('Content-Length', contentLength);
+      // Set content-type to urlencoded if nothing
+      // else specified
+      if (typeof req.headers['Content-Type'] == 'undefined') {
         trans.setRequestHeader('Content-Type',
           'application/x-www-form-urlencoded');
       }
@@ -407,8 +417,7 @@ fleegix.xhr = new function () {
       try {
         switch (true) {
           // Request was successful -- execute response handler
-          case ((trans.status > 199 && trans.status < 300) ||
-              trans.status == 304):
+          case this.isReqSuccessful(trans):
             if (req.async) {
               // Make sure handler is defined
               if (!req.handleSuccess) {
@@ -438,13 +447,21 @@ fleegix.xhr = new function () {
               throw new Error('XMLHttpRequest HTTP status not set.');
             }
             break;
-          // Request failed -- execute error handler
+          // Request failed -- execute error handler or hand back
+          // raw request obj
           default:
-            if (req.handleErr) {
-              req.handleErr(resp, req.id);
+            // Blocking requests that want the raw object returned
+            // on error, instead of letting the built-in handle it
+            if (!req.async && !this.useDefaultErrHandlerForSync) {
+              return  resp;
             }
             else {
-              this.handleErrDefault(trans);
+              if (req.handleErr) {
+                req.handleErr(resp, req.id);
+              }
+              else {
+                this.handleErrDefault(trans);
+              }
             }
             break;
         }
@@ -452,7 +469,7 @@ fleegix.xhr = new function () {
       // FIXME: Might be nice to try to catch NS_ERROR_NOT_AVAILABLE
       // err in Firefox for broken connections
       catch (e) {
-        throw e; 
+        throw e;
       }
     }
     // Clean up, move immediately to respond to any
@@ -491,6 +508,23 @@ fleegix.xhr = new function () {
       alert('An error occurred, but the error message cannot be' +
       ' displayed because of your browser\'s pop-up blocker.\n' +
       'Please allow pop-ups from this Web site.');
+    }
+  };
+  // All the goofy normalization and logic to determine
+  // what constitutes 'success'
+  this.isReqSuccessful = function (obj) {
+    var stat = obj.status;
+    if (!stat) { return false; }
+    // Handle stupid bogus URLMon "Operation Aborted"
+    // code in IE for 204 no-content
+    if (document.all && stat == 1223) {
+      stat = 204;
+    }
+    if ((stat > 199 && stat < 300) || stat == 304) {
+      return true;
+    }
+    else {
+      return false;
     }
   };
 };
