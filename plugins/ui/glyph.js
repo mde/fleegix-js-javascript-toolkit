@@ -35,6 +35,8 @@ fleegix.ui.Glyph = function (domNode, id) {
   this.children = [];
   // Flag for init-only code that has to run
   this.hasBeenRendered = false;
+  // Visibility flag
+  this.visible = true;
   // List of Glyphes
   fleegix.ui.GlyphRegistry[id] = this;
   // Place to keep data
@@ -51,7 +53,15 @@ fleegix.ui.Glyph.prototype = new function () {
     node.innerHTML = '';
   };
   this.clearAll =  function () {
-    this.clearNode(this.domNode);
+    if (this.domNode) {
+      this.clearNode(this.domNode);
+    }
+    var ch = this.children;
+    if (ch && ch.length) {
+      for (var i = 0; i < ch.length; i++) {
+        ch[i].clearAll();
+      }
+    }
   };
   this.setPosition =  function (left, top) {
     this.setTop(top);
@@ -124,6 +134,7 @@ fleegix.ui.Glyph.prototype = new function () {
     else {
       this.domNode.style.display = 'none';
     }
+    this.visible = false;
   };
   this.show =  function (visOnly) {
     if (visOnly) {
@@ -132,6 +143,7 @@ fleegix.ui.Glyph.prototype = new function () {
     else {
       this.domNode.style.display = 'block';
     }
+    this.visible = true;
   };
   this.renderSelf =  function () {};
   this.update = function (p) {
@@ -144,13 +156,13 @@ fleegix.ui.Glyph.prototype = new function () {
       this.init();
     }
     if (typeof this.renderSelf == 'function') {
-      this.renderSelf.apply(this, arguments);
+      this.renderSelf();
     };
     var children = this.children;
     var child;
     for (var i = 0; i < children.length; i++) {
       child = children[i];
-      child.render.apply(child, arguments);
+      child.render();
     }
     this.hasBeenRendered = true;
   };
