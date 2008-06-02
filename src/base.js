@@ -66,4 +66,36 @@ fleegix.clone = function (o) {
   return ret;
 };
 
+// This stuff gets run inline below, props added to 
+// base 'fleegix' obj -- namespaced to avoid global refs
+// Some code taken from the Dojo loader
+fleegix.agentSniffing = new function () {
+  var f = fleegix; // Alias the base 'fleegix' obj
+  var n = navigator;
+  var ua = n.userAgent;
+  var av = n.appVersion;
+  f.isOpera = (ua.indexOf("Opera") > -1);
+  f.isKhtml = (av.indexOf("Konqueror") > -1) ||
+    (av.indexOf("Safari") > -1);
+  f.isSafari = (av.indexOf("Safari") > -1);
+  f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
+  f.isFF = false;
+  f.isIE = false;
+  try {
+    if (f.isMoz) {
+      f.isFF = (ua.indexOf('Firefox') > -1);
+    }
+    if ((document.all) && (!f.isOpera)) {
+      f.isIE = (ua.indexOf('MSIE ') > -1);
+    }
+  } 
+  // Squelch
+  catch(e) {}
+  f.isMac = (ua.indexOf('Mac') > -1);
+  f.isUnix = (ua.indexOf('Linux') > -1) ||
+    (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
+  f.isLinux = (ua.indexOf('Linux') > -1);
+  f.isWindows = (ua.indexOf('Windows') > -1);
+};
+
 
