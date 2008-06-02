@@ -17,7 +17,8 @@
  * Credits: Ideas included from incomplete JS implementation of Olson
  * parser, "XMLDAte" by Philippe Goetz (philippe.goetz@wanadoo.fr)
  * Additional contributions: Preston Hunt (prestonhunt@gmail.com),
- * Dov. B Katz (dov.katz@morganstanley.com)
+ * Dov. B Katz (dov.katz@morganstanley.com), Peter Bergström
+ * (pbergstr@mac.com)
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.date == 'undefined') { fleegix.date = {}; }
@@ -420,7 +421,9 @@ fleegix.date.timezone = new function() {
       }
     };
 
-    if (!rules) { return null; }
+    // String conversion may be happening somewhere?
+    // so check for string of 'undefined'
+    if (!rules || rules == 'undefined') { return null; }
     for (var i = 0; i < rules.length; i++) {
       r = rules[i];
       // Only look at applicable rules -- throw out:
@@ -568,7 +571,6 @@ fleegix.date.timezone = new function() {
     return builtInLoadZoneFile(fileName, sync);
   };
   this.loadZoneJSONData = function (url, sync) {
-    var _this = this;
     var processData = function (data) {
       data = eval('('+ data +')');
       for (var z in data.zones) {
@@ -584,6 +586,15 @@ fleegix.date.timezone = new function() {
     }
     else {
       fleegix.xhr.doGet(processData, url);
+    }
+  };
+  this.loadZoneDataFromObject = function (data) {
+    if (!data) { return; }
+    for (var z in data.zones) {
+      _this.zones[z] = data.zones[z];
+    }
+    for (var r in data.rules) {
+      _this.rules[r] = data.rules[r];
     }
   };
   this.getAllZones = function() {
