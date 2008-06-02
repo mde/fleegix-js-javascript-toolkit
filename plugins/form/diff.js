@@ -32,8 +32,9 @@ fleegix.form.diff = function (formUpdated, formOrig, opts) {
   function addDiff(n, hA, hB, secondPass) {
     if (!diffs[n]) {
       count++;
-      diffs[n] = secondPass? [hB[n], hA[n]] :
-        [hA[n], hB[n]];
+      diffs[n] = secondPass?
+        { origVal: hB[n], newVal: hA[n] } :
+        { origVal: hA[n], newVal: hB[n] };
     }
   }
 
