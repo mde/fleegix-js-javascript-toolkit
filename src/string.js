@@ -39,5 +39,15 @@ fleegix.string = new function () {
     var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
     return str.replace(pat, '');
   };
+  // Converts someVariableName to some_variable_name
+  this.toLowerCaseWithUnderscores = function (s) {
+    return s.replace(/([A-Z]+)/g, '_$1').toLowerCase().
+      replace(/^_/, '');
+  };
+  // Converts some_variable_name to someVariableName
+  this.toCamelCase = function (s) {
+    return s.replace(/_[a-z]{1}/g, function (s) 
+      { return s.replace('_', '').toUpperCase() });
+  };
 };
 
