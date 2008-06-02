@@ -22,6 +22,8 @@ fleegix.extend = function (/* Super-class constructor function */ superClass,
     superClass.apply(this, arguments);
     superClass.prototype.constructor.apply(this, arguments);
     subClass.apply(this, arguments);
+    this.superClass = superClass;
+    this.subClass = subClass
   };
 };
 
