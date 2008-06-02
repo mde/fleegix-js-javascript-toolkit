@@ -16,6 +16,7 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.hash == 'undefined') { fleegix.hash = {}; }
+fleegix.hash.UNDEFINED_VALUE;
 fleegix.hash.Hash = function (d) {
   this.count = 0;
   this.items = {}; // Hash keys and their values
@@ -222,6 +223,10 @@ fleegix.hash.Hash.prototype = new function () {
       this.setItem(key, val);
     }
   };
+  this.push = function (key, val) {
+    this.insertAtIndex(this.count, key, val);
+    return this.count;
+  };
   this.pop = function () {
     var pos = this.count-1;
     var ret = this.items[this.order[pos]];
@@ -230,7 +235,22 @@ fleegix.hash.Hash.prototype = new function () {
       return ret;
     }
     else {
-      return false;
+      return fleegix.hash.UNDEFINED_VALUE;
+    }
+  };
+  this.unshift = function (key, val) {
+    this.insertAtIndex(0, key, val);
+    return this.count;
+  };
+  this.shift = function (key, val) {
+    var pos = 0;
+    var ret = this.items[this.order[pos]];
+    if (typeof ret != 'undefined') {
+      this.removeAtPos(pos);
+      return ret;
+    }
+    else {
+      return fleegix.hash.UNDEFINED_VALUE;
     }
   };
   this.splice = function (index, numToRemove, hash) {
