@@ -150,11 +150,10 @@ fleegix.form.toObject= function (f, o) {
         case 'password':
         case 'textarea':
         case 'select-one':
-          c[n] = elem.value || null;
+          c[n] = elem.value;
           break;
         // Multi-option select
         case 'select-multiple':
-          c[n] = null;
           for(var j = 0; j < elem.options.length; j++) {
             var e = elem.options[j];
             if(e.selected) {
@@ -164,16 +163,12 @@ fleegix.form.toObject= function (f, o) {
           break;
         // Radio buttons
         case 'radio':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
           if (elem.checked) {
             c[n] = elem.value;
           }
           break;
         // Checkboxes
         case 'checkbox':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
           if (elem.checked) {
             c[n] = expandToArr(c[n], elem.value);
           }
@@ -184,7 +179,7 @@ fleegix.form.toObject= function (f, o) {
         case 'file':
         case 'image':
         case 'button':
-          if (opts.pedantic) { c[n] = elem.value || null; }
+          if (opts.pedantic) { c[n] = elem.value; }
           break;
       }
     }
