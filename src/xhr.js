@@ -312,6 +312,10 @@ fleegix.xhr = new function () {
         self.processingWatcherId = setTimeout(
           fleegix.xhr.watchProcessing, 10);
       }
+      // Otherwise stop watching
+      else {
+        self.processingWatcherId = null;
+      }
       return ret;
     }
   };
