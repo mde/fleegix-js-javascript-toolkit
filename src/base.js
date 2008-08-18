@@ -16,6 +16,23 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
+if (typeof $ == 'undefined') {
+  var $ = function (s) { return document.getElementById(s); }
+}
+
+var $elem = function (s, o) {
+  var opts = o || {};
+  var elem = document.createElement(s);
+  for (var p in opts) {
+    elem[p] = opts[p];
+  }
+  return elem;
+};
+
+var $text = function (s) {
+  return document.createTextNode(s);
+};
+
 fleegix.extend = function (/* Super-class constructor function */ superClass,
   /* Sub-class constructor function */ subClass) {
   return function () {
