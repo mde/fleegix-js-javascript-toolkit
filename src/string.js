@@ -49,5 +49,8 @@ fleegix.string = new function () {
     return s.replace(/_[a-z]{1}/g, function (s) 
       { return s.replace('_', '').toUpperCase() });
   };
+  this.capitalize = function (s) {
+    return s.substr(0, 1).toUpperCase() + s.substr(1);
+  };
 };
 
