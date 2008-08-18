@@ -91,8 +91,12 @@ fleegix.fx = new function () {
   // Public (interface) methods
   this.fadeOut = function (elem, opts) {
     return doFade(elem, opts, 'out');
+    elem.style.visibility = 'hidden';
+    var sync = this.setCssProp(elem, 'opacity', 100);
   };
   this.fadeIn = function (elem, opts) {
+    var sync = this.setCssProp(elem, 'opacity', 0);
+    elem.style.visibility = 'visible';
     return doFade(elem, opts, 'in');
   };
   this.blindUp = function (elem, opts) {
@@ -146,15 +150,15 @@ fleegix.fx = new function () {
 };
 
 fleegix.fx.Effecter = function (elem, opts) {
-  var self = this;
+  var _this = this;
   this.props = opts.props;
   this.trans = opts.trans || 'lightEaseIn';
   this.duration = opts.duration || 500;
   this.fps = 30;
   this.startTime = new Date().getTime();
   this.timeSpent = 0;
-  this.doOnStart = opts.doOnStart || null;
-  this.doAfterFinished = opts.doAfterFinished || null;
+  this.doBeforeStart = opts.doBeforeStart || null;
+  this.doAfterFinish = opts.doAfterFinish || null;
   this.autoStart = opts.autoStart === false ? false : true;
 
   if (typeof this.transitions[this.trans] != 'function') {
@@ -162,12 +166,12 @@ fleegix.fx.Effecter = function (elem, opts) {
   }
 
   this.start = function () {
-    self.id = setInterval( function () {
-      self.doStep.apply(self, [elem]); },
-      Math.round(1000/self.fps));
+    _this.id = setInterval( function () {
+      _this.doStep.apply(_this, [elem]); },
+      Math.round(1000/_this.fps));
     // Run the pre-execution func if any
-    if (typeof opts.doOnStart == 'function') {
-      self.doOnStart();
+    if (typeof opts.doBeforeStart == 'function') {
+      _this.doBeforeStart();
     }
   };
   // Fire it up unless auto-start turned off
@@ -200,8 +204,8 @@ fleegix.fx.Effecter.prototype.doStep = function (elem) {
     }
     clearInterval(this.id);
     // Run the post-execution func if any
-    if (typeof this.doAfterFinished == 'function') {
-      this.doAfterFinished();
+    if (typeof this.doAfterFinish == 'function') {
+      this.doAfterFinish();
     }
   }
 };
