@@ -16,6 +16,18 @@ def get_source_file_list
   files
 end
 
+def get_base_module_file_list(param)
+  mods = []
+  if not param.nil? and param.length > 0
+    mods = param.gsub(' ', '').split(",")
+    mods.each do |p|
+      p.sub!(/^/, './src/')
+    end
+  end
+  puts mods.inspect
+  mods
+end
+
 def get_plugin_file_list(param)
   plugins = []
   if not param.nil? and param.length > 0
@@ -73,12 +85,14 @@ task :default do
     conf = JSON.parse(file)
     plugins_only = conf['plugins_only'].to_s
     plugins = conf['plugins']
+    base_modules = conf['base_modules']
     compression = conf['compression'].to_s
     gzip = conf['gzip'].to_s
   # Otherwise look for command params
   else
     plugins_only = ENV['plugins_only']
     plugins = ENV['plugins']
+    base_modules = ENV['base_modules']
     compression = ENV['compression']
     gzip = ENV['gzip']
   end
@@ -101,8 +115,12 @@ task :default do
     gzip = gzip == 'false' ? false : true;
   end
 
+  files = []
   if plugins_only
-    files = []
+    files += []
+  elsif not base_modules.nil? and base_modules.length > 0
+    puts 'Getting list of base source files ...'
+    files += get_base_module_file_list(base_modules)
   else
     puts 'Getting list of base source files ...'
     files = get_source_file_list
