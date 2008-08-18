@@ -18,10 +18,10 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.i18n = new function () {
   this.localizedStrings = {};
   this.getText = function () {
-    var args = arguments;
-    var key = args[0];
+    var args = Array.prototype.slice.apply(arguments);
+    var key = args.shift();
     var str = this.localizedStrings[key] || "[[" + key + "]]";
-    for (var i = 1; i < args.length; i++){
+    for (var i = 0; i < args.length; i++){
         str = str.replace(new RegExp('\\{' + i + '\\}', 'g'), args[i]);
     }
     return str;
