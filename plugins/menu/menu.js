@@ -287,6 +287,7 @@ fleegix.menu = new function () {
     fleegix.event.listen(table, 'onclick', this, 'handleClick');
   };
   this._hideSubMenus = function (level) {
+    if (!this._baseNode) { return false; }
     this._currX = this._xPosMarksForEachLevel[level];
     this._currY = this._yPosMarksForEachLevel[level];
     var nextLevel = level + 1;
