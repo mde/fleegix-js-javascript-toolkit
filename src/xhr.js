@@ -105,14 +105,13 @@ fleegix.xhr = new function () {
     return this.post.apply(this, arguments);
   }
   this.doReq = function (opts) {
-    return this.send(opts.url, opts);
+    return this.send(opts);
   }
-  this.send = function (url, o) {
+  this.send = function (o) {
     var opts = o || {};
     var req = new fleegix.xhr.Request();
     var xhrId = null;
 
-    opts.url = url;
     // Override default request opts with any specified
     for (var p in opts) {
       if (opts.hasOwnProperty(p)) {
