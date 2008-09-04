@@ -52,5 +52,13 @@ fleegix.string = new function () {
   this.capitalize = function (s) {
     return s.substr(0, 1).toUpperCase() + s.substr(1);
   };
+  this.escapeXML = function (s) {
+    return s.replace(/&/gm, '&amp;').replace(/</gm, '&lt;').
+      replace(/>/gm, '&gt;').replace(/"/gm, '&quot;');
+  };
+  this.unescapeXML = function (s) {
+    return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
+      replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
+  };
 };
 
