@@ -80,6 +80,24 @@ fleegix.form.serialize = function (f, o) {
       if (opts.includeEmpty) { str += n + '=&'; }
     }
   }
+  // Convert all the camelCase param names to Ruby/Python style
+  // lowercase_with_underscores
+  if (opts.deCamelize) {
+    if (!fleegix.string) {
+      throw new Error(
+        'deCamelize option depends on fleegix.string module.');
+    }
+    var arr = str.split('&');
+    var arrItems;
+    str = '';
+    for (var i = 0; i < arr.length; i++) {
+      arrItems = arr[i].split('=');
+      if (arrItems[0]) {
+        str += fleegix.string.deCamelize(arrItems[0]) +
+          '=' + arrItems[1] + '&';
+      }
+    }
+  }
   str = str.substr(0, str.length - 1);
   return str;
 };
