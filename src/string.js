@@ -44,10 +44,18 @@ fleegix.string = new function () {
     return s.replace(/([A-Z]+)/g, '_$1').toLowerCase().
       replace(/^_/, '');
   };
+  // Alias for above
+  this.deCamelize = function (s) {
+    return this.toLowerCaseWithUnderscores(s);
+  };
   // Converts some_variable_name to someVariableName
   this.toCamelCase = function (s) {
     return s.replace(/_[a-z]{1}/g, function (s) 
       { return s.replace('_', '').toUpperCase() });
+  };
+  // Alias for above
+  this.camelize = function (s) {
+    return this.toCamelCase(s);
   };
   this.capitalize = function (s) {
     return s.substr(0, 1).toUpperCase() + s.substr(1);
