@@ -1,893 +1,1395 @@
-2008-01-05 03:59  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* fleegix.js.gz: Updated gzip'd built file for 0.4.1 release.
+	* fleegix.js, fleegix.js.uncompressed.js: Updating the repo's cooked
+	files.
 
-2008-01-05 03:55  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* tests/event.js: Added basic test for event.listen click handling.
+	* doc/index.html, doc/index.txt: Updated docs to reflect all the new
+	work for the upcoming release.
 
-2008-01-05 03:38  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* ChangeLog, README: Updated doc for 0.4.1 release.
+	* plugins/template/template.js: A bit of cleanup while working on
+	the new EJS templates.
 
-2008-01-05 03:31  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js: Updated
-	  built fleegix.js files for 0.4.1 release.
+	* src/base.js: Updated clone method to use constructor method of
+	clone target if one exists.
 
-2008-01-05 03:30  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* Rakefile: Turn on gzip option for default rake build.
+	* src/form.js: Added deCamelize option for passing form data back to
+	Ruby/Python RESTish services.
 
-2008-01-05 03:26  mde
+2008-09-07  mde <mde@fleegix.org>
 
-	* tests/cookie.js, tests/css.js, tests/index.html,
-	  tests/initialize.js, tests/register.js, tests/xhr.js: Changed
-	  tests to work with updates to Windmill's JavaScript testing
-	  framework.
+	* src/string.js: Added 'camelize' and 'deCamelize' aliases, much
+	nicer than verbose Java-style method names.
 
-2008-01-05 03:24  mde
+2008-09-04  mde <mde@fleegix.org>
 
-	* plugins/html/html.js: Added code for cases where user sets form
-	  field values to null or undefined instead of correctly using
-	  empty string.
+	* plugins/ejs/ejs.js: Added new plugin -- EJS, embedded JavaScript
+	templating.
 
-2008-01-05 03:23  mde
+2008-09-04  mde <mde@fleegix.org>
 
-	* src/event.js: Added code to deal with X-domain issues caused by
-	  on-the-fly changes to document.domain.
+	* src/xhr.js: Cleanup of the send method to pass it a single params
+	object.
 
-2008-01-05 03:22  mde
+2008-09-04  mde <mde@fleegix.org>
 
-	* src/xhr.js: Changed code to work with Firefox's fix to XHR --
-	  hitting ESC key to cancel XHR request no longer results in an
-	  error.
+	* src/string.js: Added methods for escaping and unescaping XML
+	strings.
 
-2007-11-11 05:00  mde
+2008-09-04  mde <mde@fleegix.org>
 
-	* plugins/date/date.js: Fixed a bug caused by incorrectly including
-	  previous years' rules in the list of hits for timezone parsing.
-	  Also added some smart caching, and a getTimezoneAbbreviation
-	  method.
+	* src/dom.js: Added scroll offset calculation to centering method.
+	Added getOffset method for finding absolute x/y position of
+	arbitrary nodes, contributed by Adam Christian
+	(adam@adamchristian.com).
 
-2007-10-29 05:49  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
-	  plugins/xml/xml.js: Updated XML parser plugin to handle CDATA and
-	  comment nodes properly.
+	* src/xhr.js: Large-scale refactoring of the xhr module.
 
-2007-10-26 04:57  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
-	  src/xhr.js: Updated fleegix.xhr to allow a configurable default
-	  request-timeout value, and changed responseFormat for requests to
-	  use an ennumerable, fleegix.xhr.responseFormats. The values in
-	  the ennumerable are the same as the original string values, so
-	  this change is backward compatible.
+	* src/string.js: Added a method to capitalize the initial letter of
+	a string.
 
-2007-10-25 19:16  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* fleegix.js, fleegix.js.gz, fleegix.js.uncompressed.js,
-	  src/css.js, tests/css.js, tests/initialize.js: Fixed some issues
-	  with the spaces in multi-selector class attributes in the CSS
-	  module.
+	* src/fx.js: Made naming convention consistent for pre- and
+	post-animation hook-methods.
 
-2007-10-25 04:11  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* tests/cookie.js, tests/initialize.js, tests/register.js: Updated
-	  tests to reflect changes in the Windmill JS test framework.
+	* src/base.js: Added convenience definition of dollar-sign method
+	($) if not already defined in global namespace, added a couple of
+	convenient shortcuts for often-used DOM methods.
 
-2007-10-18 19:02  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* plugins/hash/hash.js: Added workaround in random-key creation for
-	  Safari 2's buggy Math.random implementation.
+	* plugins/menu/menu.js: Added  paranoia check for base node before
+	attempting to access it.
 
-2007-10-17 03:00  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* plugins/shell/shell.js: Updated shell plugin to deal with both
-	  IE's and Safari 2's broken eval.
+	* Rakefile: Added task for a plugins-only build.
 
-2007-10-06 23:16  mde
+2008-08-17  mde <mde@fleegix.org>
 
-	* NOTICE: Added GNU-style top-level copyright NOTICE file.
+	* plugins/i18n/i18n.js: Changed from one-based to zero-based arrays
+	for parametric replacement.
 
-2007-10-06 23:15  mde
+2008-06-11  mde <mde@fleegix.org>
 
-	* plugins/date/date.js, plugins/html/html.js, src/form.js: Adding
-	  OSAF and SitePoint copyright attributions.
+	* src/xhr.js: Fixed bug with initial sync XHR call stopping further
+	request handling.  Fixed bug where the first XHR call being a sync call would prevent
+	the processing request watcher from ever getting switched back on.
 
-2007-10-06 22:46  mde
+2008-06-02  mde <mde@fleegix.org>
 
-	* src/json.js: Removed erroneous copyright attribution for
-	  SitePoint in JSON serialization library.
+	* src/string.js: Added two utility methods for converting strings
+	back and forth between (JavaScript) camelCase naming convention and
+	(Ruby/Python) lowercase_with_underscores.
 
-2007-10-04 03:11  mde
+2008-06-02  mde <mde@fleegix.org>
 
-	* fleegix.js.gz: Added gzipped fleegix.js file for 0.4.0 release.
+	* src/form.js: Don't set non-existent form field values explicitly
+	to null -- we want empty strings to stay empty strings.
 
-2007-10-04 03:05  mde
+2008-06-02  mde <mde@fleegix.org>
 
-	* ChangeLog, fleegix.js, fleegix.js.uncompressed.js: Updating both
-	  cooked and uncompressed fleegix.js files for inclusion in 0.4.0
-	  release. Also final update to ChangeLog.
+	* src/base.js: Added user-agent sniffing to base namespace (e.g.,
+	fleegix.isIE).
 
-2007-10-04 02:55  mde
+2008-06-02  mde <mde@fleegix.org>
 
-	* ChangeLog, plugins/hash/tests, plugins/hash/tests/hash.js: Moved
-	  tests for Hash plugin into appropriate directory.
+	* src/base.js: Added basic recursive clone method for objects.
 
-2007-10-04 02:54  mde
+2008-06-02  mde <mde@fleegix.org>
 
-	* src/cookie.js, src/dom.js, src/event.js, src/form.js, src/fx.js,
-	  src/json.js, src/string.js, src/xhr.js: Ran JS lint, fixed a lot
-	  of small syntax issues.
+	* src/base.js: Added superClass and subClass refs to objects
+	extended with fleegix.extend.
 
-2007-10-02 04:42  mde
+2008-06-01  mde <mde@fleegix.org>
 
-	* tests/HashTest.js, tests/cookie.js, tests/css.js,
-	  tests/index.html, tests/initialize.js, tests/xhr.js,
-	  tests/xhr_response.php: Adding some basic unit tests for running
-	  under Windmill, a test stub page for running tests against, and a
-	  basic PHP page for proving XHR GET and POST against.
+	* plugins/hash/hash.js: Added unshift, shift, and push methods to
+	Hash.
 
-2007-10-01 04:36  mde
+2008-06-01  mde <mde@fleegix.org>
 
-	* tests/AllTests.js: Removing JSUnit test runner file in
-	  preparation for moving to Windmill for unit-testing.
+	* plugins/form/diff.js: Change from array-based diff values to
+	origVal/newVal keyed objects for better clarity.
 
-2007-09-29 04:42  mde
+2008-06-01  mde <mde@fleegix.org>
 
-	* plugins/html, plugins/html/html.js: Added plugin for generating
-	  HTML form elements programmatically.
+	* plugins/date/date.js: Added loadZoneDataFromObject method and
+	check for string literal of 'undefined' in rules, contributed by
+	Peter Bergström, pbergstr@mac.com.
 
-2007-09-25 06:52  mde
+2008-04-18  mde <mde@dargo.(none)>
 
-	* plugins/shell/shell.js: Fixed bug caused by undeclared variable.
+	* plugins/date/date.js: Fixed bug in Date that prevented loading of
+	timezones based on links.
 
-2007-09-25 06:41  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/shell/shell.js: Added property names to object explorer
-	  for shell plugin.
+	* fleegix.js, fleegix.js.uncompressed.js: Updating built fleegix.js
+	files with all the latest changes.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@227
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-23 04:45  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/shell/shell.js, plugins/shell/test.html: Added some final
-	  polish to the shell plugin -- for now, hard-coded explorer output
-	  to the normal output node, added auto-scroll code to explorer
-	  output.
+	* src/xhr.js: Added useDefaultErrHandlerForSync setting to allow
+	non-success status codes to be return in sync XHR calls. Added
+	content-length header for POST/PUT requests, added public static
+	method to determine if the status code for a particular request
+	constitutes 'success' or not.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@226
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-22 04:41  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/shell/shell.js, plugins/shell/test.html: Implemented
-	  object explorer and auto-scroll.
+	* src/event.js: Moved stopPropagation/preventDefault to public
+	static methods, added annihilate method that will call those methods
+	on a passed DOM event.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@225
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-21 19:31  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/shell/test.html: Added demo page for JS shell plugin.
+	* plugins/ui/glyph.js: Recurse through child node for the clearAll
+	method, added visibile property, removed variable passing to the
+	render methods.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@224
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-21 05:43  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/shell, plugins/shell/shell.js: Added basic JavaScript
-	  shell plugin.
+	* plugins/template/template.js: Added default setting for
+	preventCache, fixed bug in variable replacement.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@223
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-19 05:05  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* README, Rakefile, doc/index.html, doc/index.txt: Some final
-	  polish to the RakeFile and docs for the 0.4.0 release.
+	* plugins/menu/test.html: Get hierarchical menu setup working in
+	Safari.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@222
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-19 02:29  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* ChangeLog, Rakefile, fleegix.js, fleegix.js.uncompressed.js:
-	  Updated built/compressed fleegix.js files, ChangeLog in
-	  preparation for release 0.4.0.
+	* plugins/menu/menu.js: Clarified dependencies, fixed indentation
+	issues.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@221
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-17 23:24  mde
+2008-04-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/css.js: Added replaceClass convenience method to CSS module.
+	* plugins/hash/hash.js: Added reverse, splice, and positionOf
+	methods.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@220
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-17 04:12  mde
+2008-03-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* Rakefile: Some final cleanup and polishing of the build process.
+	* plugins/date/date.js: Fixing some edge cases involving checks for
+	previous year rules -- specifically Sao Paulo, whose DST is reversed
+	because it's in the Southern Hemisphere, and Jerusalem, where the
+	DST forward leaps are aggregated in one rule, and the return leaps
+	are year-by-year with 'only' rules. Hacky check for fall month
+	numbers FTW.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@219
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-16 04:58  mde
+2008-03-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/string.js: Added
-	  small string module with reverse, trim, etc.
+	* tests/date_date.js, tests/index.html: Updated date.Date
+	timezone/DST tests to reflex fixage for Sao Paulo and Jerusalem.
+	Hacky check for fall month numbers FTW.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@218
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 07:20  mde
+2008-03-07  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/date.js: Added attributions for
-	  bugfixes/contributions.
+	* : Set MIME type on test.html file.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@217
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 07:02  mde
+2008-02-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/preparse.js: Removed reimplemented 'alert' function.
-	  The alert function is no longer used in the timezone code.
+	* plugins/i18n/i18n.js: Adding small i18n library for displaying
+	localized strings.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@215
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 07:00  mde
+2008-02-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/preparse.js: Removed superfluous code for other
-	  scripting engines.
+	* plugins/html/html.js: Fixed bug in setSelect that prevented actual
+	selection from occuring.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@214
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 06:35  mde
+2008-02-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/date.js: Added ability to load pre-parsed JSON
-	  timezone data, improved error messages.
+	* plugins/menu/menu.js, plugins/menu/test.html: Some final tweaks to
+	the menu plugin to make it more generally usable -- added ability to
+	use it for simple, fixed-position menus as well. Some namespace
+	designation changes to make things simpler.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@213
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 02:53  mde
+2008-02-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Added better error handling when zone file
+	doesn't load properly.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@212
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-12  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Fixed a bug in specific-date rules caused by
+	a superfluous and incorrect line of code. The algorithm originated
+	in Philippe Goetz's incomplete JS Olson implementation, "XMLDate."
+	While I was at it, belatedly included Goetz and XMLDate in the
+	credits section.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@211
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js: Updated built files to
+	reflect numerous source code changes.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@210
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/ui/contentbox.js: Renamed to glyph.js git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@209
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/ui/glyph.js: Renamed to more appropriate "glyph" to
+	reflect its being derived from the recursive composition sections in
+	the GOF Design Patterns book. Also added some conveniences which
+	remove the need to set a bunch of defaults per-glyph, and link
+	parent and child glyphs.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@208
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/ui/contentbox.js: Removed ContentBoxRegistry and moved
+	hasBeenRendered from a per-widget call to be called directly in the
+	rendering code.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@207
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/date_date.js, tests/date_util.js, tests/index.html: Added
+	tests for date code, including timezome code in fleegix.date.Date.
+	For now just load the plugins on the main page until there's a way
+	to load code for testing dynamically.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@206
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* Rakefile: Fixed bug where base.js was getting included in the
+	concat'd source file multiple times.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@205
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/event.js: Added compatibility mode which sets the registry of
+	listening functions directly on the object instead as a hidden
+	property on the event listener. This prevents the registry from
+	being blown away by other toolkits touching event listeners. Also
+	retooled the method that looks up the id of an event's source elem
+	or its immediate parent to do the lookup by arbitrary properties,
+	and to return the element itself.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@204
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/fx.js: Added mixed-case alias for a commonly called method
+	(i.e, Css/CSS).  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@203
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/xhr.js: Added code to upppercase HTTP methods -- methods are
+	case sensitive per Section 5.1.1 of RFC 2616. This used to be in the
+	code somewhere previously, but was likely removed because the
+	convenience methods already use correct uppercased method names.
+	It's still possible to set the method directly in a doReq, so
+	uppercasing the method will prevent breakage in IE on the browser
+	side, and older versions of Apache on the server side.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@202
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-02-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Removed code branch that was corollary to
+	code removed in r187 -- should have removed it then. "No, really --
+	actually fix the early DST leap problem." git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@201
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-31  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/base.js: Added extend and mixin methods for convenient
+	inheritance fu.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@200
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/menu/menu.js, plugins/ui/contentbox.js: Updated contextual
+	menu code to be general-purpose hierarchical menu. Added ContentBox
+	plugin for recursive-composition layout.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@199
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* ChangeLog: Final doc update for 0.4.1.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@197
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* : Updated gzip'd built file for 0.4.1 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@196
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/event.js: Added basic test for event.listen click handling.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@195
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* ChangeLog, README: Updated doc for 0.4.1 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@194
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js: Updated built fleegix.js
-	  files to make newer plugin-based code available for download
-	  before release.
+	files for 0.4.1 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@193
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 02:52  mde
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/form/diff.js, plugins/form/restore.js, src/form.js:
-	  Renamed confusing method name to something simpler. Fixed
-	  form-object detection bug in diff function specific to IE.
+	* Rakefile: Turn on gzip option for default rake build.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@192
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 02:49  mde
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/cookie.js, tests/css.js, tests/index.html,
+	tests/initialize.js, tests/register.js, tests/xhr.js: Changed tests
+	to work with updates to Windmill's JavaScript testing framework.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@191
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/html/html.js: Added code for cases where user sets form
+	field values to null or undefined instead of correctly using empty
+	string.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@190
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/event.js: Added code to deal with X-domain issues caused by
+	on-the-fly changes to document.domain.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@189
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2008-01-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/xhr.js: Changed code to work with Firefox's fix to XHR --
+	hitting ESC key to cancel XHR request no longer results in an error.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@188
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-11-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Fixed a bug caused by incorrectly including
+	previous years' rules in the list of hits for timezone parsing. Also
+	added some smart caching, and a getTimezoneAbbreviation method.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@187
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js, plugins/xml/xml.js: 
+	Updated XML parser plugin to handle CDATA and comment nodes
+	properly.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@186
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-26  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Updated
+	fleegix.xhr to allow a configurable default request-timeout value,
+	and changed responseFormat for requests to use an ennumerable,
+	fleegix.xhr.responseFormats. The values in the ennumerable are the
+	same as the original string values, so this change is backward
+	compatible.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@185
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-25  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/css.js, tests/css.js,
+	tests/initialize.js: Fixed some issues with the spaces in
+	multi-selector class attributes in the CSS module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@184
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-25  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/cookie.js, tests/initialize.js, tests/register.js: Updated
+	tests to reflect changes in the Windmill JS test framework.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@183
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/hash/hash.js: Added workaround in random-key creation for
+	Safari 2's buggy Math.random implementation.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@182
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js: Updated shell plugin to deal with both
+	IE's and Safari 2's broken eval.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@181
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* NOTICE: Added GNU-style top-level copyright NOTICE file.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@180
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js, plugins/html/html.js, src/form.js: Adding
+	OSAF and SitePoint copyright attributions.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@179
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/json.js: Removed erroneous copyright attribution for SitePoint
+	in JSON serialization library.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@178
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* : Added gzipped fleegix.js file for 0.4.0 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@176
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* ChangeLog, fleegix.js, fleegix.js.uncompressed.js: Updating both
+	cooked and uncompressed fleegix.js files for inclusion in 0.4.0
+	release. Also final update to ChangeLog.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@173
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* ChangeLog, plugins/hash/tests/hash.js: Moved tests for Hash plugin
+	into appropriate directory.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@170
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/cookie.js, src/dom.js, src/event.js, src/form.js, src/fx.js,
+	src/json.js, src/string.js, src/xhr.js: Ran JS lint, fixed a lot of
+	small syntax issues.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@169
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/HashTest.js, tests/cookie.js, tests/css.js,
+	tests/index.html, tests/initialize.js, tests/xhr.js,
+	tests/xhr_response.php: Adding some basic unit tests for running
+	under Windmill, a test stub page for running tests against, and a
+	basic PHP page for proving XHR GET and POST against.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@168
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-10-01  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* tests/AllTests.js: Removing JSUnit test runner file in preparation
+	for moving to Windmill for unit-testing.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@167
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/html/html.js: Added plugin for generating HTML form
+	elements programmatically.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@166
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-25  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js: Fixed bug caused by undeclared variable.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@165
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-25  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js: Added property names to object explorer
+	for shell plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@164
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-23  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js, plugins/shell/test.html: Added some final
+	polish to the shell plugin -- for now, hard-coded explorer output to
+	the normal output node, added auto-scroll code to explorer output.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@163
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js, plugins/shell/test.html: Implemented
+	object explorer and auto-scroll.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@162
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-21  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/test.html: Added demo page for JS shell plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@161
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-21  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/shell/shell.js: Added basic JavaScript shell plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@160
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-19  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* README, Rakefile, doc/index.html, doc/index.txt: Some final polish
+	to the RakeFile and docs for the 0.4.0 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@159
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-19  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* ChangeLog, Rakefile, fleegix.js, fleegix.js.uncompressed.js: 
+	Updated built/compressed fleegix.js files, ChangeLog in preparation
+	for release 0.4.0.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@158
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/css.js: Added replaceClass convenience method to CSS module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@157
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* Rakefile: Some final cleanup and polishing of the build process.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@156
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-16  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/string.js: Added small
+	string module with reverse, trim, etc.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@155
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Added attributions for
+	bugfixes/contributions.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@154
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/preparse.js: Removed reimplemented 'alert' function.
+	The alert function is no longer used in the timezone code.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@153
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/preparse.js: Removed superfluous code for other
+	scripting engines.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@152
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/date/date.js: Added ability to load pre-parsed JSON
+	timezone data, improved error messages.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@151
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js: Updated built fleegix.js
+	files to make newer plugin-based code available for download before
+	release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@150
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* plugins/form/diff.js, plugins/form/restore.js, src/form.js: 
+	Renamed confusing method name to something simpler. Fixed
+	form-object detection bug in diff function specific to IE.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@149
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/hash/hash.js: Added WITH_CASE to hash.sorts ennumerables
-	  to clarify what sorts are available, fixed default sort for
-	  sortByKey to non-case-sensitive.
+	to clarify what sorts are available, fixed default sort for
+	sortByKey to non-case-sensitive.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@148
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-15 02:47  mde
+2007-09-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/xml/xml.js: Removed large, superfluous block of comments.
+	* plugins/xml/xml.js: Removed large, superfluous block of comments.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@147
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-14 18:02  mde
+2007-09-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/preparse.js: Made the exemplar cities parameter
-	  optional for the timezone preparsing Rhino script. If the param
-	  is not passed, the script returns all the Olson data for all
-	  cities as a JSON bbject.
+	optional for the timezone preparsing Rhino script. If the param is
+	not passed, the script returns all the Olson data for all cities as
+	a JSON bbject.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@146
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-14 08:34  mde
+2007-09-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/date.js, plugins/date/preparse.js: More work to
-	  allow the preparse.js Rhino command-line script accept args for
-	  the Olson data directory and list of exemplar cities to generate
-	  JSON data for.
+	* plugins/date/date.js, plugins/date/preparse.js: More work to allow
+	the preparse.js Rhino command-line script accept args for the Olson
+	data directory and list of exemplar cities to generate JSON data
+	for.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@145
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-13 06:00  mde
+2007-09-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/preparse.js: Added Rhino script which pre-parses the
-	  zones and rules for a limited list of Olson exemplar cities.
+	zones and rules for a limited list of Olson exemplar cities.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@144
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-11 02:05  mde
+2007-09-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/event.js, src/form.js, src/fx.js, src/xhr.js: Fixed some
-	  undeclared variables.
+	undeclared variables.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@143
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-11 02:05  mde
+2007-09-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* Rakefile: Changed to force users to specify actual plugin files,
-	  since the namespaced objects won't always match up with file
-	  naming conventions.
+	since the namespaced objects won't always match up with file naming
+	conventions.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@142
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-11 01:56  mde
+2007-09-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* Rakefile: Added code to allow saved build profiles, for building
-	  in plugins or doing plugin-only builds.
+	in plugins or doing plugin-only builds.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@141
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-10 07:28  mde
+2007-09-10  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/form/diff.js, plugins/form/restore.js: Adding the
-	  form.diff and form.restore plugin files.
+	form.diff and form.restore plugin files.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@140
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-10 07:27  mde
+2007-09-10  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/form, plugins/popup, plugins/popup/popup.js, plugins/xml,
-	  plugins/xml/xml.js, src/form.js, src/popup.js, src/xml.js: Moved
-	  xml and popup modules, form.diff, and form.restore to plugins.
+	* plugins/popup/popup.js, plugins/xml/xml.js, src/form.js,
+	src/popup.js, src/xml.js: Moved xml and popup modules, form.diff,
+	and form.restore to plugins.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@139
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-10 06:53  mde
+2007-09-10  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* Rakefile: Modified Rakefile to allow plugins to be added to a
-	  built fleegix.js file, or for plugins to be built into a
-	  fleegix_plugins.js file for standalone use.
+	built fleegix.js file, or for plugins to be built into a
+	fleegix_plugins.js file for standalone use.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@138
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-10 04:52  mde
+2007-09-10  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/fx.js: Removed hsv2rgb conversion code that's now in
-	  color.convert plugin.
+	color.convert plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@137
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-09 22:00  mde
+2007-09-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/cookie.js, src/form.js, src/json.js, src/popup.js,
-	  src/uri.js, src/xhr.js: Removed some superfluous whitespace and
-	  "obj.constructor = null;" code.
+	src/uri.js, src/xhr.js: Removed some superfluous whitespace and
+	"obj.constructor = null;" code.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@136
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-05 05:12  mde
+2007-09-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/color/convert.js: Update naming convention in
-	  color.convert module to reflect new filename.
+	color.convert module to reflect new filename.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@135
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-05 05:11  mde
+2007-09-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/color/color.js, plugins/color/convert.js: Changed name of
-	  color conversion library to make it more specific.
+	color conversion library to make it more specific.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@134
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-05 03:27  mde
+2007-09-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/Date.js, plugins/date/date.js: Change filename for
-	  Date module to lowercase to avoid confusing case-insensitive
-	  OS's.
+	Date module to lowercase to avoid confusing case-insensitive OS's.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@133
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-04 23:40  mde
+2007-09-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/util.js: Added date.diff and date.add to date.util
-	  module.
+	module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@132
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-04 23:39  mde
+2007-09-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/strftime.js, plugins/date/util.js: Changed the name
-	  of the strftime plugin to accommodate other date utilities.
+	of the strftime plugin to accommodate other date utilities.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@131
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-03 07:00  mde
+2007-09-03  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/strip_olson_comments.rb: Added sample Ruby script
-	  for stripping the copious comments from Olson timezone data
-	  files.
+	* plugins/date/strip_olson_comments.rb: Added sample Ruby script for
+	stripping the copious comments from Olson timezone data files.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@130
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-09-01 05:55  mde
+2007-09-01  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/date/Date.js: Finished work on timezone-enabled Date,
-	  including lazy-loading mechanism for zone files.
+	including lazy-loading mechanism for zone files.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@129
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-29 05:48  mde
+2007-08-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date/Date.js: Added timezone-enabled Date object that
-	  uses the standard Olson zone info timezone files -- API is
-	  compatible with standard JS Date.
+	* plugins/date/Date.js: Added timezone-enabled Date object that uses
+	the standard Olson zone info timezone files -- API is compatible
+	with standard JS Date.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@128
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-15 20:02  mde
+2007-08-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/xml.js: Fixed xml.parse array-expansion for multiple
-	  same-named tags having non-string values.
+	same-named tags having non-string values.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@127
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-14 00:36  mde
+2007-08-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/color, plugins/color/color.js, plugins/date/strftime.js:
-	  Removed hsv2rgb color conversion, added color plugin for basic
-	  color conversion code.
+	* plugins/color/color.js, plugins/date/strftime.js: Removed hsv2rgb
+	color conversion, added color plugin for basic color conversion
+	code.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@126
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-08 05:09  mde
+2007-08-08  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/date, plugins/date/strftime.js: Added strftime
-	  date-formatting pluging ported from code I originally wrote for
-	  both OSAF and Dojo.
+	* plugins/date/strftime.js: Added strftime date-formatting pluging
+	ported from code I originally wrote for both OSAF and Dojo.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@125
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-06 17:42  mde
+2007-08-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* tests, tests/AllTests.js, tests/HashTest.js: Begin adding some
-	  test coverage, starting with the sortable hash plugin.
+	* tests/AllTests.js, tests/HashTest.js: Begin adding some test
+	coverage, starting with the sortable hash plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@124
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-03 05:57  mde
+2007-08-03  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/hash/hash.js: Returned to checking for existence of
-	  namespace object for plugins to avoid overwriting the namespace
-	  object if other plugins in the same namespace have already been
-	  loaded.
+	namespace object for plugins to avoid overwriting the namespace
+	object if other plugins in the same namespace have already been
+	loaded.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@123
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-02 18:39  mde
+2007-08-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/hash/hash.js: Added addItemCreateKey method to make it
-	  explicit that a single arg passed to the addItem method is a key,
-	  and the value should be set to the default.
+	explicit that a single arg passed to the addItem method is a key,
+	and the value should be set to the default.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@122
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-08-02 04:26  mde
+2007-08-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/hash, plugins/hash/hash.js: Added sortable Hash plugin,
-	  adapted from the Hash code written for OSAF's Chandler Server.
+	* plugins/hash/hash.js: Added sortable Hash plugin, adapted from the
+	Hash code written for OSAF's Chandler Server.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@121
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-19 18:34  mde
+2007-07-19  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js.uncompressed.js, src/xml.js: Some code cleanup, added
-	  attribution for ideas contributed by Kevin Faulhaber
-	  (kjf@kjfx.net) to xml module.
+	attribution for ideas contributed by Kevin Faulhaber (kjf@kjfx.net)
+	to xml module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@120
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-17 18:44  mde
+2007-07-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Fixed
-	  broken event.unlisten method, did a bit of code cleanup.
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Fixed broken
+	event.unlisten method, did a bit of code cleanup.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@119
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-17 18:26  mde
+2007-07-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/xml.js: Rewrite of
-	  xml.parse to handle multiple same-named tags, and to trim text
-	  values. Copious code refactoring and cleaup.
+	xml.parse to handle multiple same-named tags, and to trim text
+	values. Copious code refactoring and cleaup.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@118
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-13 05:25  mde
+2007-07-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/popup.js: Cleaned up formatting in popup module, began
-	  process of changing 'self' references to '_this'.
+	* src/popup.js: Cleaned up formatting in popup module, began process
+	of changing 'self' references to '_this'.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@117
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-06 06:11  mde
+2007-07-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/event.js: Fixed bug where srcElement was not getting set on
-	  Firefox DOM events. Added code to calculated a unified delta for
-	  both IE and Firefox.
+	Firefox DOM events. Added code to calculated a unified delta for
+	both IE and Firefox.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@116
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-06 05:30  mde
+2007-07-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Changed
-	  hierarchical option in form.toHash to make sure the position of
-	  square brackets in the form element names result in
-	  object/property names at least one character long.
+	hierarchical option in form.toHash to make sure the position of
+	square brackets in the form element names result in object/property
+	names at least one character long.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@115
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-06 05:14  mde
+2007-07-06  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Added
-	  hierarchical option to form.toHash that creates sub-objects for
-	  the converted object's properties when using Rails-/PHP-style
-	  form elements names like name="foo[bar]". Also added pedantic
-	  option which includes form elements types like image and submit
-	  in the converted object.
+	hierarchical option to form.toHash that creates sub-objects for the
+	converted object's properties when using Rails-/PHP-style form
+	elements names like name="foo[bar]".  Also added pedantic option
+	which includes form elements types like image and submit in the
+	converted object.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@114
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-05 08:00  mde
+2007-07-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added
-	  mousewheel events in event.listen -- support for Firefox hacked
-	  in by wiring its XUL event to a dummy onmousescroll event on the
-	  target object.
+	mousewheel events in event.listen -- support for Firefox hacked in
+	by wiring its XUL event to a dummy onmousescroll event on the target
+	object.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@113
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-05 05:25  mde
+2007-07-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/drag/drag.js: Updated drag.js plugin to prevent text
-	  selection during drag for both Firefox and IE.
+	selection during drag for both Firefox and IE.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@112
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-02 06:13  mde
+2007-07-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/template/template.js: Changed incorrect reference to
-	  'opts' object to point to the single paraams object in
-	  template.Templater.
+	'opts' object to point to the single paraams object in
+	template.Templater.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@111
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-07-02 05:58  mde
+2007-07-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/menu/test.html, plugins/template,
-	  plugins/template/template.js: Added basic JS templating plugin.
+	* plugins/menu/test.html, plugins/template/template.js: Added basic
+	JS templating plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@110
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-06-28 05:22  mde
+2007-06-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* plugins/menu, plugins/menu/menu.js, plugins/menu/test.html: Added
-	  contextual menu plugin.
+	* plugins/menu/menu.js, plugins/menu/test.html: Added contextual
+	menu plugin.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@109
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-06-24 03:02  mde
+2007-06-24  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added code
-	  to throw an error when event.listen is called on an object that
-	  does not exist.
+	to throw an error when event.listen is called on an object that does
+	not exist.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@108
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-06-22 08:27  mde
+2007-06-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* plugins/drag/drag.js: Added code in drag.js plugin to do DOM
-	  traversal upward to find containerNode for dragging when explicit
-	  drag handle node is not specified.
+	traversal upward to find containerNode for dragging when explicit
+	drag handle node is not specified.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@107
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-06-22 05:00  mde
+2007-06-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, plugins, plugins/drag,
-	  plugins/drag/drag.js, plugins/drag/test.html: Added plugins
-	  directory, added new drag plugin for multiple draggable windows.
+	* fleegix.js, fleegix.js.uncompressed.js, plugins/drag/drag.js,
+	plugins/drag/test.html: Added plugins directory, added new drag
+	plugin for multiple draggable windows.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@106
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-06-14 03:56  mde
+2007-06-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/xhr.js: Removed debug statement in default error handler for
-	  xhr.js.
+	xhr.js.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@105
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-29 17:43  mde
+2007-05-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.html, doc/index.txt: Fixed doc bug for fx module --
-	  should be 'doAfterFinished' property.
+	should be 'doAfterFinished' property.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@104
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-29 17:39  mde
+2007-05-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/event.js: Added code to throw error if another toolkit
-	  removes the event.listen handler registry but still tries to
-	  execute the handler.
+	* src/event.js: Added code to throw error if another toolkit removes
+	the event.listen handler registry but still tries to execute the
+	handler.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@103
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 21:08  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* ChangeLog, fleegix.js, fleegix.js.uncompressed.js: Updated
-	  built/compressed fleegix.js files, ChangeLog in preparation for
-	  release 0.3.2.
+	built/compressed fleegix.js files, ChangeLog in preparation for
+	release 0.3.2.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@101
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 21:01  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.html, doc/index.txt: Added to docs: DOM and CSS
-	  sections, fx methods -- blindUp, blindDown, hex2rgb, hsv2rgb.
+	sections, fx methods -- blindUp, blindDown, hex2rgb, hsv2rgb.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@100
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 19:51  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/css.js: Changed redundant addCssClass/removeCssClass method
-	  names in css module to addClass/removeClass.
+	names in css module to addClass/removeClass.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@99
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 19:26  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/dom.js: Changed getViewportMeasure in dom to a private
-	  function.
+	function.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@98
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 18:44  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/fx.js: Unified syntax
-	  and return-value formats between fx.hex2rgb and fx.hsv2rgb.
+	and return-value formats between fx.hex2rgb and fx.hsv2rgb.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@97
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 18:34  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.html, doc/index.txt: Fixed typos and unclear wording in
-	  docs.
+	docs.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@96
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 17:55  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* ChangeLog: Added GNU-style Changelog generated by svn2cl (Arthur
-	  de Jong, arthur@ch.tudelft.nl).
+	de Jong, arthur@ch.tudelft.nl).  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@95
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-20 03:24  mde
+2007-05-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/dom.js, src/event.js,
-	  src/fx.js: Added hsv2rgb conversion to fx library.
+	src/fx.js: Added hsv2rgb conversion to fx library.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@94
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-13 02:26  mde
+2007-05-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/css.js, src/dom.js: Methods for adding and removing CSS
-	  classes on a DOM node.
+	classes on a DOM node.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@93
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-13 02:17  mde
+2007-05-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/fx.js, src/ui.js: Don't require explicit target height passed
-	  to fx.blindDown method.
+	to fx.blindDown method.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@92
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-13 02:15  mde
+2007-05-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/dom.js: Changing fleegix.ui to fleegix.dom.
+	* src/dom.js: Changing fleegix.ui to fleegix.dom.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@91
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-13 02:14  mde
+2007-05-13  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/ui.js: Changing to fleegix.dom.
+	* src/ui.js: Changing to fleegix.dom.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@90
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-10 05:00  mde
+2007-05-10  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Adding
-	  stopPropagation and preventDefault to fleegix.event.
+	stopPropagation and preventDefault to fleegix.event.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@89
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-09 07:15  mde
+2007-05-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/fx.js: Remove redundant whitespace.
+	* src/fx.js: Remove redundant whitespace.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@88
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-09 03:01  mde
+2007-05-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/fx.js: Added code for doing windowshade effects.
+	* src/fx.js: Added code for doing windowshade effects.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@87
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-01 05:06  mde
+2007-05-01  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/event.js: Remove remarked-out code.
+	* src/event.js: Remove remarked-out code.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@86
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-01 04:36  mde
+2007-05-01  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Remove
-	  debugging function from fleegix.event.
+	debugging function from fleegix.event.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@85
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-05-01 03:49  mde
+2007-05-01  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Fix
-	  event.listen to work across iframes.
+	event.listen to work across iframes.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@84
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-04-24 06:19  mde
+2007-04-24  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/form.js, src/json.js: Fix null-vs.-undefined issue in
-	  form.toHash, remove redundant whitespace.
+	form.toHash, remove redundant whitespace.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@83
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-03-27 05:54  mde
+2007-03-27  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/base.js, src/cookie.js, src/json.js, src/xhr.js: Remove
-	  redundant whitespace.
+	redundant whitespace.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@82
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-03-27 03:03  mde
+2007-03-27  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/xhr.js: Remove undesirable MS prog IDs for the XHR ActiveX
-	  Object, per
-	  http://blogs.msdn.com/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx.
+	Object, per
 
-2007-03-27 02:56  mde
+	http://blogs.msdn.com/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx.git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@80
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2007-03-27  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Include MS
-	  prog IDs for XHR ActiveX object.
+	prog IDs for XHR ActiveX object.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@79
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-02-22 04:06  mde
+2007-02-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.txt: Use Lynx dump to get plaintext version of API ref.
+	* doc/index.txt: Use Lynx dump to get plaintext version of API ref.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@78
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-02-14 21:13  mde
+2007-02-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/ui.js: Centering
-	  functionality for fleegix.ui.
+	functionality for fleegix.ui.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@77
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-02-14 20:18  mde
+2007-02-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.html, doc/index.txt, fleegix.js,
-	  fleegix.js.uncompressed.js, src/fx.js, src/ui.js: Re-adding
-	  ui.js.
+	fleegix.js.uncompressed.js, src/fx.js, src/ui.js: Re-adding ui.js.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@76
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-02-09 04:00  mde
+2007-02-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Bug fixes
-	  for Events module.
+	for Events module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@75
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-29 23:49  mde
+2007-01-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Update XHR
-	  lib to handle undefined or zero HTTP status.
+	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Update XHR lib
+	to handle undefined or zero HTTP status.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@73
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-29 21:19  mde
+2007-01-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.html, doc/index.txt: Fix typo in docs -- should be
-	  'fadeIn,' not 'fadein.'
+	'fadeIn,' not 'fadein.' git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@61
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-29 05:08  mde
+2007-01-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* README, doc/index.html, doc/index.txt: Complete documentation,
-	  update README.
+	update README.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@59
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-29 02:43  mde
+2007-01-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.html: More HTML doc work.
+	* doc/index.html: More HTML doc work.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@58
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-29 00:07  mde
+2007-01-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.html: More work on HTML docs.
+	* doc/index.html: More work on HTML docs.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@57
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 17:42  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.html: More work on HTML doc.
+	* doc/index.html: More work on HTML doc.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@56
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 17:19  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.html: Work on HTML doc.
+	* doc/index.html: Work on HTML doc.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@55
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 08:00  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.html: Add HTML doc.
+	* doc/index.html: Add HTML doc.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@54
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 06:48  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js: Newest build.
+	* fleegix.js, fleegix.js.uncompressed.js: Newest build.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@53
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 06:48  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* LICENSE, README: Adding license and readme text.
+	* LICENSE, README: Adding license and readme text.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@52
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-28 06:13  mde
+2007-01-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.txt, src/form.js, src/fx.js: Cleanup and more
-	  documentation.
+	documentation.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@51
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-27 08:18  mde
+2007-01-27  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.txt: More doc.
+	* doc/index.txt: More doc.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@50
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-26 09:12  mde
+2007-01-26  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* doc/index.txt, src/fx.js, src/xhr.js: Minor bugfixes, some more
-	  doco.
+	doco.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@49
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-26 06:40  mde
+2007-01-26  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/xhr.js: Reset timeout
-	  start when queued requests are picked up by XHR.
+	start when queued requests are picked up by XHR.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@48
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-24 07:01  mde
+2007-01-24  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: Add excpetion squelch for connection drops and
-	  hitting ESC.
+	* src/xhr.js: Add excpetion squelch for connection drops and hitting
+	ESC.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@47
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-24 06:36  mde
+2007-01-24  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: Implemented timeout handling.
+	* src/xhr.js: Implemented timeout handling.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@46
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-22 08:10  mde
+2007-01-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/fx.js: Finished basic
-	  underpinnings for effect library.
+	underpinnings for effect library.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@45
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-22 03:58  mde
+2007-01-22  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/fx.js, src/ui.js: Rename ui namespace to fx.
+	* src/fx.js, src/ui.js: Rename ui namespace to fx.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@44
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-20 07:40  mde
+2007-01-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/ui.js: First stab at
-	  some effects, with basic linear transitions.
+	some effects, with basic linear transitions.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@43
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-20 07:38  mde
+2007-01-20  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/uri.js: Added getBase method for base URL. getBase and
-	  getQuery accept string params to search. setParam will append the
-	  param if it's not in the string.
+	getQuery accept string params to search. setParam will append the
+	param if it's not in the string.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@42
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-19 04:28  mde
+2007-01-19  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: More improvements for 0.2.1 release.
+	* src/xhr.js: More improvements for 0.2.1 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@41
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-19 04:27  mde
+2007-01-19  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/cookie.js: Allow path to be passed in as a third arg instead
-	  of as part of an opts object.
+	of as part of an opts object.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@40
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-18 06:29  mde
+2007-01-18  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.txt: More documentation.
+	* doc/index.txt: More documentation.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@39
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-16 07:42  mde
+2007-01-16  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc/index.txt: XHR docs.
+	* doc/index.txt: XHR docs.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@38
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-16 05:34  mde
+2007-01-16  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js: Updateed main built
-	  library pages.
+	library pages.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@37
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-16 05:31  mde
+2007-01-16  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* doc, doc/index.txt, fleegix.js, fleegix.js.uncompressed.js: Start
-	  of documentation.
+	* doc/index.txt, fleegix.js, fleegix.js.uncompressed.js: Start of
+	documentation.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@36
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-15 06:39  mde
+2007-01-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: Finish work on XHR pooling and request queuing.
+	* src/xhr.js: Finish work on XHR pooling and request queuing.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@35
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-14 04:01  mde
+2007-01-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/xhr.js: Sync requests do not participate in the request
-	  pooling.
+	pooling.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@34
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-14 03:23  mde
+2007-01-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: Initial work on request pooling.
+	* src/xhr.js: Initial work on request pooling.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@33
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-14 03:22  mde
+2007-01-14  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/uri.js: Return query string with the single desired value set
-	  if no query string exists.
+	if no query string exists.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@32
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-08 08:10  mde
+2007-01-08  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/uri.js: Updates to
-	  uri methods -- added setParam method to set a value in an
-	  arbitrary query string.
+	* fleegix.js, fleegix.js.uncompressed.js, src/uri.js: Updates to uri
+	methods -- added setParam method to set a value in an arbitrary
+	query string.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@31
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2007-01-02 20:16  mde
+2007-01-02  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/timezone.js,
-	  src/xdate.js: Updates for 0.2 release.
+	src/xdate.js: Updates for 0.2 release.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@29
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-17 03:37  mde
+2006-12-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Remove
-	  unnecessary eval/valueOf in cloning original method for
-	  event.listen.
+	unnecessary eval/valueOf in cloning original method for
+	event.listen.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@26
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-17 03:36  mde
+2006-12-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/xhr.js: Proper rewrite to treat each request as separate obj.
+	* src/xhr.js: Proper rewrite to treat each request as separate obj.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@25
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-17 03:36  mde
+2006-12-17  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/popup.js: A little refactoring.
+	* src/popup.js: A little refactoring.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@24
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-04 07:03  mde
-
-	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: form.diff
-	  returns Differ obj with count of diffs, the actual diffs, and a
-	  hasKey method.
-
-2006-12-04 06:47  mde
-
-	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Return
-	  object with 'count' and 'diffs' property for form.diff.
-
-2006-12-04 06:33  mde
+2006-12-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: form.diff
-	  return null is no differences. Check for null in B when testing
-	  array value for A.
+	returns Differ obj with count of diffs, the actual diffs, and a
+	hasKey method.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@23
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-04 06:12  mde
+2006-12-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/form.js: Change output val for form.diff to hash.
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Return object
+	with 'count' and 'diffs' property for form.diff.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@22
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-12-03 17:49  mde
+2006-12-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: form.diff
+	return null is no differences. Check for null in B when testing
+	array value for A.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@21
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2006-12-04  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
+
+	* src/form.js: Change output val for form.diff to hash.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@20
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
+
+2006-12-03  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Allow
-	  form.diff to handle either forms or hash-converted forms.
+	form.diff to handle either forms or hash-converted forms.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@19
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-11-27 07:17  mde
+2006-11-27  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Added
-	  form.toHash and form.diff. Rewrote form.serialize to use
-	  form.toHash to handle non-sequential, same-named form elements
-	  properly.
+	form.toHash and form.diff. Rewrote form.serialize to use form.toHash
+	to handle non-sequential, same-named form elements properly.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@18
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-11-11 03:08  mde
+2006-11-11  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js: Finished
-	  form.restore.
+	form.restore.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@17
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-11-05 07:44  mde
+2006-11-05  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/form.js, src/json.js:
-	  Fixes to JSON serialization. Added form deserialization to
-	  restore a form from a stored string.
+	* fleegix.js, fleegix.js.uncompressed.js, src/form.js, src/json.js: 
+	Fixes to JSON serialization. Added form deserialization to restore a
+	form from a stored string.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@16
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-31 08:01  mde
+2006-10-31  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/json.js: Add quotes
-	  to JSON object properties.
+	* fleegix.js, fleegix.js.uncompressed.js, src/json.js: Add quotes to
+	JSON object properties.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@15
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-29 05:45  mde
+2006-10-29  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* src/xdate.js: Fix setAttribute method for XDate -- remove
-	  unsupported attributes (minutes, seconds, etc.). Fix constructor
-	  methods for XDate and XDateTime to allow no params to be passed.
+	unsupported attributes (minutes, seconds, etc.). Fix constructor
+	methods for XDate and XDateTime to allow no params to be passed.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@14
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-28 07:13  mde
+2006-10-28  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/timezone.js, src/xdate.js: Updates to date fu.
+	* src/timezone.js, src/xdate.js: Updates to date fu.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@13
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-26 05:25  mde
+2006-10-26  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/form.js, src/json.js,
-	  src/xhr.js: Bugfixes, added JSON serialization.
+	src/xhr.js: Bugfixes, added JSON serialization.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@12
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-16 03:08  mde
+2006-10-16  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Normalize
-	  event models, add getSrcElementId method.
+	event models, add getSrcElementId method.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@11
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-15 19:13  mde
+2006-10-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Pass
-	  trigger function args to all triggered funcs/methods in listener
-	  registry, and execute in correct scope.
+	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Pass trigger
+	function args to all triggered funcs/methods in listener registry,
+	and execute in correct scope.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@10
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-15 09:11  mde
+2006-10-15  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* fleegix.js, fleegix.js.uncompressed.js, src/event.js: Added basic
-	  event system.
+	event system.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@9
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 05:37  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/base.js: Adding base object file.
+	* src/base.js: Adding base object file.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@7
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 04:33  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* Rakefile, fleegix.js, fleegix.js.uncompressed.js: During build
-	  strip out comments and the check for base object in module files.
+	strip out comments and the check for base object in module files.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@6
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 03:44  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
 	* Rakefile, fleegix.js, fleegix.js.uncompressed.js, src/cookie.js,
-	  src/event.js, src/form.js, src/popup.js, src/ui.js, src/uri.js,
-	  src/xhr.js, src/xml.js: Removed individual file versioning,
-	  changed Rakefile to allow configuring path to ShrinkSafe.
+	src/event.js, src/form.js, src/popup.js, src/ui.js, src/uri.js,
+	src/xhr.js, src/xml.js: Removed individual file versioning, changed
+	Rakefile to allow configuring path to ShrinkSafe.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@5
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 03:12  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* fleegix.js, fleegix.js.uncompressed.js, src/ajax.js, src/xhr.js:
-	  Change name of module.
+	* fleegix.js, fleegix.js.uncompressed.js, src/ajax.js, src/xhr.js: 
+	Change name of module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@4
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 03:12  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* src/ajax.js: Change name of module.
+	* src/ajax.js: Change name of module.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@3
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 03:11  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* Rakefile, fleegix.js, fleegix.js.uncompressed.js: Initial test.
+	* Rakefile, fleegix.js, fleegix.js.uncompressed.js: Initial test.  git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@2
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
-2006-10-09 03:02  mde
+2006-10-09  mde <mde@c3ab02eb-571f-0410-ad69-ce51ba5a7568>
 
-	* ., Rakefile, fleegix.js, fleegix.js.uncompressed.js, src,
-	  src/ajax.js, src/cookie.js, src/event.js, src/form.js,
-	  src/popup.js, src/ui.js, src/uri.js, src/xml.js: initial import
+	* initial import git-svn-id: http://svn.fleegix.org/fleegix_js/trunk@1
+	c3ab02eb-571f-0410-ad69-ce51ba5a7568
 
