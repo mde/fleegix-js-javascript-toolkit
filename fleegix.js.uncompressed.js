@@ -16,12 +16,31 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
+if (typeof $ == 'undefined') {
+  var $ = function (s) { return document.getElementById(s); }
+}
+
+var $elem = function (s, o) {
+  var opts = o || {};
+  var elem = document.createElement(s);
+  for (var p in opts) {
+    elem[p] = opts[p];
+  }
+  return elem;
+};
+
+var $text = function (s) {
+  return document.createTextNode(s);
+};
+
 fleegix.extend = function (/* Super-class constructor function */ superClass,
   /* Sub-class constructor function */ subClass) {
   return function () {
     superClass.apply(this, arguments);
     superClass.prototype.constructor.apply(this, arguments);
     subClass.apply(this, arguments);
+    this.superClass = superClass;
+    this.subClass = subClass
   };
 };
 
@@ -45,134 +64,63 @@ fleegix.mixin = function (/* Target obj */ target,
   return target;
 };
 
-
-fleegix.uri = new function () {
-  var self = this;
-
-  this.params = {};
-
-  this.getParamHash = function (str) {
-    var q = str || self.getQuery();
-    var d = {};
-    if (q) {
-      var arr = q.split('&');
-      for (var i = 0; i < arr.length; i++) {
-        var pair = arr[i].split('=');
-        var name = pair[0];
-        var val = pair[1];
-        if (typeof d[name] == 'undefined') {
-          d[name] = val;
-        }
-        else {
-          if (!(d[name] instanceof Array)) {
-            var t = d[name];
-            d[name] = [];
-            d[name].push(t);
-          }
-          d[name].push(val);
-        }
-      }
-    }
-    return d;
-  };
-  this.getParam = function (name, str) {
-    var p = null;
-    if (str) {
-      var h = this.getParamHash(str);
-      p = h[name];
+// Note this doesn't check for cyclical references
+fleegix.clone = function (o) {
+  if (typeof o == 'object') {
+    var ret;
+    if (typeof o.constructor == 'function') {
+      ret = new o.constructor();
     }
     else {
-      p = this.params[name];
+      ret = {};
     }
-    return p;
-  };
-  this.setParam = function (name, val, str) {
-    var ret = null;
-    // If there's a query string, set the param
-    if (str) {
-      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
-      var arr = str.match(pat);
-      // If it's there, replace it
-      if (arr) {
-        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+    for (var p in o) {
+      if (typeof o[p] == 'object' && o[p] != null) {
+        ret[p] = fleegix.clone(o[p]);
       }
-      // Otherwise append it
       else {
-        ret = str + '&' + name + '=' + val;
+        ret[p] = o[p];
       }
     }
-    // Otherwise create a query string with just that param
-    else {
-      ret = name + '=' + val;
-    }
-    return ret;
-  };
-  this.getQuery = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[1];
-  };
-  this.getBase = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[0];
-  };
-  this.params = this.getParamHash();
+  }
+  else {
+    ret = o;
+  }
+  return ret;
 };
 
-fleegix.cookie = new function() {
-  this.set = function(name, value, optParam) {
-    var opts = optParam || {};
-    var path = '/';
-    var days = 0;
-    var hours = 0;
-    var minutes = 0;
-    var exp = '';
-    var t = 0;
-    if (typeof optParam == 'object') {
-      path = opts.path || '/';
-      days = opts.days || 0;
-      hours = opts.hours || 0;
-      minutes = opts.minutes || 0;
+// This stuff gets run inline below, props added to 
+// base 'fleegix' obj -- namespaced to avoid global refs
+// Some code taken from the Dojo loader
+fleegix.agentSniffing = new function () {
+  var f = fleegix; // Alias the base 'fleegix' obj
+  var n = navigator;
+  var ua = n.userAgent;
+  var av = n.appVersion;
+  f.isOpera = (ua.indexOf("Opera") > -1);
+  f.isKhtml = (av.indexOf("Konqueror") > -1) ||
+    (av.indexOf("Safari") > -1);
+  f.isSafari = (av.indexOf("Safari") > -1);
+  f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
+  f.isFF = false;
+  f.isIE = false;
+  try {
+    if (f.isMoz) {
+      f.isFF = (ua.indexOf('Firefox') > -1);
     }
-    else {
-      path = optParam || '/';
+    if ((document.all) && (!f.isOpera)) {
+      f.isIE = (ua.indexOf('MSIE ') > -1);
     }
-    t += days ? days*24*60*60*1000 : 0;
-    t += hours ? hours*60*60*1000 : 0;
-    t += minutes ? minutes*60*1000 : 0;
-
-    if (t) {
-      var dt = new Date();
-      dt.setTime(dt.getTime() + t);
-      exp = '; expires=' + dt.toGMTString();
-    }
-    else {
-      exp = '';
-    }
-    document.cookie = name + '=' + value +
-      exp + '; path=' + path;
-  };
-  this.get = function(name) {
-    var nameEq = name + '=';
-    var arr = document.cookie.split(';');
-    for(var i = 0; i < arr.length; i++) {
-      var c = arr[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEq) === 0) {
-        return c.substring(nameEq.length, c.length);
-      }
-    }
-    return null;
-  };
-  this.create = this.set;
-  this.destroy = function(name, path) {
-    var opts = {};
-    opts.minutes = -1;
-    if (path) { opts.path = path; }
-    this.set(name, '', opts);
-  };
+  } 
+  // Squelch
+  catch(e) {}
+  f.isMac = (ua.indexOf('Mac') > -1);
+  f.isUnix = (ua.indexOf('Linux') > -1) ||
+    (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
+  f.isLinux = (ua.indexOf('Linux') > -1);
+  f.isWindows = (ua.indexOf('Windows') > -1);
 };
+
 
 
 fleegix.fx = new function () {
@@ -251,8 +199,12 @@ fleegix.fx = new function () {
   // Public (interface) methods
   this.fadeOut = function (elem, opts) {
     return doFade(elem, opts, 'out');
+    elem.style.visibility = 'hidden';
+    var sync = this.setCssProp(elem, 'opacity', 100);
   };
   this.fadeIn = function (elem, opts) {
+    var sync = this.setCssProp(elem, 'opacity', 0);
+    elem.style.visibility = 'visible';
     return doFade(elem, opts, 'in');
   };
   this.blindUp = function (elem, opts) {
@@ -306,15 +258,15 @@ fleegix.fx = new function () {
 };
 
 fleegix.fx.Effecter = function (elem, opts) {
-  var self = this;
+  var _this = this;
   this.props = opts.props;
   this.trans = opts.trans || 'lightEaseIn';
   this.duration = opts.duration || 500;
   this.fps = 30;
   this.startTime = new Date().getTime();
   this.timeSpent = 0;
-  this.doOnStart = opts.doOnStart || null;
-  this.doAfterFinished = opts.doAfterFinished || null;
+  this.doBeforeStart = opts.doBeforeStart || null;
+  this.doAfterFinish = opts.doAfterFinish || null;
   this.autoStart = opts.autoStart === false ? false : true;
 
   if (typeof this.transitions[this.trans] != 'function') {
@@ -322,12 +274,12 @@ fleegix.fx.Effecter = function (elem, opts) {
   }
 
   this.start = function () {
-    self.id = setInterval( function () {
-      self.doStep.apply(self, [elem]); },
-      Math.round(1000/self.fps));
+    _this.id = setInterval( function () {
+      _this.doStep.apply(_this, [elem]); },
+      Math.round(1000/_this.fps));
     // Run the pre-execution func if any
-    if (typeof opts.doOnStart == 'function') {
-      self.doOnStart();
+    if (typeof opts.doBeforeStart == 'function') {
+      _this.doBeforeStart();
     }
   };
   // Fire it up unless auto-start turned off
@@ -360,8 +312,8 @@ fleegix.fx.Effecter.prototype.doStep = function (elem) {
     }
     clearInterval(this.id);
     // Run the post-execution func if any
-    if (typeof this.doAfterFinished == 'function') {
-      this.doAfterFinished();
+    if (typeof this.doAfterFinish == 'function') {
+      this.doAfterFinish();
     }
   }
 };
@@ -463,232 +415,39 @@ fleegix.dom = new function() {
     var nH = node.offsetHeight;
     var vW = fleegix.dom.getViewportWidth();
     var vH = fleegix.dom.getViewportHeight();
-    node.style.left = parseInt((vW/2)-(nW/2), 10) + 'px';
-    node.style.top = parseInt((vH/2)-(nH/2), 10) + 'px';
+    var calcLeft = parseInt((vW/2)-(nW/2), 10);
+    var calcTop = parseInt((vH/2)-(nH/2), 10);
+    calcTop += document.documentElement.scrollTop;
+    node.style.left = calcLeft + 'px';
+    node.style.top = calcTop + 'px';
     return true;
   };
-};
-
-
-fleegix.json = new function() {
-  this.serialize = function(obj) {
-    var str = '';
-    switch (typeof obj) {
-      case 'object':
-        // Null
-        if (obj === null) {
-           return 'null';
-        }
-        // Arrays
-        else if (obj instanceof Array) {
-          for (var i = 0; i < obj.length; i++) {
-            if (str) { str += ','; }
-            str += fleegix.json.serialize(obj[i]);
-          }
-          return '[' + str + ']';
-        }
-        // Objects
-        else if (typeof obj.toString != 'undefined') {
-          for (var i in obj) {
-            if (str) { str += ','; }
-            str += '"' + i + '":';
-            if (typeof obj[i] == 'undefined') {
-              str += '"undefined"';
-            }
-            else {
-              str += fleegix.json.serialize(obj[i]);
-            }
-          }
-          return '{' + str + '}';
-        }
-        return str;
-      case 'unknown':
-      case 'undefined':
-      case 'function':
-        return '"undefined"';
-      case 'string':
-        str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
-          /\r/g, '').replace(/\n/g, '\\n') + '"';
-        return str;
-      default:
-        return String(obj);
+  /* Get absolute XY pos of a DOM node */
+  this.getOffset = function(node){
+    var _getCoords = function (obj) {
+      var curleft = 0;
+      var curtop = 0;
+      if (obj.offsetParent) {
+        do {
+          curleft += obj.offsetLeft;
+          curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+      }
+      return { left: curleft, top: curtop };
+    };
+    var nodeCoords = null;
+    //in IE and Mozilla we can use the
+    // getBoundingClientRect()
+    if (fleegix.isIE || fleegix.isMoz) {
+      nodeCoords = node.getBoundingClientRect();
     }
+    else {
+      nodeCoords = _getCoords(node);
+    }
+    return nodeCoords;
   };
 };
 
-
-fleegix.form = {};
-/**
- * Serializes the data from all the inputs in a Web form
- * into a query-string style string.
- * @param docForm -- Reference to a DOM node of the form element
- * @param formatOpts -- JS object of options for how to format
- * the return string. Supported options:
- *   collapseMulti: (Boolean) take values from elements that
- *      can return multiple values (multi-select, checkbox groups)
- *      and collapse into a single, comman-delimited value
- *      (e.g., thisVar=asdf,qwer,zxcv)
- *   stripTags: (Boolean) strip markup tags from any values
- *   includeEmpty: (Boolean) include keys in the string for
- *     all elements, even if they have no value set (e.g.,
- *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
- *   pedantic: (Boolean) include the values of elements like
- *      button or image
- * @returns query-string style String of variable-value pairs
- */
-fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toObject(f, o);
-  var opts = o || {};
-  var str = '';
-  var pat = null;
-
-  if (opts.stripTags) { pat = /<[^>]*>/g; }
-  for (var n in h) {
-    var s = '';
-    var v = h[n];
-    if (v) {
-      // Single val -- string
-      if (typeof v == 'string') {
-        s = opts.stripTags ? v.replace(pat, '') : v;
-        str += n + '=' + encodeURIComponent(s);
-      }
-      // Multiple vals -- array
-      else {
-        var sep = '';
-        if (opts.collapseMulti) {
-          sep = ',';
-          str += n + '=';
-        }
-        else {
-          sep = '&';
-        }
-        for (var j = 0; j < v.length; j++) {
-          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
-          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
-            encodeURIComponent(s);
-          str += s + sep;
-        }
-        str = str.substr(0, str.length - 1);
-      }
-      str += '&';
-    }
-    else {
-      if (opts.includeEmpty) { str += n + '=&'; }
-    }
-  }
-  str = str.substr(0, str.length - 1);
-  return str;
-};
-
-/**
- * Converts the values in an HTML form into a JS object
- * Elements with multiple values like sets of radio buttons
- * become arrays
- * @param f -- HTML form element to convert into a JS object
- * @param o -- JS Object of options:
- *    pedantic: (Boolean) include the values of elements like
- *      button or image
- *    hierarchical: (Boolean) if the form is using Rails-/PHP-style
- *      name="foo[bar]" inputs, setting this option to
- *      true will create a hierarchy of objects in the
- *      resulting JS object, where some of the properties
- *      of the objects are sub-objects with values pulled
- *      from the form. Note: this only supports one level
- *      of nestedness
- * hierarchical option code by Kevin Faulhaber, kjf@kjfx.net
- * @returns JavaScript object representation of the contents
- * of the form.
- */
-fleegix.form.toObject= function (f, o) {
-  var opts = o || {};
-  var h = {};
-  function expandToArr(orig, val) {
-    if (orig) {
-      var r = null;
-      if (typeof orig == 'string') {
-        r = [];
-        r.push(orig);
-      }
-      else { r = orig; }
-      r.push(val);
-      return r;
-    }
-    else { return val; }
-  }
-
-  for (var i = 0; i < f.elements.length; i++) {
-    var elem = f.elements[i];
-    // Elements should have a name
-    if (elem.name) {
-      var st = elem.name.indexOf('[');
-      var sp = elem.name.indexOf(']');
-      var sb = '';
-      var en = '';
-      var c;
-      var n;
-      // Using Rails-/PHP-style name="foo[bar]"
-      // means you can go hierarchical if you want
-      if (opts.hierarchical && (st > 0) && (sp > 2)) {
-          sb = elem.name.substring(0, st);
-          en = elem.name.substring(st + 1, sp);
-          if (typeof h[sb] == 'undefined') { h[sb] = {}; }
-          c = h[sb];
-          n = en;
-      }
-      else {
-          c = h;
-          n = elem.name;
-      }
-      switch (elem.type) {
-        // Text fields, hidden form elements, etc.
-        case 'text':
-        case 'hidden':
-        case 'password':
-        case 'textarea':
-        case 'select-one':
-          c[n] = elem.value || null;
-          break;
-        // Multi-option select
-        case 'select-multiple':
-          c[n] = null;
-          for(var j = 0; j < elem.options.length; j++) {
-            var e = elem.options[j];
-            if(e.selected) {
-              c[n] = expandToArr(c[n], e.value);
-            }
-          }
-          break;
-        // Radio buttons
-        case 'radio':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
-          if (elem.checked) {
-            c[n] = elem.value;
-          }
-          break;
-        // Checkboxes
-        case 'checkbox':
-          if (typeof c[n] == 'undefined') {
-            c[n] = null; }
-          if (elem.checked) {
-            c[n] = expandToArr(c[n], elem.value);
-          }
-          break;
-        // Pedantic
-        case 'submit':
-        case 'reset':
-        case 'file':
-        case 'image':
-        case 'button':
-          if (opts.pedantic) { c[n] = elem.value || null; }
-          break;
-      }
-    }
-  }
-  return h;
-};
-// Alias for backward compat
-fleegix.form.toHash = fleegix.form.toObject;
 
 fleegix.css = new function() {
     this.addClass = function (elem, s) {
@@ -1103,90 +862,92 @@ fleegix.event = new function () {
 fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
 
 
-fleegix.xhr = new function () {
+fleegix.uri = new function () {
+  var self = this;
 
-  var UNDEFINED_VALUE;
-  var msProgId = null; // Cache the prog ID if needed
-  function spawnTransporter(isSync) {
-    var i = 0;
-    var t = [
-      'Msxml2.XMLHTTP.6.0',
-      'MSXML2.XMLHTTP.3.0',
-      'Microsoft.XMLHTTP'
-    ];
-    var trans = null;
-    if (window.XMLHttpRequest) {
-      trans = new XMLHttpRequest();
-    }
-    else if (window.ActiveXObject) {
-      if (msProgId) {
-        trans = new ActiveXObject(msProgId);
-      }
-      else {
-        for (var i = 0; i < t.length; i++) {
-          try {
-            trans = new ActiveXObject(t[i]);
-            // Cache the prog ID, break the loop
-            msProgId = t[i]; break;
+  this.params = {};
+
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
+        }
+        else {
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
           }
-          catch(e) {}
+          d[name].push(val);
         }
       }
     }
-    // Instantiate XHR obj
-    if (trans) {
-      if (isSync) {
-        return trans;
-      }
-      else {
-        fleegix.xhr.transporters.push(trans);
-        var transporterId = fleegix.xhr.transporters.length - 1;
-        return transporterId;
-      }
+    return d;
+  };
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
     }
     else {
-      throw new Error('Could not create XMLHttpRequest object.');
+      p = this.params[name];
     }
-  }
+    return p;
+  };
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    // If there's a query string, set the param
+    if (str) {
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      // If it's there, replace it
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+      // Otherwise append it
+      else {
+        ret = str + '&' + name + '=' + val;
+      }
+    }
+    // Otherwise create a query string with just that param
+    else {
+      ret = name + '=' + val;
+    }
+    return ret;
+  };
+  this.getQuery = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[1];
+  };
+  this.getBase = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[0];
+  };
+  this.params = this.getParamHash();
+};
 
-  // Public members
+fleegix.xhr = new function () {
+  // Public vars
   // ================================
-  // Array of XHR obj transporters, spawned as needed up to
-  // maxTransporters ceiling
-  this.transporters = [];
   // Maximum number of XHR objects to spawn to handle requests
-  // IE6 and IE7 are shite for XHR re-use -- fortunately
-  // copious numbers of XHR objs don't seem to be a problem
-  // Moz/Safari perform significantly better with XHR re-use
-  this.maxTransporters = 5;
+  // Moz/Safari seem to perform significantly better with XHR
+  // re-use, IE -- not so much
+  this.maxXhrs = 5;
   // Used to increment request IDs -- these may be used for
   // externally tracking or aborting specific requests
   this.lastReqId = 0;
-  // Queued-up requests -- appended to when all XHR transporters
-  // are in use -- FIFO list, XHR objs respond to waiting
-  // requests immediately as then finish processing the current one
-  this.requestQueue = [];
-  // List of free XHR objs -- transporters sit here when not
-  // processing requests. If this is empty when a new request comes
-  // in, we try to spawn a request -- if we're already at max
-  // transporter number, we queue the request
-  this.idleTransporters = [];
-  // Hash of currently in-flight requests -- each string key is
-  // the request id of the request
-  // Used to abort processing requests
-  this.processingMap = {};
-  this.processingArray = [];
-  // The single XHR obj used for synchronous requests -- sync
-  // requests do not participate in the request pooling
-  this.syncTransporter = spawnTransporter(true);
-  this.syncRequest = null;
   // Show exceptions for connection failures
   this.debug = false;
-  // The id for the setTimeout used in the the
-  // request timeout watcher
-  this.processingWatcherId = null;
   // Default number of seconds before a request times out
-  this.defaultTimeoutSeconds = 30;
+  this.defaultTimeoutSeconds = 300;
   // If set to true, use the default err handler for sync requests
   // If false, failures always hand back the whole request object
   this.useDefaultErrHandlerForSync = true;
@@ -1197,7 +958,7 @@ fleegix.xhr = new function () {
 
   // Public methods
   // ================================
-  this.doGet = function () {
+  this.get = function () {
     var o = {};
     var hand = null;
     var args = Array.prototype.slice.apply(arguments);
@@ -1224,7 +985,10 @@ fleegix.xhr = new function () {
     o.url = url;
     return this.doReq(o);
   };
-  this.doPost = function () {
+  this.doGet = function () {
+    return this.get.apply(this, arguments);
+  }
+  this.post = function () {
     var o = {};
     var hand = null;
     var args = Array.prototype.slice.apply(arguments);
@@ -1236,7 +1000,7 @@ fleegix.xhr = new function () {
       o.async = false;
     }
     var url = args.shift();
-    var dataPayload = args.shift();
+    var data = args.shift();
     // Passing in keyword/obj after URL
     if (typeof args[0] == 'object') {
       var opts = args.shift();
@@ -1250,18 +1014,26 @@ fleegix.xhr = new function () {
     }
     o.handleSuccess = hand;
     o.url = url;
-    o.dataPayload = dataPayload;
+    o.data = data;
     o.method = 'POST';
     return this.doReq(o);
   };
-  this.doReq = function (o) {
+  this.doPost = function () {
+    return this.post.apply(this, arguments);
+  }
+  this.doReq = function (opts) {
+    return this.send(opts);
+  }
+  this.send = function (o) {
     var opts = o || {};
     var req = new fleegix.xhr.Request();
-    var transporterId = null;
+    var xhrId = null;
 
     // Override default request opts with any specified
     for (var p in opts) {
-      req[p] = opts[p];
+      if (opts.hasOwnProperty(p)) {
+        req[p] = opts[p];
+      }
     }
     // HTTP req method all-caps
     req.method = req.method.toUpperCase();
@@ -1274,29 +1046,29 @@ fleegix.xhr = new function () {
     // -------
     if (req.async) {
       // If we have an instantiated XHR we can use, let him handle it
-      if (this.idleTransporters.length) {
-        transporterId = this.idleTransporters.shift();
+      if (_idleXhrs.length) {
+        xhrId = _idleXhrs.shift();
       }
       // No available XHRs -- spawn a new one if we're still
       // below the limit
-      else if (this.transporters.length < this.maxTransporters) {
-        transporterId = spawnTransporter();
+      else if (_xhrs.length < this.maxXhrs) {
+        xhrId = _spawnXhr();
       }
 
-      // If we have an XHR transporter to handle the request, do it
-      // transporterId should be a number (index of XHR obj in this.transporters)
-      if (transporterId !== null) {
-        this.processReq(req, transporterId);
+      // If we have an XHR xhr to handle the request, do it
+      // xhrId should be a number (index of XHR obj in _xhrs)
+      if (xhrId !== null) {
+        _processReq(req, xhrId);
       }
-      // No transporter available to handle the request -- queue it up
+      // No xhr available to handle the request -- queue it up
       else {
         // Uber-requests step to the front of the line, please
         if (req.uber) {
-          this.requestQueue.unshift(req);
+          _requestQueue.unshift(req);
         }
         // Normal queued requests are FIFO
         else {
-          this.requestQueue.push(req);
+          _requestQueue.push(req);
         }
       }
       // Return request ID -- may be used for aborting,
@@ -1306,294 +1078,23 @@ fleegix.xhr = new function () {
     // Sync -- do request inlne and return actual result
     // -------
     else {
-        return this.processReq(req);
-    }
-  };
-  this.processReq = function (req, t) {
-    var self = this;
-    var transporterId = null;
-    var trans = null;
-    var url = '';
-    var resp = null;
-
-    // Async mode -- grab an XHR obj from the pool
-    if (req.async) {
-      transporterId = t;
-      trans = this.transporters[transporterId];
-      this.processingMap[req.id] = req;
-      this.processingArray.unshift(req);
-      req.transporterId = transporterId;
-    }
-    // Sync mode -- use single sync XHR
-    else {
-      trans = this.syncTransporter;
-      this.syncRequest = req;
-    }
-
-    // Defeat the evil power of the IE caching mechanism
-    if (req.preventCache) {
-      var dt = new Date().getTime();
-      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt :
-        req.url + '?preventCache=' + dt;
-    }
-    else {
-      url = req.url;
-    }
-
-    // Call 'abort' method in IE to allow reuse of the obj
-    if (document.all) {
-      trans.abort();
-    }
-
-    // Set up the request
-    // ==========================
-    if (req.username && req.password) {
-      trans.open(req.method, url, req.async, req.username, req.password);
-    }
-    else {
-      trans.open(req.method, url, req.async);
-    }
-    // Override MIME type if necessary for Mozilla/Firefox & Safari
-    if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
-      trans.overrideMimeType(req.mimeType);
-    }
-
-    // Add any custom headers that are defined
-    for (var h in req.headers) {
-      trans.setRequestHeader(h, req.headers[h]);
-    }
-    // Otherwise set correct content-type for POST
-    if (req.method == 'POST' || req.method == 'PUT') {
-      // Firefox throws out the content-length
-      // if this is not present
-      if (!req.dataPayload) {
-        req.dataPayload = '';
-      }
-      // Set content-length for picky servers
-      var contentLength = typeof req.dataPayload == 'string' ?
-        req.dataPayload.length : 0;
-      trans.setRequestHeader('Content-Length', contentLength);
-      // Set content-type to urlencoded if nothing
-      // else specified
-      if (typeof req.headers['Content-Type'] == 'undefined') {
-        trans.setRequestHeader('Content-Type',
-          'application/x-www-form-urlencoded');
-      }
-    }
-
-    // Send the request, along with any data for POSTing
-    // ==========================
-    trans.send(req.dataPayload);
-
-    if (this.processingWatcherId === null) {
-      this.processingWatcherId = setTimeout(fleegix.xhr.watchProcessing, 10);
-    }
-    // Sync mode -- return actual result inline back to doReq
-    if (!req.async) {
-      // Blocks here
-      var ret = this.handleResponse(trans, req);
-      this.syncRequest = null;
-      // Start the watcher loop back up again if need be
-      if (self.processingArray.length) {
-        self.processingWatcherId = setTimeout(
-          fleegix.xhr.watchProcessing, 10);
-      }
-      return ret;
-    }
-  };
-  this.getResponseByType = function (trans, req) {
-    var r = null;
-    // Set the response according to the desired format
-    switch(req.responseFormat) {
-      // Text
-      case 'text':
-        r = trans.responseText;
-        break;
-      // XML
-      case 'xml':
-        r = trans.responseXML;
-        break;
-      // The object itself
-      case 'object':
-        r = trans;
-        break;
-    }
-    return r;
-  };
-  this.watchProcessing = function () {
-    var self = fleegix.xhr;
-    var proc = self.processingArray;
-    var d = new Date().getTime();
-
-    // Stop looping while processing sync requests
-    // after req returns, it will start the loop back up
-    if (self.syncRequest !== null) {
-      return;
-    }
-    else {
-      for (var i = 0; i < proc.length; i++) {
-        var req = proc[i];
-        var trans = self.transporters[req.transporterId];
-        var isTimedOut = ((d - req.startTime) > (req.timeoutSeconds*1000));
-        switch (true) {
-          // Aborted requests
-          case (req.aborted || !trans.readyState):
-            self.processingArray.splice(i, 1);
-            break;
-          // Timeouts
-          case isTimedOut:
-            self.processingArray.splice(i, 1);
-            self.timeout(req);
-            break;
-          // Actual responses
-          case (trans.readyState == 4):
-            self.processingArray.splice(i, 1);
-            self.handleResponse.apply(self, [trans, req]);
-            break;
-        }
-      }
-    }
-    clearTimeout(self.processingWatcherId);
-    if (self.processingArray.length) {
-      self.processingWatcherId = setTimeout(
-        fleegix.xhr.watchProcessing, 10);
-    }
-    else {
-      self.processingWatcherId = null;
+        return _processReq(req);
     }
   };
   this.abort = function (reqId) {
-    var r = this.processingMap[reqId];
-    var t = this.transporters[r.transporterId];
+    var r = _processingMap[reqId];
+    var t = _xhrs[r.xhrId];
     // Abort the req if it's still processing
     if (t) {
       // onreadystatechange can still fire as abort is executed
       t.onreadystatechange = function () { };
       t.abort();
       r.aborted = true;
-      this.cleanupAfterReq(r);
+      _cleanup(r);
       return true;
     }
     else {
       return false;
-    }
-  };
-  this.timeout = function (req) {
-    if (fleegix.xhr.abort.apply(fleegix.xhr, [req.id])) {
-      if (typeof req.handleTimeout == 'function') {
-        req.handleTimeout();
-      }
-      else {
-        alert('XMLHttpRequest to ' + req.url + ' timed out.');
-      }
-    }
-  };
-  this.handleResponse = function (trans, req) {
-    // Grab the desired response type
-    var resp = this.getResponseByType(trans, req);
-
-    // If we have a One True Event Handler, use that
-    // Best for odd cases such as Safari's 'undefined' status
-    // or 0 (zero) status from trying to load local files or chrome
-    if (req.handleAll) {
-      req.handleAll(resp, req.id);
-    }
-    // Otherwise hand to either success/failure
-    else {
-      try {
-        switch (true) {
-          // Request was successful -- execute response handler
-          case this.isReqSuccessful(trans):
-            if (req.async) {
-              // Make sure handler is defined
-              if (!req.handleSuccess) {
-                throw new Error('No response handler defined ' +
-                  'for this request');
-              }
-              else {
-                req.handleSuccess(resp, req.id);
-              }
-            }
-            // Blocking requests return the result inline on success
-            else {
-              return resp;
-            }
-            break;
-          // Status of 0 -- in FF, user may have hit ESC while processing
-          case (trans.status == 0):
-            if (this.debug) {
-              throw new Error('XMLHttpRequest HTTP status is zero.');
-            }
-            break;
-          // Status of null or undefined -- yes, null == undefined
-          case (trans.status == UNDEFINED_VALUE):
-            // Squelch -- if you want to get local files or
-            // chrome, use 'handleAll' above
-            if (this.debug) {
-              throw new Error('XMLHttpRequest HTTP status not set.');
-            }
-            break;
-          // Request failed -- execute error handler or hand back
-          // raw request obj
-          default:
-            // Blocking requests that want the raw object returned
-            // on error, instead of letting the built-in handle it
-            if (!req.async && !this.useDefaultErrHandlerForSync) {
-              return  resp;
-            }
-            else {
-              if (req.handleErr) {
-                req.handleErr(resp, req.id);
-              }
-              else {
-                this.handleErrDefault(trans);
-              }
-            }
-            break;
-        }
-      }
-      // FIXME: Might be nice to try to catch NS_ERROR_NOT_AVAILABLE
-      // err in Firefox for broken connections
-      catch (e) {
-        throw e;
-      }
-    }
-    // Clean up, move immediately to respond to any
-    // queued up requests
-    if (req.async) {
-      this.cleanupAfterReq(req);
-    }
-    return true;
-  };
-  this.cleanupAfterReq = function (req) {
-    // Remove from list of transporters currently in use
-    // this XHR can't be aborted until it's processing again
-    delete this.processingMap[req.id];
-
-    // Requests queued up, grab one to respond to
-    if (this.requestQueue.length) {
-      var nextReq = this.requestQueue.shift();
-      // Reset the start time for the request for timeout purposes
-      nextReq.startTime = new Date().getTime();
-      this.processReq(nextReq, req.transporterId);
-    }
-    // Otherwise this transporter is idle, waiting to respond
-    else {
-      this.idleTransporters.push(req.transporterId);
-    }
-  };
-  this.handleErrDefault = function (r) {
-    var errorWin;
-    // Create new window and display error
-    try {
-      errorWin = window.open('', 'errorWin');
-      errorWin.document.body.innerHTML = r.responseText;
-    }
-    // If pop-up gets blocked, inform user
-    catch(e) {
-      alert('An error occurred, but the error message cannot be' +
-      ' displayed because of your browser\'s pop-up blocker.\n' +
-      'Please allow pop-ups from this Web site.');
     }
   };
   // All the goofy normalization and logic to determine
@@ -1613,17 +1114,372 @@ fleegix.xhr = new function () {
       return false;
     }
   };
+
+  // Private vars
+  // ================================
+  var _this = this;
+  // Prog ID for specific versions of MSXML -- caches after
+  // initial req
+  var _msProgId = null;
+  // Used in response status test
+  var _UNDEFINED_VALUE;
+  // Array of XHR obj xhrs, spawned as needed up to
+  // maxXhrs ceiling
+  var _xhrs = [];
+  // Queued-up requests -- appended to when all XHR xhrs
+  // are in use -- FIFO list, XHR objs respond to waiting
+  // requests immediately as then finish processing the current one
+  var _requestQueue = [];
+  // List of free XHR objs -- xhrs sit here when not
+  // processing requests. If this is empty when a new request comes
+  // in, we try to spawn a request -- if we're already at max
+  // xhr number, we queue the request
+  var _idleXhrs = [];
+  // Hash of currently in-flight requests -- each string key is
+  // the request id of the request
+  // Used to abort processing requests
+  var _processingMap = {};
+  // Array of in-flight request for the watcher to iterate over
+  var _processingArray = [];
+  // The single XHR obj used for synchronous requests -- sync
+  // requests do not participate in the request pooling
+  var _syncXhr = null;
+  // The single request obj used for sync requests, same
+  // as above
+  var _syncRequest = null;
+  // The id for the setTimeout used in the the
+  // request timeout watcher
+  _processingWatcherId = null;
+
+  // Private methods
+  // ================================
+  // The XHR object factory
+  var _spawnXhr = function (isSync) {
+    var i = 0;
+    var t = [
+      'Msxml2.XMLHTTP.6.0',
+      'MSXML2.XMLHTTP.3.0',
+      'Microsoft.XMLHTTP'
+    ];
+    var xhrObj = null;
+    if (window.XMLHttpRequest) {
+      xhrObj = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject) {
+      if (_msProgId) {
+        xhrObj = new ActiveXObject(_msProgId);
+      }
+      else {
+        for (var i = 0; i < t.length; i++) {
+          try {
+            xhrObj = new ActiveXObject(t[i]);
+            // Cache the prog ID, break the loop
+            _msProgId = t[i]; break;
+          }
+          catch(e) {}
+        }
+      }
+    }
+    // Instantiate XHR obj
+    if (xhrObj) {
+      if (isSync) { return xhrObj; }
+      else {
+        _xhrs.push(xhrObj);
+        var xhrId = _xhrs.length - 1;
+        return xhrId;
+      }
+    }
+    else {
+      throw new Error('Could not create XMLHttpRequest object.');
+    }
+  };
+  // This is the workhorse function that actually
+  // sets up and makes the XHR request
+  var _processReq = function (req, t) {
+    var xhrId = null;
+    var xhrObj = null;
+    var url = '';
+    var resp = null;
+
+    // Async mode -- grab an XHR obj from the pool
+    if (req.async) {
+      xhrId = t;
+      xhrObj = _xhrs[xhrId];
+      _processingMap[req.id] = req;
+      _processingArray.unshift(req);
+      req.xhrId = xhrId;
+    }
+    // Sync mode -- use single sync XHR
+    else {
+      if (!_syncXhr) { _syncXhr = _spawnXhr(true); }
+      xhrObj = _syncXhr;
+      _syncRequest = req;
+    }
+
+    // Defeat the evil power of the IE caching mechanism
+    if (req.preventCache) {
+      var dt = new Date().getTime();
+      url = req.url.indexOf('?') > -1 ? req.url + '&preventCache=' + dt :
+        req.url + '?preventCache=' + dt;
+    }
+    else {
+      url = req.url;
+    }
+
+    // Call 'abort' method in IE to allow reuse of the obj
+    if (document.all) {
+      xhrObj.abort();
+    }
+
+    // Set up the request
+    // ==========================
+    if (req.username && req.password) {
+      xhrObj.open(req.method, url, req.async, req.username, req.password);
+    }
+    else {
+      xhrObj.open(req.method, url, req.async);
+    }
+    // Override MIME type if necessary for Mozilla/Firefox & Safari
+    if (req.mimeType && navigator.userAgent.indexOf('MSIE') == -1) {
+      xhrObj.overrideMimeType(req.mimeType);
+    }
+
+    // Add any custom headers that are defined
+    var headers = req.headers;
+    for (var h in headers) {
+      if (headers.hasOwnProperty(h)) {
+        xhrObj.setRequestHeader(h, headers[h]);
+      }
+    }
+    // Otherwise set correct content-type for POST
+    if (req.method == 'POST' || req.method == 'PUT') {
+      // Backward-compatibility
+      req.data = req.data || req.dataPayload;
+      // Firefox throws out the content-length
+      // if data isn't present
+      if (!req.data) {
+        req.data = '';
+      }
+      // Set content-length for picky servers
+      var contentLength = typeof req.data == 'string' ?
+        req.data.length : 0;
+      xhrObj.setRequestHeader('Content-Length', contentLength);
+      // Set content-type to urlencoded if nothing
+      // else specified
+      if (typeof req.headers['Content-Type'] == 'undefined') {
+        xhrObj.setRequestHeader('Content-Type',
+          'application/x-www-form-urlencoded');
+      }
+    }
+    // Send the request, along with any POST/PUT data
+    // ==========================
+    xhrObj.send(req.data);
+    // ==========================
+    if (_processingWatcherId === null) {
+      _processingWatcherId = setTimeout(_watchProcessing, 10);
+    }
+    // Sync mode -- return actual result inline back to doReq
+    if (!req.async) {
+      // Blocks here
+      var ret = _handleResponse(xhrObj, req);
+      _syncRequest = null;
+      // Start the watcher loop back up again if need be
+      if (_processingArray.length) {
+        _processingWatcherId = setTimeout(_watchProcessing, 10);
+      }
+      // Otherwise stop watching
+      else {
+        _processingWatcherId = null;
+      }
+      return ret;
+    }
+  };
+  // Called in a setTimeout loop as long as requests are
+  // in-flight, and invokes the handler for each request
+  // as it returns
+  var _watchProcessing = function () {
+    var proc = _processingArray;
+    var d = new Date().getTime();
+
+    // Stop looping while processing sync requests
+    // after req returns, it will start the loop back up
+    if (_syncRequest !== null) {
+      return;
+    }
+    else {
+      for (var i = 0; i < proc.length; i++) {
+        var req = proc[i];
+        var xhrObj = _xhrs[req.xhrId];
+        var isTimedOut = ((d - req.startTime) > (req.timeoutSeconds*1000));
+        switch (true) {
+          // Aborted requests
+          case (req.aborted || !xhrObj.readyState):
+            _processingArray.splice(i, 1);
+            break;
+          // Timeouts
+          case isTimedOut:
+            _processingArray.splice(i, 1);
+            _timeout(req);
+            break;
+          // Actual responses
+          case (xhrObj.readyState == 4):
+            _processingArray.splice(i, 1);
+            _handleResponse.call(_this, xhrObj, req);
+            break;
+        }
+      }
+    }
+    clearTimeout(_processingWatcherId);
+    if (_processingArray.length) {
+      _processingWatcherId = setTimeout(_watchProcessing, 10);
+    }
+    else {
+      _processingWatcherId = null;
+    }
+  };
+  var _handleResponse = function (xhrObj, req) {
+    // Grab the desired response type
+    var resp;
+    switch(req.responseFormat) {
+      // XML
+      case 'xml':
+        resp = xhrObj.responseXML;
+        break;
+      // The object itself
+      case 'object':
+        resp = xhrObj;
+        break;
+      // Text
+      case 'text':
+      default:
+        resp = xhrObj.responseText;
+        break;
+    }
+    // If we have a One True Event Handler, use that
+    // Best for odd cases such as Safari's 'undefined' status
+    // or 0 (zero) status from trying to load local files or chrome
+    if (req.handleAll) {
+      req.handleAll(resp, req.id);
+    }
+    // Otherwise hand to either success/failure
+    else {
+      try {
+        switch (true) {
+          // Request was successful -- execute response handler
+          case _this.isReqSuccessful(xhrObj):
+            if (req.async) {
+              // Make sure handler is defined
+              if (!req.handleSuccess) {
+                throw new Error('No response handler defined ' +
+                  'for this request');
+              }
+              else {
+                req.handleSuccess(resp, req.id);
+              }
+            }
+            // Blocking requests return the result inline on success
+            else {
+              return resp;
+            }
+            break;
+          // Status of 0 -- in FF, user may have hit ESC while processing
+          case (xhrObj.status == 0):
+            if (_this.debug) {
+              throw new Error('XMLHttpRequest HTTP status is zero.');
+            }
+            break;
+          // Status of null or undefined -- yes, null == undefined
+          case (xhrObj.status == _UNDEFINED_VALUE):
+            // Squelch -- if you want to get local files or
+            // chrome, use 'handleAll' above
+            if (_this.debug) {
+              throw new Error('XMLHttpRequest HTTP status not set.');
+            }
+            break;
+          // Request failed -- execute error handler or hand back
+          // raw request obj
+          default:
+            // Blocking requests that want the raw object returned
+            // on error, instead of letting the built-in handle it
+            if (!req.async && !_this.useDefaultErrHandlerForSync) {
+              return  resp;
+            }
+            else {
+              if (req.handleErr) {
+                req.handleErr(resp, req.id);
+              }
+              else {
+                _handleErrDefault(xhrObj);
+              }
+            }
+            break;
+        }
+      }
+      // FIXME: Might be nice to try to catch NS_ERROR_NOT_AVAILABLE
+      // err in Firefox for broken connections
+      catch (e) {
+        throw e;
+      }
+    }
+    // Clean up, move immediately to respond to any
+    // queued up requests
+    if (req.async) {
+      _cleanup(req);
+    }
+    return true;
+  };
+  var _timeout = function (req) {
+    if (_this.abort.apply(_this, [req.id])) {
+      if (typeof req.handleTimeout == 'function') {
+        req.handleTimeout();
+      }
+      else {
+        alert('XMLHttpRequest to ' + req.url + ' timed out.');
+      }
+    }
+  };
+  var _cleanup = function (req) {
+    // Remove from list of xhrs currently in use
+    // this XHR can't be aborted until it's processing again
+    delete _processingMap[req.id];
+
+    // Requests queued up, grab one to respond to
+    if (_requestQueue.length) {
+      var nextReq = _requestQueue.shift();
+      // Reset the start time for the request for timeout purposes
+      nextReq.startTime = new Date().getTime();
+      _processReq(nextReq, req.xhrId);
+    }
+    // Otherwise this xhr is idle, waiting to respond
+    else {
+      _idleXhrs.push(req.xhrId);
+    }
+  };
+  var _handleErrDefault = function (r) {
+    var errorWin;
+    // Create new window and display error
+    try {
+      errorWin = window.open('', 'errorWin');
+      errorWin.document.body.innerHTML = r.responseText;
+    }
+    // If pop-up gets blocked, inform user
+    catch(e) {
+      alert('An error occurred, but the error message cannot be' +
+      ' displayed because of your browser\'s pop-up blocker.\n' +
+      'Please allow pop-ups from this Web site.');
+    }
+  };
 };
 
 fleegix.xhr.Request = function () {
   this.id = 0;
-  this.transporterId = null;
+  this.xhrId = null;
   this.url = null;
   this.status = null;
   this.statusText = '';
   this.method = 'GET';
   this.async = true;
-  this.dataPayload = null;
+  this.data = null;
   this.readyState = null;
   this.responseText = null;
   this.responseXML = null;
@@ -1644,6 +1500,53 @@ fleegix.xhr.Request = function () {
 };
 fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerValue) {
   this.headers.push(headerName + ': ' + headerValue);
+};
+
+
+fleegix.json = new function() {
+  this.serialize = function(obj) {
+    var str = '';
+    switch (typeof obj) {
+      case 'object':
+        // Null
+        if (obj === null) {
+           return 'null';
+        }
+        // Arrays
+        else if (obj instanceof Array) {
+          for (var i = 0; i < obj.length; i++) {
+            if (str) { str += ','; }
+            str += fleegix.json.serialize(obj[i]);
+          }
+          return '[' + str + ']';
+        }
+        // Objects
+        else if (typeof obj.toString != 'undefined') {
+          for (var i in obj) {
+            if (str) { str += ','; }
+            str += '"' + i + '":';
+            if (typeof obj[i] == 'undefined') {
+              str += '"undefined"';
+            }
+            else {
+              str += fleegix.json.serialize(obj[i]);
+            }
+          }
+          return '{' + str + '}';
+        }
+        return str;
+      case 'unknown':
+      case 'undefined':
+      case 'function':
+        return '"undefined"';
+      case 'string':
+        str += '"' + obj.replace(/(["\\])/g, '\\$1').replace(
+          /\r/g, '').replace(/\n/g, '\\n') + '"';
+        return str;
+      default:
+        return String(obj);
+    }
+  };
 };
 
 
@@ -1671,5 +1574,277 @@ fleegix.string = new function () {
     var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
     return str.replace(pat, '');
   };
+  // Converts someVariableName to some_variable_name
+  this.toLowerCaseWithUnderscores = function (s) {
+    return s.replace(/([A-Z]+)/g, '_$1').toLowerCase().
+      replace(/^_/, '');
+  };
+  // Alias for above
+  this.deCamelize = function (s) {
+    return this.toLowerCaseWithUnderscores(s);
+  };
+  // Converts some_variable_name to someVariableName
+  this.toCamelCase = function (s) {
+    return s.replace(/_[a-z]{1}/g, function (s) 
+      { return s.replace('_', '').toUpperCase() });
+  };
+  // Alias for above
+  this.camelize = function (s) {
+    return this.toCamelCase(s);
+  };
+  this.capitalize = function (s) {
+    return s.substr(0, 1).toUpperCase() + s.substr(1);
+  };
+  this.escapeXML = function (s) {
+    return s.replace(/&/gm, '&amp;').replace(/</gm, '&lt;').
+      replace(/>/gm, '&gt;').replace(/"/gm, '&quot;');
+  };
+  this.unescapeXML = function (s) {
+    return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
+      replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
+  };
 };
 
+
+fleegix.cookie = new function() {
+  this.set = function(name, value, optParam) {
+    var opts = optParam || {};
+    var path = '/';
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
+    var exp = '';
+    var t = 0;
+    if (typeof optParam == 'object') {
+      path = opts.path || '/';
+      days = opts.days || 0;
+      hours = opts.hours || 0;
+      minutes = opts.minutes || 0;
+    }
+    else {
+      path = optParam || '/';
+    }
+    t += days ? days*24*60*60*1000 : 0;
+    t += hours ? hours*60*60*1000 : 0;
+    t += minutes ? minutes*60*1000 : 0;
+
+    if (t) {
+      var dt = new Date();
+      dt.setTime(dt.getTime() + t);
+      exp = '; expires=' + dt.toGMTString();
+    }
+    else {
+      exp = '';
+    }
+    document.cookie = name + '=' + value +
+      exp + '; path=' + path;
+  };
+  this.get = function(name) {
+    var nameEq = name + '=';
+    var arr = document.cookie.split(';');
+    for(var i = 0; i < arr.length; i++) {
+      var c = arr[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1, c.length);
+      }
+      if (c.indexOf(nameEq) === 0) {
+        return c.substring(nameEq.length, c.length);
+      }
+    }
+    return null;
+  };
+  this.create = this.set;
+  this.destroy = function(name, path) {
+    var opts = {};
+    opts.minutes = -1;
+    if (path) { opts.path = path; }
+    this.set(name, '', opts);
+  };
+};
+
+
+fleegix.form = {};
+/**
+ * Serializes the data from all the inputs in a Web form
+ * into a query-string style string.
+ * @param docForm -- Reference to a DOM node of the form element
+ * @param formatOpts -- JS object of options for how to format
+ * the return string. Supported options:
+ *   collapseMulti: (Boolean) take values from elements that
+ *      can return multiple values (multi-select, checkbox groups)
+ *      and collapse into a single, comman-delimited value
+ *      (e.g., thisVar=asdf,qwer,zxcv)
+ *   stripTags: (Boolean) strip markup tags from any values
+ *   includeEmpty: (Boolean) include keys in the string for
+ *     all elements, even if they have no value set (e.g.,
+ *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
+ *   pedantic: (Boolean) include the values of elements like
+ *      button or image
+ * @returns query-string style String of variable-value pairs
+ */
+fleegix.form.serialize = function (f, o) {
+  var h = fleegix.form.toObject(f, o);
+  var opts = o || {};
+  var str = '';
+  var pat = null;
+
+  if (opts.stripTags) { pat = /<[^>]*>/g; }
+  for (var n in h) {
+    var s = '';
+    var v = h[n];
+    if (v) {
+      // Single val -- string
+      if (typeof v == 'string') {
+        s = opts.stripTags ? v.replace(pat, '') : v;
+        str += n + '=' + encodeURIComponent(s);
+      }
+      // Multiple vals -- array
+      else {
+        var sep = '';
+        if (opts.collapseMulti) {
+          sep = ',';
+          str += n + '=';
+        }
+        else {
+          sep = '&';
+        }
+        for (var j = 0; j < v.length; j++) {
+          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
+          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
+            encodeURIComponent(s);
+          str += s + sep;
+        }
+        str = str.substr(0, str.length - 1);
+      }
+      str += '&';
+    }
+    else {
+      if (opts.includeEmpty) { str += n + '=&'; }
+    }
+  }
+  // Convert all the camelCase param names to Ruby/Python style
+  // lowercase_with_underscores
+  if (opts.deCamelize) {
+    if (!fleegix.string) {
+      throw new Error(
+        'deCamelize option depends on fleegix.string module.');
+    }
+    var arr = str.split('&');
+    var arrItems;
+    str = '';
+    for (var i = 0; i < arr.length; i++) {
+      arrItems = arr[i].split('=');
+      if (arrItems[0]) {
+        str += fleegix.string.deCamelize(arrItems[0]) +
+          '=' + arrItems[1] + '&';
+      }
+    }
+  }
+  str = str.substr(0, str.length - 1);
+  return str;
+};
+
+/**
+ * Converts the values in an HTML form into a JS object
+ * Elements with multiple values like sets of radio buttons
+ * become arrays
+ * @param f -- HTML form element to convert into a JS object
+ * @param o -- JS Object of options:
+ *    pedantic: (Boolean) include the values of elements like
+ *      button or image
+ *    hierarchical: (Boolean) if the form is using Rails-/PHP-style
+ *      name="foo[bar]" inputs, setting this option to
+ *      true will create a hierarchy of objects in the
+ *      resulting JS object, where some of the properties
+ *      of the objects are sub-objects with values pulled
+ *      from the form. Note: this only supports one level
+ *      of nestedness
+ * hierarchical option code by Kevin Faulhaber, kjf@kjfx.net
+ * @returns JavaScript object representation of the contents
+ * of the form.
+ */
+fleegix.form.toObject= function (f, o) {
+  var opts = o || {};
+  var h = {};
+  function expandToArr(orig, val) {
+    if (orig) {
+      var r = null;
+      if (typeof orig == 'string') {
+        r = [];
+        r.push(orig);
+      }
+      else { r = orig; }
+      r.push(val);
+      return r;
+    }
+    else { return val; }
+  }
+
+  for (var i = 0; i < f.elements.length; i++) {
+    var elem = f.elements[i];
+    // Elements should have a name
+    if (elem.name) {
+      var st = elem.name.indexOf('[');
+      var sp = elem.name.indexOf(']');
+      var sb = '';
+      var en = '';
+      var c;
+      var n;
+      // Using Rails-/PHP-style name="foo[bar]"
+      // means you can go hierarchical if you want
+      if (opts.hierarchical && (st > 0) && (sp > 2)) {
+          sb = elem.name.substring(0, st);
+          en = elem.name.substring(st + 1, sp);
+          if (typeof h[sb] == 'undefined') { h[sb] = {}; }
+          c = h[sb];
+          n = en;
+      }
+      else {
+          c = h;
+          n = elem.name;
+      }
+      switch (elem.type) {
+        // Text fields, hidden form elements, etc.
+        case 'text':
+        case 'hidden':
+        case 'password':
+        case 'textarea':
+        case 'select-one':
+          c[n] = elem.value;
+          break;
+        // Multi-option select
+        case 'select-multiple':
+          for(var j = 0; j < elem.options.length; j++) {
+            var e = elem.options[j];
+            if(e.selected) {
+              c[n] = expandToArr(c[n], e.value);
+            }
+          }
+          break;
+        // Radio buttons
+        case 'radio':
+          if (elem.checked) {
+            c[n] = elem.value;
+          }
+          break;
+        // Checkboxes
+        case 'checkbox':
+          if (elem.checked) {
+            c[n] = expandToArr(c[n], elem.value);
+          }
+          break;
+        // Pedantic
+        case 'submit':
+        case 'reset':
+        case 'file':
+        case 'image':
+        case 'button':
+          if (opts.pedantic) { c[n] = elem.value; }
+          break;
+      }
+    }
+  }
+  return h;
+};
+// Alias for backward compat
+fleegix.form.toHash = fleegix.form.toObject;
