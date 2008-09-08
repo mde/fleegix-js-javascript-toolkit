@@ -30,12 +30,12 @@ if (typeof fleegix.template == 'undefined') { fleegix.template = {}; }
 //    the template are replaced with empty strings
 // preventCache -- Boolean, setting to true will always pull
 //    down a fresh copy of the template -- otherwise the template
-//    string gets stored in fleegix.template.markupCache so that
+//    string gets stored in fleegix.template.templateTextCache so that
 //    different UI elements sharing the same template file won't
 //    all have to make the server round-trip to get their template
 //    string.
 fleegix.template.Templater = function (p) {
-  var params = p || {}
+  var params = p || {};
   var opts = params.options || {};
   this.markup = params.markup || '';
   this.markupFile = '';
@@ -47,7 +47,7 @@ fleegix.template.Templater = function (p) {
     var noCache = typeof this.preventCache == 'undefined' ?
       false : this.preventCache;
     this.markupFile = params.markupFile;
-    var s = fleegix.template.markupCache[this.markupFile];
+    var s = fleegix.template.templateTextCache[this.markupFile];
     if (!s || noCache) {
       var p = {
         url: this.markupFile,
@@ -56,21 +56,21 @@ fleegix.template.Templater = function (p) {
         async: false
       };
       s = fleegix.xhr.doReq(p);
-      fleegix.template.markupCache[this.markupFile] = s;
+      fleegix.template.templateTextCache[this.markupFile] = s;
     }
     this.markup = s;
   }
-}
+};
 fleegix.template.Templater.prototype.templatize =
   function (domNode) {
   var str = this.getTemplatedMarkup();
   domNode.innerHTML = str;
   return domNode;
-}
+};
 fleegix.template.Templater.prototype.getTemplatedMarkup =
   function () {
-  var pat = /\$\{ *(.*?) *}/g;
-  var subPat = /[${} ]/g
+  var pat = /\$\{ *(.*?) *\}/g;
+  var subPat = /[${} ]/g;
   var str = this.markup;
   var match = str.match(pat);
   if (match) {
@@ -85,4 +85,7 @@ fleegix.template.Templater.prototype.getTemplatedMarkup =
   }
   return str;
 };
-fleegix.template.markupCache = {};
+fleegix.template.templateTextCache = {};
+
+
+
