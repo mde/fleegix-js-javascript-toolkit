@@ -12,7 +12,7 @@
 
 body { font: 12px "Verdana", "Arial", sans-serif; margin: 12; padding: 0; background:#ffffff; width:480px; }
 div,form,input { margin: 0; padding: 0; }
-h1,h2,h3,h4,h5,h6 { font-family: arial; }
+h1,h2,h3,h4,h5,h6 { font-family: "Arial", sans-serif; }
 a { color: #a37159; }
 a img { border: 0; }
 h1 { color:#333; margin: 16px 0 0; }
@@ -20,7 +20,8 @@ h3 { font-weight: normal; font-size: 15px; margin: 0 0 3px; color: #a99; }
 p { margin: 0 0 10px; line-height:20px; }
 code { font-size:13px; }
 hr { border: 0px; height: 1px; background: #ccc; color: #ccc; font-size: 0px; line-height: 1px; margin: 2px 0 8px; }
-.dataType { font-style: italic; }
+.paramName { font-weight: bold; color: #555; }
+.dataType { color: #999; }
 
 </style>
 
@@ -41,6 +42,20 @@ module or method name for a detailed description.</p>
 <hr/>
 
 <ul>
+  <li><a href="#globals">Globals</a></li>
+    <ul>
+      <li><a href="#$">$ (dollar sign)</a></li>
+      <li><a href="#$elem">$elem</a></li>
+      <li><a href="#$text">$text</a></li>
+      <li><a href="#fleegix">fleegix</a></li>
+    </ul>
+  <li><a href="#base">Base</a></li>
+    <ul>
+      <li><a href="#fleegix.extend">fleegix.extend</a></li>
+      <li><a href="#fleegix.mixin">fleegix.mixin</a></li>
+      <li><a href="#fleegix.clone">fleegix.clone</a></li>
+      <li><a href="#sniffing">Agent sniffing</a></li>
+    </ul>
   <li><a href="#fleegix.event">Events</a></li>
     <ul>
       <li><a href="#fleegix.event.listen">fleegix.event.listen</a></li>
@@ -51,10 +66,23 @@ module or method name for a detailed description.</p>
     </ul>
   <li><a href="#fleegix.xhr">XHR</a></li>
     <ul>
-      <li><a href="#fleegix.xhr.doGet">fleegix.xhr.doGet</a></li>
-      <li><a href="#fleegix.xhr.doPost">fleegix.xhr.doPost</a></li>
-      <li><a href="#fleegix.xhr.doReq">fleegix.xhr.doReq</a></li>
+      <li><a href="#fleegix.xhr.get">fleegix.xhr.get</a></li>
+      <li><a href="#fleegix.xhr.post">fleegix.xhr.post</a></li>
+      <li><a href="#fleegix.xhr.send">fleegix.xhr.send</a></li>
       <li><a href="#fleegix.xhr.abort">fleegix.xhr.abort</a></li>
+    </ul>
+  <li><a href="#fleegix.string">String</a></li>
+    <ul>
+      <li><a href="#fleegix.string.toArray">fleegix.string.toArray</a></li>
+      <li><a href="#fleegix.string.reverse">fleegix.string.reverse</a></li>
+      <li><a href="#fleegix.string.ltrim">fleegix.string.ltrim</a></li>
+      <li><a href="#fleegix.string.rtrim">fleegix.string.rtrim</a></li>
+      <li><a href="#fleegix.string.trim">fleegix.string.trim</a></li>
+      <li><a href="#fleegix.string.deCamelize">fleegix.string.deCamelize</a></li>
+      <li><a href="#fleegix.string.camelize">fleegix.string.camelize</a></li>
+      <li><a href="#fleegix.string.capitalize">fleegix.string.capitalize</a></li>
+      <li><a href="#fleegix.string.escapeXML">fleegix.string.escapeXML</a></li>
+      <li><a href="#fleegix.string.unescapeXML">fleegix.string.unescapeXML</a></li>
     </ul>
   <li><a href="#fleegix.form">Form</a></li>
     <ul>
@@ -98,6 +126,385 @@ module or method name for a detailed description.</p>
     </ul>
 </ul>
 
+<a name="globals"></a>
+
+<h1>Globals</h1>
+
+<hr/>
+
+<p>
+  Fleegix.js defines a tiny number of global variables -- this
+  makes it a lot less likely we step on somebodys else's toes.
+</p>
+
+<a name="$"></a>
+
+<h2>$ (dollar sign)</h2>
+
+<h3>Syntax</h3>
+
+<p>$(nodId)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    nodeId
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  -- The id of a DOM node.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Ah, the global dollar-sign function. Some people love it. Some
+  hate it. Whatever you think of it, it's undeniable that it's
+  implemented enough places now that it's fairly universal. The
+  Fleegix.js version is minimal -- it just works for lookup
+  of a single node.
+</p>
+
+<p>
+  Note: this global function is <em>only</em> created if
+  Fleegix.js doesn't find an already-existing one. So if you're
+  using a library like Prototype or JQuery that has its own
+  ideas about the dollar sign, Fleegix.js won't clobber the
+  existing definition.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var fooNode = $('foo');
+=> Returns a DOM node with the id of 'foo'</code></pre>
+
+<a name="$elem"></a>
+
+<h2>$elem</h2>
+
+<h3>Syntax</h3>
+
+<p>$elem(elemType, opts)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    elemType
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  The type of DOM element to create.
+</p>
+
+<p>
+  <span class="paramName">
+    opts
+  </span>
+  <span class="dataType">
+    (Object)
+  </span>
+  --
+  A keyword/value object containing a list of properties to
+  assign to the new DOM element.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Alias for <code>document.createElement</code>, with the
+  option of passing in a list of attributes to assign to the
+  new element.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var fooDiv = $elem('div', {
+  id: 'foo',
+  className: 'barClass',
+  innerHTML: 'Howdy' });</code></pre>
+
+<a name="$text"></a>
+
+<h2>$text</h2>
+
+<h3>Syntax</h3>
+
+<p>$text(nodeText)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    nodeText
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  Text to use in the new text node.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Alias for <code>document.createTextNode</code>.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var fooDiv = $elem('div', {
+  id: 'foo',
+  className: 'barClass');
+fooDiv.appendChild($text('Howdy'));</code></pre>
+
+<a name="fleegix"></a>
+
+<h2>fleegix</h2>
+
+<h3>Syntax</h3>
+
+<p>(None)</p>
+
+<h3>Parameters</h3>
+
+<p>(None)</p>
+
+<h3>Description</h3>
+
+<p>
+  Namespace for the methods and properties in the Fleegix.js
+  toolkit.
+</p>
+
+<a name="base"></a>
+
+<h1>Base</h1>
+
+<hr/>
+
+<p>
+  Basic metaprogramming helpers are here, as well as all
+  the code used to set up agent-sniffing flags like the
+  always-helpful <code>fleegix.isIE</code>.
+</p>
+
+<a name="fleegix.extend"></a>
+
+<h2>fleegix.extend</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.extend(superClass, subClass)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    superClass
+  </span>
+  <span class="dataType">
+    (Function)
+  </span>
+  --
+  Constructor function for the object you want to extend.
+</p>
+
+<p>
+  <span class="paramName">
+    subClass
+  </span>
+  <span class="dataType">
+    (Function)
+  </span>
+  --
+  Constructor function for the object containing all the stuff
+  you want to extend the superclass object with.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Simple object extension, returns a constructor function you
+  can use to create the extended objects. Note this makes the
+  assumption you always want to call the contstuctor function
+  of the superclass object with the same arguments as the
+  subclass object.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var superThing = function (f) {
+  this.foo = f;
+};
+var subThing = fleegix.extend(superThing, function (f, b) {
+  this.bar = b;
+});
+
+var sub = new subThing('QWER', 'ASDF');
+sub.foo;
+=> 'QWER'
+sub.bar;
+=> 'ASDF'</code></pre>
+
+<a name="fleegix.mixin"></a>
+
+<h2>fleegix.mixin</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.mixin(targetObj, mixinObj)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    targetObj
+  </span>
+  <span class="dataType">
+    (Object)
+  </span>
+  --
+  Object you want to copy methods and properties onto.
+</p>
+
+<p>
+  <span class="paramName">
+    mixinObj
+  </span>
+  <span class="dataType">
+    (Object)
+  </span>
+  --
+  Object with methods and properties you want to copy to
+  the target.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Copies methods and properties on one object onto another.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someThing = function (f) {
+  this.foo = f;
+};
+var some = new someThing('QWER');
+fleegix.mixin(some, {
+  bar: 'ASDF',
+  fooFinder: function () {
+    return this.foo;
+  }
+});
+
+some.bar;
+=> 'ASDF'
+some.fooFinder();
+=> 'QWER'</code></pre>
+
+<a name="fleegix.clone"></a>
+
+<h2>fleegix.clone</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.clone(cloneObj)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    cloneObj
+  </span>
+  <span class="dataType">
+    (Object)
+  </span>
+  --
+  Object you want to make a copy of.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Simple cloning function that makes a copy of object. Will
+  recurse through all the properties and copy those as
+  well. Note: does <em>not</em> check for cyclical references.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var someThing = function () {
+  this.foo = 'QWER',
+  this.bar = [1, 2, 3]
+};
+var some = new someThing();
+var other = fleegix.clone(some);
+
+other instanceof someThing;
+=> true
+other.foo;
+=> 'QWER'
+other.bar.push(4);
+other.bar;
+=> [1, 2, 3, 4]
+some.bar;
+=> [1, 2, 3]</code></pre>
+
+<a name="sniffing"></a>
+
+<h2>Agent sniffing</h2>
+
+<h3>Description</h3>
+
+<p>
+  Agent sniffing is horrible, but in the imperfect world of
+  cross-browser apps, sometimes you just have to suck it up
+  and do what has to be done.
+</p>
+
+<p>
+  Here's a list of the user-agents and OS's detected:
+</p>
+
+<ul>
+  <li>
+    fleeix.isOpera
+  </li>
+  <li>
+    fleegix.isKhtml
+  </li>
+  <li>
+    fleegix.isSafari
+  </li>
+  <li>
+    fleegix.isMoz (includes Firefox plus older Mozilla)
+  </li>
+  <li>
+    fleegix.isFF (Firefox only)
+  </li>
+  <li>
+    fleegix.isIE
+  </li>
+  <li>
+    fleegix.isMac
+  </li>
+  <li>
+    fleegix.isUnix (includes Linux plus BSD, Sun OS)
+  </li>
+  <li>
+    fleegix.isLinux (Linux only)
+  </li>
+  <li>
+    fleegix.isWindows
+  </li>
+</ul>
+
 <a name="fleegix.event"></a>
 
 <h1>Events</h1>
@@ -126,18 +533,18 @@ of your Web UI.</p>
 
 <h3>Parameters</h3>
 
-<p>listenerObj <span class="dataType">(Object/HTMLElement)</span> -- Object to add the listener to.</p>
+<p><span class="paramName">listenerObj</span> <span class="dataType">(Object/HTMLElement)</span> -- Object to add the listener to.</p>
 
-<p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
+<p><span class="paramName">triggerEventName</span> <span class="dataType">(String)</span> -- Name of method or event which
 will trigger execution of a function or method.</p>
 
-<p>someFunction <span class="dataType">(Function)</span> -- Function to execute when the triggering
+<p><span class="paramName">someFunction</span> <span class="dataType">(Function)</span> -- Function to execute when the triggering
 event is run.</p>
 
-<p>someObject <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to
+<p><span class="paramName">someObject</span> <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to
 execute when the triggering event is run.</p>
 
-<p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to
+<p><span class="paramName">someMethodName</span> <span class="dataType">(String)</span> -- Name of the method you want to
 execute when the triggering event is run.</p>
 
 <h3>Description</h3>
@@ -188,18 +595,18 @@ zardoz.foo(); => now three alerts, 'ABC,' 'simple,' then '123.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>listenerObj <span class="dataType">(Object/HTMLElement)</span> -- Object to remove the listener from.</p>
+<p><span class="paramName">listenerObj</span> <span class="dataType">(Object/HTMLElement)</span> -- Object to remove the listener from.</p>
 
-<p>triggerEventName <span class="dataType">(String)</span> -- Name of method or event which
+<p><span class="paramName">triggerEventName</span> <span class="dataType">(String)</span> -- Name of method or event which
 you want to stop triggering a certain function or method.</p>
 
-<p>someFunction <span class="dataType">(Function)</span> -- Function to stop triggering when
+<p><span class="paramName">someFunction</span> <span class="dataType">(Function)</span> -- Function to stop triggering when
 the triggering event is run.</p>
 
-<p>someObject <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to stop
+<p><span class="paramName">someObject</span> <span class="dataType">(Object/HTMLElement)</span> -- Object with the method you want to stop
 from executing when the triggering event is run.</p>
 
-<p>someMethodName <span class="dataType">(String)</span> -- Name of the method you want to stop
+<p><span class="paramName">someMethodName</span> <span class="dataType">(String)</span> -- Name of the method you want to stop
 from executing when the triggering event is run.</p>
 
 <h3>Description</h3>
@@ -243,9 +650,9 @@ zardoz.foo(); => now just one alert, 'ABC.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName <span class="dataType">(String)</span> -- Name of the channel to publish on.</p>
+<p><span class="paramName">channelName</span> <span class="dataType">(String)</span> -- Name of the channel to publish on.</p>
 
-<p>publishPayload <span class="dataType">(Object)</span> -- Object to send to anyone listening
+<p><span class="paramName">publishPayload</span> <span class="dataType">(Object)</span> -- Object to send to anyone listening
 on the specified channel.</p>
 
 <h3>Description</h3>
@@ -274,13 +681,13 @@ fleegix.event.publish('sciFi' pubObj);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName <span class="dataType">(String)</span> -- Name of the channel to listen for
+<p><span class="paramName">channelName</span> <span class="dataType">(String)</span> -- Name of the channel to listen for
 publish-events on.</p>
 
-<p>subscriberObj <span class="dataType">(Object)</span> -- Object that is listening for
+<p><span class="paramName">subscriberObj</span> <span class="dataType">(Object)</span> -- Object that is listening for
 publish-events on that channel.</p>
 
-<p>handlerMethod <span class="dataType">(Function)</span> -- Method to invoke when the
+<p><span class="paramName">handlerMethod</span> <span class="dataType">(Function)</span> -- Method to invoke when the
 publish-event occurs. The publish event will pass this method
 a JavaScript Object as a parameter.</p>
 
@@ -319,9 +726,9 @@ handlePublish method of zardoz, which alerts 'foo.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>channelName <span class="dataType">(String)</span> -- Name of the channel to unsubscribe from.</p>
+<p><span class="paramName">channelName</span> <span class="dataType">(String)</span> -- Name of the channel to unsubscribe from.</p>
 
-<p>unsubscribeObj <span class="dataType">(Object)</span> -- Object that should stop listening
+<p><span class="paramName">unsubscribeObj</span> <span class="dataType">(Object)</span> -- Object that should stop listening
 to that channel.</p>
 
 <h3>Description</h3>
@@ -346,30 +753,30 @@ HTTP methods such as PUT, or setting authentication headers
 or the format of the response). The module uses XHR-object
 pooling and request queueing.</p>
 
-<a name="fleegix.xhr.doGet"></a>
+<a name="fleegix.xhr.get"></a>
 
-<h2>fleegix.xhr.doGet</h2>
+<h2>fleegix.xhr.get</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.xhr.doGet(handlerFunction, url,
+<p>fleegix.xhr.get(handlerFunction, url,
     [responseFormat]);
 <em>(Asynchronous requests)</em></p>
 
-<p>fleegix.xhr.doGet(url, [responseFormat]);
+<p>fleegix.xhr.get(url, [responseFormat]);
 <em>(Synchronous requests)</em></p>
 
 <h3>Parameters</h3>
 
-<p>handlerFunction <span class="dataType">(Function)</span> -- function called when an
+<p><span class="paramName">handlerFunction</span> <span class="dataType">(Function)</span> -- function called when an
 asynchronous XHR request returns. If first argument
-is missing, doGet assumes a synchronous (blocking) request.
+is missing, get assumes a synchronous (blocking) request.
 When called by the response, it will be passed two parameters
 -- the response in the desired format, and the request ID.</p>
 
-<p>url <span class="dataType">(String)</span> -- The URL to make the request to.</p>
+<p><span class="paramName">url</span> <span class="dataType">(String)</span> -- The URL to make the request to.</p>
 
-<p>responseFormat <span class="dataType">(String)</span> -- Optional parameter, sets the format
+<p><span class="paramName">responseFormat</span> <span class="dataType">(String)</span> -- Optional parameter, sets the format
 of the response passed to the handler function.  Possible values
 are 'text' (to pass the responseText of the XHR object), 'xml'
 (the responseXML), and 'object' (to get the XHR object itself)
@@ -386,43 +793,43 @@ handler function.</p>
   alert(resp);
   alert('Request ID was: ' + id);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt');
+fleegix.xhr.get(alertResponse, 'random_textfile.txt');
 
-var s = fleegix.xhr.doGet('random_textfile.txt');
+var s = fleegix.xhr.get('random_textfile.txt');
 alert(s);
 
 function alertStatus(resp, id) {
   alert(resp.status);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
+fleegix.xhr.get(alertResponse, 'random_textfile.txt',
     'object');</code></pre>
 
-<a name="fleegix.xhr.doPost"></a>
+<a name="fleegix.xhr.post"></a>
 
-<h2>fleegix.xhr.doPost</h2>
+<h2>fleegix.xhr.post</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.xhr.doPost(handlerFunction, url, dataPayload,
+<p>fleegix.xhr.post(handlerFunction, url, data,
     [responseFormat]);
 <em>(Asynchronous requests)</em></p>
 
-<p>fleegix.xhr.doPost(url, dataPayload, [responseFormat]);
+<p>fleegix.xhr.post(url, data, [responseFormat]);
 <em>(Synchronous requests)</em></p>
 
 <h3>Parameters</h3>
 
-<p>handlerFunction <span class="dataType">(Function)</span> -- function called when an
+<p><span class="paramName">handlerFunction</span> <span class="dataType">(Function)</span> -- function called when an
 asynchronous XHR request returns. If first argument
-is missing, doPost assumes a synchronous (blocking) request.
+is missing, post assumes a synchronous (blocking) request.
 When called by the response, it will be passed two parameters
 -- the response in the desired format, and the request ID.</p>
 
-<p>url <span class="dataType">(String)</span> -- The URL to make the request to.</p>
+<p><span class="paramName">url</span> <span class="dataType">(String)</span> -- The URL to make the request to.</p>
 
-<p>dataPayload <span class="dataType">(String)</span> -- Data payload to send with the request.</p>
+<p><span class="paramName">data</span> <span class="dataType">(String)</span> -- Data payload to send with the request.</p>
 
-<p>responseFormat <span class="dataType">(String)</span> -- Optional parameter, sets the format
+<p><span class="paramName">responseFormat</span> <span class="dataType">(String)</span> -- Optional parameter, sets the format
 of the response passed to the handler function.  Possible values
 are 'text' (to pass the responseText of the XHR object), 'xml'
 (the responseXML), and 'object' (to get the XHR object itself)
@@ -438,10 +845,10 @@ handler function.</p>
 <pre><code>function alertResponse(resp, id) {
   alert(resp);
 }
-fleegix.xhr.doPost(alertResponse, 'random_textfile.txt',
+fleegix.xhr.post(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112');
 
-var s = fleegix.xhr.doPost('random_textfile.txt',
+var s = fleegix.xhr.post('random_textfile.txt',
   'foo=bar&baz=2112');
 alert(s);
 
@@ -449,20 +856,20 @@ function alertStatus(resp, id) {
   alert(resp.status);
   alert('Request ID was: ' + id);
 }
-fleegix.xhr.doGet(alertResponse, 'random_textfile.txt',
+fleegix.xhr.get(alertResponse, 'random_textfile.txt',
   'foo=bar&baz=2112', 'object');</code></pre>
 
-<a name="fleegix.xhr.doReq"></a>
+<a name="fleegix.xhr.send"></a>
 
-<h2>fleegix.xhr.doReq</h2>
+<h2>fleegix.xhr.send</h2>
 
 <h3>Syntax</h3>
 
-<p>fleegix.xhr.doReq(requestOptions); <em>(Either asynchronous or synchronous)</em></p>
+<p>fleegix.xhr.send(requestOptions); <em>(Either asynchronous or synchronous)</em></p>
 
 <h3>Parameters</h3>
 
-<p>requestOptions <span class="dataType">(Object)</span> -- Options for the XHR request. Here
+<p><span class="paramName">requestOptions</span> <span class="dataType">(Object)</span> -- Options for the XHR request. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 
@@ -471,7 +878,7 @@ values if they are not set:</p>
   <li>method: 'GET' -- HTTP request method to use</li>
   <li>async: true -- If set to false, makes a blocking
     request and returns the result inline</li>
-  <li>dataPayload: null -- data to send with POST or
+  <li>data: null -- data to send with POST or
     PUT requests</li>
   <li>handleSuccess: null -- Function to handle successful
     responses for asynchronous requests</li>
@@ -517,7 +924,7 @@ of request, type of response, as well as many other options.</p>
 
 <h3>Examples</h3>
 
-<pre><code>fleegix.xhr.doReq({
+<pre><code>fleegix.xhr.send({
   url: 'some_page.rbx',
   handleAll: function (s) { alert(s.status); },
   responseFormat: 'object',
@@ -534,7 +941,7 @@ of request, type of response, as well as many other options.</p>
 
 <h3>Parameters</h3>
 
-<p>requestId <span class="dataType">(Number)</span> -- Request ID of a currently processing
+<p><span class="paramName">requestId</span> <span class="dataType">(Number)</span> -- Request ID of a currently processing
 XHR request to abort.</p>
 
 <h3>Description</h3>
@@ -545,9 +952,360 @@ processing (i.e., it may have already completed), returns false.</p>
 
 <h3>Examples</h3>
 
-<pre><code>var id = fleegix.doGet(handlerFunction,
+<pre><code>var id = fleegix.get(handlerFunction,
   '/some_file.rbx'); // Get a request ID number
 fleegix.xhr.abort(id); // Abort the request</code></pre>
+
+<a name="fleegix.string"></a>
+
+<h1>Strings</h1>
+
+<hr/>
+
+<p>
+  A bunch of methods for wrangling strings.
+</p>
+
+<a name="fleegix.string.toArray"></a>
+
+<h2>fleegix.string.toArray</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.toArray(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to convert into an Array.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Converts a string into an Array of one-character strings.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = 'Rush2112';
+fleegix.string.toArray(str);
+=> ["R", "u", "s", "h", "2", "1", "1", "2"]</code></pre>
+
+<a name="fleegix.string.reverse"></a>
+
+<h2>fleegix.string.reverse</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.reverse(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to reverse.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Reverses the order of characters in a string.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = 'Rush2112';
+fleegix.string.reverse(str);
+=> '2112hsuR'</code></pre>
+
+<a name="fleegix.string.ltrim"></a>
+
+<h2>fleegix.string.ltrim</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.ltrim(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to trim whitespace off the left side of.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Trims whitespace characters off the left side of a string.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = '   ABC  ';
+fleegix.string.ltrim(str);
+=> 'ABC   '</code></pre>
+
+<a name="fleegix.string.rtrim"></a>
+
+<h2>fleegix.string.rtrim</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.rtrim(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to trim whitespace off the right side of.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Trims whitespace characters off the right side of a string.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = '   ABC  ';
+fleegix.string.rtrim(str);
+=> '   ABC'</code></pre>
+
+<a name="fleegix.string.trim"></a>
+
+<h2>fleegix.string.trim</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.trim(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to trim whitespace off.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Trims whitespace characters off either end of a string.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = '   ABC  ';
+fleegix.string.trim(str);
+=> 'ABC'</code></pre>
+
+<a name="fleegix.string.deCamelize"></a>
+
+<h2>fleegix.string.deCamelize</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.deCamelize(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to convert from camelCase to
+  lowercase_with_underscores.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Convert a string from camelCase (e.g., JavaScript variable
+  style) to lowercase_with_underscores (e.g., Ruby/Python
+  variable style).
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = 'someParameterName';
+fleegix.string.deCamelize(str);
+=> 'some_parameter_name'</code></pre>
+
+<a name="fleegix.string.camelize"></a>
+
+<h2>fleegix.string.camelize</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.camelize(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String you want to convert from lowercase_with_underscores
+  to camelCase.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Convert a string from lowercase_with_underscores (e.g,
+  Ruby/Python variable style) to camelCase (e.g., JavaScript
+  variable style).
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = 'some_parameter_name';
+fleegix.string.camelize(str);
+=> 'someParameterName'</code></pre>
+
+<a name="fleegix.string.capitalize"></a>
+
+<h2>fleegix.string.capitalize</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.capitalize(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String that you want to uppercase the first letter of.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Uppercases the first letter of a string.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = 'geddy';
+fleegix.string.capitalize(str);
+=> 'Geddy'</code></pre>
+
+<a name="fleegix.string.escapeXML"></a>
+
+<h2>fleegix.string.escapeXML</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.escapeXML(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String of XML markup to escape.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Escapes quotes, ampersands, and angle brackets in XML markup,
+  changing them to entity codes.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = "&lt;div&gt;Howdy&lt;/div&gt;";
+fleegix.string.escapeXmL(str);
+=> "&amp;lt;div&amp;gt;Howdy&amp;lt;/div&amp;gt;"</code></pre>
+
+<a name="fleegix.string.unescapeXML"></a>
+
+<h2>fleegix.string.unescapeXML</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.string.unescapeXML(str)</p>
+
+<h3>Parameters</h3>
+
+<p>
+  <span class="paramName">
+    str
+  </span>
+  <span class="dataType">
+    (String)
+  </span>
+  --
+  String of XML markup to unescape.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Converts entity codes for quotes, ampersands, and angle
+  brackets in escaped XML markup back to their original
+  characters.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var str = "&amp;lt;div&amp;gt;Howdy&amp;lt;/div&amp;gt;";
+fleegix.string.escapeXmL(str);
+=> "&lt;div&gt;Howdy&lt;/div&gt;"</code></pre>
+
+
 
 <a name="fleegix.form"></a>
 
@@ -573,10 +1331,10 @@ has changed in a form).</p>
 
 <h3>Parameters</h3>
 
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
+<p><span class="paramName">formElement</span> <span class="dataType">(Object)</span> -- The HTML form you want to
 serialize.</p>
 
-<p>serializeOptions <span class="dataType">(Object)</span> -- Options for how to serialize
+<p><span class="paramName">serializeOptions</span> <span class="dataType">(Object)</span> -- Options for how to serialize
 the form. Here is the list of possible properties to set,
 and the default values if they are not set:</p>
 <ul>
@@ -602,13 +1360,13 @@ the payload in an XMLHttpRequest POST request.</p>
 
 <pre><code>var someForm = document.getElementById('someFormId');
 var str = fleegix.form.serialize(someForm);
-fleegix.xhr.doPost(handlerFunc, '/post_page.rbx', str);
+fleegix.xhr.post(handlerFunc, '/post_page.rbx', str);
 => Posts contents of someForm to post_page.rbx
 
 var someForm = document.getElementById('someFormId');
 var str = fleegix.form.serialize(someForm, { includeEmpty: true });
 var url = 'get_page.rbx?' + str;
-fleegix.xhr.doGet(handlerFunc, url);
+fleegix.xhr.get(handlerFunc, url);
 => Use the serialized form as a query string in a GET</code></pre>
 
 <a name="fleegix.form.toObject"></a>
@@ -621,7 +1379,7 @@ fleegix.xhr.doGet(handlerFunc, url);
 
 <h3>Parameters</h3>
 
-<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
+<p><span class="paramName">formElement</span> <span class="dataType">(Object)</span> -- The HTML form you want to
 convert to a keyword/value object.</p>
 
 <h3>Description</h3>
@@ -661,10 +1419,10 @@ visual effects for a Web app -- fade-in and fade-out.</p>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
+<p><span class="paramName">domElement</span> <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
 that you wish to apply a fadeout animation effect to.</p>
 
-<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
+<p><span class="paramName">fadeOptions</span> <span class="dataType">(Object)</span> -- Options for the fadeout animation. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 <ul>
@@ -697,10 +1455,10 @@ fleegix.fx.fadeOut(fadeDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
+<p><span class="paramName">domElement</span> <span class="dataType">(HTMLElement)</span> -- DOM node (such as div or span)
 that you wish to apply a fadein animation effect to.</p>
 
-<p>fadeOptions <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
+<p><span class="paramName">fadeOptions</span> <span class="dataType">(Object)</span> -- Options for the fadein animation. Here
 is the list of possible properties to set, and the default
 values if they are not set:</p>
 <ul>
@@ -733,11 +1491,11 @@ fleegix.fx.fadeIn(fadeDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM
+<p><span class="paramName">domElement</span> <span class="dataType">(HTMLElement)</span> -- DOM
 node (such as div or span) that you wish to apply a window
 blind animation effect to.</p>
 
-<p>fadeOptions <span class="dataType">(Object)</span>
+<p><span class="paramName">fadeOptions</span> <span class="dataType">(Object)</span>
 -- Options for the fadein animation. Here is the list of
 possible properties to set, and the default values if they
 are not set:</p>
@@ -781,11 +1539,11 @@ fleegix.fx.blindDown(blindDiv);</code></pre>
 
 <h3>Parameters</h3>
 
-<p>domElement <span class="dataType">(HTMLElement)</span> -- DOM
+<p><span class="paramName">domElement</span> <span class="dataType">(HTMLElement)</span> -- DOM
 node (such as div or span) that you wish to apply a window
 blind animation effect to.</p>
 
-<p>fadeOptions <span class="dataType">(Object)</span>
+<p><span class="paramName">fadeOptions</span> <span class="dataType">(Object)</span>
 -- Options for the fadein animation. Here is the list of
 possible properties to set, and the default values if they
 are not set:</p>
@@ -838,7 +1596,7 @@ the JSON data format.</p>
 
 <h3>Parameters</h3>
 
-<p>serializeObj <span class="dataType">(Object)</span> -- Object to serialize as a JSON string. </p>
+<p><span class="paramName">serializeObj</span> <span class="dataType">(Object)</span> -- Object to serialize as a JSON string. </p>
 
 <h3>Description</h3>
 
@@ -902,7 +1660,7 @@ elements.</p>
 
 <h3>Parameters</h3>
 
-<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+<p><span class="paramName">someNode</span> <span class="dataType">(HTMLElement)</span> -- The DOM
 element you wish to center both horizontally and vertically.</p>
 
 <h3>Description</h3>
@@ -934,10 +1692,10 @@ CSS.</p>
 
 <h3>Parameters</h3>
 
-<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+<p><span class="paramName">someNode</span> <span class="dataType">(HTMLElement)</span> -- The DOM
 node you wish to add a CSS class to.</p>
 
-<p>someClass <span class="dataType">(String)</span> -- The CSS class
+<p><span class="paramName">someClass</span> <span class="dataType">(String)</span> -- The CSS class
 you wish to add.</p>
 
 <h3>Description</h3>
@@ -960,10 +1718,10 @@ fleegix.css.addClass(someDiv, 'someCssClass');</code></pre>
 
 <h3>Parameters</h3>
 
-<p>someNode <span class="dataType">(HTMLElement)</span> -- The DOM
+<p><span class="paramName">someNode</span> <span class="dataType">(HTMLElement)</span> -- The DOM
 node you wish to remove a CSS class from.</p>
 
-<p>someClass <span class="dataType">(String)</span> -- The CSS class
+<p><span class="paramName">someClass</span> <span class="dataType">(String)</span> -- The CSS class
 you wish to remove.</p>
 
 <h3>Description</h3>
@@ -996,7 +1754,7 @@ or update query-string parameters with new values.</p>
 
 <h3>Parameters</h3>
 
-<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the query string
+<p><span class="paramName">urlString</span> <span class="dataType">(String)</span> -- The URL you want to get the query string
 from.</p>
 
 <h3>Description</h3>
@@ -1018,7 +1776,7 @@ mark) on a URL.</p>
 
 <h3>Parameters</h3>
 
-<p>urlString <span class="dataType">(String)</span> -- The URL you want to get the base URL from.</p>
+<p><span class="paramName">urlString</span> <span class="dataType">(String)</span> -- The URL you want to get the base URL from.</p>
 
 <h3>Description</h3>
 
@@ -1039,10 +1797,10 @@ mark, if there's a query string) on a URL.</p>
 
 <h3>Parameters</h3>
 
-<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to get
+<p><span class="paramName">paramName</span> <span class="dataType">(String)</span> -- The name of the parameter you want to get
 the value of.</p>
 
-<p>querystring <span class="dataType">(String)</span> -- The query string you want to get a value
+<p><span class="paramName">querystring</span> <span class="dataType">(String)</span> -- The query string you want to get a value
 from.</p>
 
 <h3>Description</h3>
@@ -1068,12 +1826,12 @@ alert(foo); => alerts '2112,1001.'</code></pre>
 
 <h3>Parameters</h3>
 
-<p>paramName <span class="dataType">(String)</span> -- The name of the parameter you want to set
+<p><span class="paramName">paramName</span> <span class="dataType">(String)</span> -- The name of the parameter you want to set
 the value of.</p>
 
-<p>value <span class="dataType">(String)</span> -- The value you want to set the parameter to.</p>
+<p><span class="paramName">value</span> <span class="dataType">(String)</span> -- The value you want to set the parameter to.</p>
 
-<p>querystring <span class="dataType">(String)</span> -- The query string you want to set a value
+<p><span class="paramName">querystring</span> <span class="dataType">(String)</span> -- The query string you want to set a value
 for a param on.</p>
 
 <h3>Description</h3>
@@ -1112,10 +1870,10 @@ getting and setting cookie values in the browser.</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to set the
+<p><span class="paramName">cookieName</span> <span class="dataType">(String)</span> -- Name of the cookie you want to set the
 value for.</p>
 
-<p>opts <span class="dataType">(Object)</span> -- Object with keyword options for the cookie.
+<p><span class="paramName">opts</span> <span class="dataType">(Object)</span> -- Object with keyword options for the cookie.
 Here is the list of possible properties to set, and the default
 values if they are not set:</p>
 
@@ -1152,10 +1910,10 @@ fleegix.cookie.set('Zardoz', { path: '/app/main', hours: 2,
 
 <h3>Parameters</h3>
 
-<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to get the
+<p><span class="paramName">cookieName</span> <span class="dataType">(String)</span> -- Name of the cookie you want to get the
 value for.</p>
 
-<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to get the value
+<p><span class="paramName">path</span> <span class="dataType">(String)</span> -- Path for the cookie you want to get the value
 for. If omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
@@ -1176,9 +1934,9 @@ for. If omitted, assumes root ('/').</p>
 
 <h3>Parameters</h3>
 
-<p>cookieName <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
+<p><span class="paramName">cookieName</span> <span class="dataType">(String)</span> -- Name of the cookie you want to remove.</p>
 
-<p>path <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If
+<p><span class="paramName">path</span> <span class="dataType">(String)</span> -- Path for the cookie you want to remove. If
 omitted, assumes root ('/').</p>
 
 <h3>Description</h3>
