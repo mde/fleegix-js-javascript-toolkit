@@ -67,7 +67,13 @@ fleegix.mixin = function (/* Target obj */ target,
 // Note this doesn't check for cyclical references
 fleegix.clone = function (o) {
   if (typeof o == 'object') {
-    var ret = {};
+    var ret;
+    if (typeof o.constructor == 'function') {
+      ret = new o.constructor();
+    }
+    else {
+      ret = {};
+    }
     for (var p in o) {
       if (typeof o[p] == 'object' && o[p] != null) {
         ret[p] = fleegix.clone(o[p]);
