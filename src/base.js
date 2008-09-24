@@ -17,7 +17,7 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 if (typeof $ == 'undefined') {
-  var $ = function (s) { return document.getElementById(s); }
+  var $ = function (s) { return document.getElementById(s); };
 }
 
 var $elem = function (s, o) {
@@ -40,7 +40,7 @@ fleegix.extend = function (/* Super-class constructor function */ superClass,
     superClass.prototype.constructor.apply(this, arguments);
     subClass.apply(this, arguments);
     this.superClass = superClass;
-    this.subClass = subClass
+    this.subClass = subClass;
   };
 };
 
@@ -75,7 +75,7 @@ fleegix.clone = function (o) {
       ret = {};
     }
     for (var p in o) {
-      if (typeof o[p] == 'object' && o[p] != null) {
+      if (typeof o[p] == 'object' && o[p] !== null) {
         ret[p] = fleegix.clone(o[p]);
       }
       else {
@@ -89,7 +89,7 @@ fleegix.clone = function (o) {
   return ret;
 };
 
-// This stuff gets run inline below, props added to 
+// This stuff gets run inline below, props added to
 // base 'fleegix' obj -- namespaced to avoid global refs
 // Some code taken from the Dojo loader
 fleegix.agentSniffing = new function () {
@@ -97,6 +97,7 @@ fleegix.agentSniffing = new function () {
   var n = navigator;
   var ua = n.userAgent;
   var av = n.appVersion;
+  // Browsers
   f.isOpera = (ua.indexOf("Opera") > -1);
   f.isKhtml = (av.indexOf("Konqueror") > -1) ||
     (av.indexOf("Safari") > -1);
@@ -106,14 +107,18 @@ fleegix.agentSniffing = new function () {
   f.isIE = false;
   try {
     if (f.isMoz) {
-      f.isFF = (ua.indexOf('Firefox') > -1);
+      f.isFF = (ua.indexOf('Firefox') > -1) ||
+        (ua.indexOf('Iceweasel') > -1); // 'Freetards'
     }
-    if ((document.all) && (!f.isOpera)) {
+    if (document.all && !f.isOpera) {
       f.isIE = (ua.indexOf('MSIE ') > -1);
     }
-  } 
+  }
   // Squelch
   catch(e) {}
+  f.isIPhone = (av.indexOf("iPhone") > -1);
+  f.isMobile = f.isIPhone || (ua.indexOf("Opera Mini") > -1);
+  // OS's
   f.isMac = (ua.indexOf('Mac') > -1);
   f.isUnix = (ua.indexOf('Linux') > -1) ||
     (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
