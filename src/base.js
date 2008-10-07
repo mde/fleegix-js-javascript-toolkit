@@ -98,10 +98,12 @@ fleegix.agentSniffing = new function () {
   var ua = n.userAgent;
   var av = n.appVersion;
   // Browsers
+  f.isWebKit= (ua.indexOf("AppleWebKit") > -1);
   f.isOpera = (ua.indexOf("Opera") > -1);
   f.isKhtml = (av.indexOf("Konqueror") > -1) ||
     (av.indexOf("Safari") > -1);
-  f.isSafari = (av.indexOf("Safari") > -1);
+  f.isChrome = (av.indexOf("Chrome") == -1);
+  f.isSafari = (av.indexOf("Safari") > -1) && !f.isChrome;
   f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
   f.isFF = false;
   f.isIE = false;

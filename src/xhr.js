@@ -343,10 +343,13 @@ fleegix.xhr = new function () {
       if (!req.data) {
         req.data = '';
       }
-      // Set content-length for picky servers
-      var contentLength = typeof req.data == 'string' ?
-        req.data.length : 0;
-      xhrObj.setRequestHeader('Content-Length', contentLength);
+      // Set content-length for picky servers, but *only*
+      // in nice browsers that allow it
+      if (!fleegix.isSafari) {
+        var contentLength = typeof req.data == 'string' ?
+          req.data.length : 0;
+        xhrObj.setRequestHeader('Content-Length', contentLength);
+      }
       // Set content-type to urlencoded if nothing
       // else specified
       if (typeof req.headers['Content-Type'] == 'undefined') {
