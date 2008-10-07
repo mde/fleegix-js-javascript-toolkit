@@ -17,7 +17,7 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 
 if (typeof $ == 'undefined') {
-  var $ = function (s) { return document.getElementById(s); }
+  var $ = function (s) { return document.getElementById(s); };
 }
 
 var $elem = function (s, o) {
@@ -40,7 +40,7 @@ fleegix.extend = function (/* Super-class constructor function */ superClass,
     superClass.prototype.constructor.apply(this, arguments);
     subClass.apply(this, arguments);
     this.superClass = superClass;
-    this.subClass = subClass
+    this.subClass = subClass;
   };
 };
 
@@ -75,7 +75,7 @@ fleegix.clone = function (o) {
       ret = {};
     }
     for (var p in o) {
-      if (typeof o[p] == 'object' && o[p] != null) {
+      if (typeof o[p] == 'object' && o[p] !== null) {
         ret[p] = fleegix.clone(o[p]);
       }
       else {
@@ -89,7 +89,7 @@ fleegix.clone = function (o) {
   return ret;
 };
 
-// This stuff gets run inline below, props added to 
+// This stuff gets run inline below, props added to
 // base 'fleegix' obj -- namespaced to avoid global refs
 // Some code taken from the Dojo loader
 fleegix.agentSniffing = new function () {
@@ -97,23 +97,30 @@ fleegix.agentSniffing = new function () {
   var n = navigator;
   var ua = n.userAgent;
   var av = n.appVersion;
+  // Browsers
+  f.isWebKit= (ua.indexOf("AppleWebKit") > -1);
   f.isOpera = (ua.indexOf("Opera") > -1);
   f.isKhtml = (av.indexOf("Konqueror") > -1) ||
     (av.indexOf("Safari") > -1);
-  f.isSafari = (av.indexOf("Safari") > -1);
+  f.isChrome = (av.indexOf("Chrome") == -1);
+  f.isSafari = (av.indexOf("Safari") > -1) && !f.isChrome;
   f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
   f.isFF = false;
   f.isIE = false;
   try {
     if (f.isMoz) {
-      f.isFF = (ua.indexOf('Firefox') > -1);
+      f.isFF = (ua.indexOf('Firefox') > -1) ||
+        (ua.indexOf('Iceweasel') > -1); // 'Freetards'
     }
-    if ((document.all) && (!f.isOpera)) {
+    if (document.all && !f.isOpera) {
       f.isIE = (ua.indexOf('MSIE ') > -1);
     }
-  } 
+  }
   // Squelch
   catch(e) {}
+  f.isIPhone = (av.indexOf("iPhone") > -1);
+  f.isMobile = f.isIPhone || (ua.indexOf("Opera Mini") > -1);
+  // OS's
   f.isMac = (ua.indexOf('Mac') > -1);
   f.isUnix = (ua.indexOf('Linux') > -1) ||
     (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
@@ -1260,10 +1267,13 @@ fleegix.xhr = new function () {
       if (!req.data) {
         req.data = '';
       }
-      // Set content-length for picky servers
-      var contentLength = typeof req.data == 'string' ?
-        req.data.length : 0;
-      xhrObj.setRequestHeader('Content-Length', contentLength);
+      // Set content-length for picky servers, but *only*
+      // in nice browsers that allow it
+      if (!fleegix.isSafari) {
+        var contentLength = typeof req.data == 'string' ?
+          req.data.length : 0;
+        xhrObj.setRequestHeader('Content-Length', contentLength);
+      }
       // Set content-type to urlencoded if nothing
       // else specified
       if (typeof req.headers['Content-Type'] == 'undefined') {
@@ -1552,6 +1562,13 @@ fleegix.json = new function() {
 
 fleegix.string = new function () {
   var ltr = /^\s+/; var rtr = /\s+$/; var tr = /^\s+|\s+$/g;
+  var _hrefPat = new RegExp(
+    "(((https?):\\/\\/|www\\.)" + // Protocol or just 'www'
+    "(?:([a-zA-Z\\d\\-_]+)@?" + // Username
+    "([a-zA-Z\\d\\-_]+)\\:)?((?:(?:(?:(?:[a-zA-Z\\d](?:(?:[a-zA-Z\\d]|-)*[a-zA-Z\\d])?)\\.)*([a-zA-Z](?:(?:[a-zA-Z\\d]|-)*[a-zA-Z\\d])?))|(?:(?:\\\d+)(?:\\.(?:\\\d+)){3}))(?::(\\\d+))?)" + // Hostname
+    "(?:\\/((?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*)(?:\\/(?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*))*)(\\?(?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*))?)?)", // Path
+    "g"); // Global regex
+
   this.toArray = function (str) {
     var arr = [];
     for (var i = 0; i < str.length; i++) {
@@ -1585,7 +1602,7 @@ fleegix.string = new function () {
   };
   // Converts some_variable_name to someVariableName
   this.toCamelCase = function (s) {
-    return s.replace(/_[a-z]{1}/g, function (s) 
+    return s.replace(/_[a-z]{1}/g, function (s)
       { return s.replace('_', '').toUpperCase() });
   };
   // Alias for above
@@ -1602,6 +1619,35 @@ fleegix.string = new function () {
   this.unescapeXML = function (s) {
     return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
       replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
+  };
+  this.addHrefLinks = function (str, cls) {
+    var s = str || '';
+    var pat = _hrefPat;
+    var url;
+    var start;
+    var end;
+    var match;
+    var matches = {};
+    while (match = pat.exec(s)) {
+      url = match[0];
+      // Get rid of any punctuation on the end, even
+      // if they may be legal URL chars
+      url = url.replace(/[,)\.\?\!]+$/, '');
+      // Build a list of URLs to replace
+      matches[url] = true;
+    }
+    // Can't use a regex to do global replace here, hack
+    // it with split/join
+    var arr;
+    var href;
+    var className = cls ? ' class="' + cls + '"' : '';
+    for (var m in matches) {
+      arr = s.split(m);
+      href = m.indexOf('www') === 0 ? 'http://' + m : m;
+      s = arr.join('<a' + className +
+        ' href="' + href + '">' + m + '</a>');
+    }
+    return s;
   };
 };
 

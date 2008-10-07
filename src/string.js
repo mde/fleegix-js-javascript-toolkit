@@ -17,6 +17,13 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.string = new function () {
   var ltr = /^\s+/; var rtr = /\s+$/; var tr = /^\s+|\s+$/g;
+  var _hrefPat = new RegExp(
+    "(((https?):\\/\\/|www\\.)" + // Protocol or just 'www'
+    "(?:([a-zA-Z\\d\\-_]+)@?" + // Username
+    "([a-zA-Z\\d\\-_]+)\\:)?((?:(?:(?:(?:[a-zA-Z\\d](?:(?:[a-zA-Z\\d]|-)*[a-zA-Z\\d])?)\\.)*([a-zA-Z](?:(?:[a-zA-Z\\d]|-)*[a-zA-Z\\d])?))|(?:(?:\\\d+)(?:\\.(?:\\\d+)){3}))(?::(\\\d+))?)" + // Hostname
+    "(?:\\/((?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*)(?:\\/(?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*))*)(\\?(?:(?:(?:[a-zA-Z\\d$\\-_.+!*'(),~#]|(?:%[a-fA-F\\\d]{2}))|[;:@&=#])*))?)?)", // Path
+    "g"); // Global regex
+
   this.toArray = function (str) {
     var arr = [];
     for (var i = 0; i < str.length; i++) {
@@ -50,7 +57,7 @@ fleegix.string = new function () {
   };
   // Converts some_variable_name to someVariableName
   this.toCamelCase = function (s) {
-    return s.replace(/_[a-z]{1}/g, function (s) 
+    return s.replace(/_[a-z]{1}/g, function (s)
       { return s.replace('_', '').toUpperCase() });
   };
   // Alias for above
@@ -67,6 +74,35 @@ fleegix.string = new function () {
   this.unescapeXML = function (s) {
     return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
       replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
+  };
+  this.addHrefLinks = function (str, cls) {
+    var s = str || '';
+    var pat = _hrefPat;
+    var url;
+    var start;
+    var end;
+    var match;
+    var matches = {};
+    while (match = pat.exec(s)) {
+      url = match[0];
+      // Get rid of any punctuation on the end, even
+      // if they may be legal URL chars
+      url = url.replace(/[,)\.\?\!]+$/, '');
+      // Build a list of URLs to replace
+      matches[url] = true;
+    }
+    // Can't use a regex to do global replace here, hack
+    // it with split/join
+    var arr;
+    var href;
+    var className = cls ? ' class="' + cls + '"' : '';
+    for (var m in matches) {
+      arr = s.split(m);
+      href = m.indexOf('www') === 0 ? 'http://' + m : m;
+      s = arr.join('<a' + className +
+        ' href="' + href + '">' + m + '</a>');
+    }
+    return s;
   };
 };
 
