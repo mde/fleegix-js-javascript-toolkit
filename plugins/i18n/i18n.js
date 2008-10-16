@@ -16,11 +16,12 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 fleegix.i18n = new function () {
+  var _this = this;
   this.localizedStrings = {};
   this.getText = function () {
     var args = Array.prototype.slice.apply(arguments);
     var key = args.shift();
-    var str = this.localizedStrings[key] || "[[" + key + "]]";
+    var str = _this.localizedStrings[key] || "[[" + key + "]]";
     for (var i = 0; i < args.length; i++){
         str = str.replace(new RegExp('\\{' + i + '\\}', 'g'), args[i]);
     }
