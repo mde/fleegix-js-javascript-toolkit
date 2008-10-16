@@ -1,5 +1,5 @@
 
-var test_fleegixXhr = new function () {
+fleegixMain.test_fleegixXhr = new function () {
   function getCurrentDir() {
     var loc = location.href;
     var str = loc.substring(0, loc.lastIndexOf('/'));
@@ -8,7 +8,7 @@ var test_fleegixXhr = new function () {
 
   this.test_doGet = [
     function () {
-      var d = _createElem('div');
+      var d = $elem('div');
       d.id = 'fooDiv';
       d.innerHTML = 'Testing fleegix.xhr.doGet ...';
       document.body.appendChild(d);
@@ -34,7 +34,7 @@ var test_fleegixXhr = new function () {
 
   this.test_doPost = [
     function () {
-      var d = _createElem('div');
+      var d = $elem('div');
       d.id = 'fooDiv';
       d.innerHTML = 'Testing fleegix.xhr.doPost ...';
       document.body.appendChild(d);

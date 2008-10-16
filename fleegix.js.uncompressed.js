@@ -1726,6 +1726,8 @@ fleegix.form = {};
  *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
  *   pedantic: (Boolean) include the values of elements like
  *      button or image
+ *   deCamelizeParams: (Boolean) change param names from
+ *     camelCase to lowercase_with_underscores
  * @returns query-string style String of variable-value pairs
  */
 fleegix.form.serialize = function (f, o) {
@@ -1770,7 +1772,7 @@ fleegix.form.serialize = function (f, o) {
   }
   // Convert all the camelCase param names to Ruby/Python style
   // lowercase_with_underscores
-  if (opts.deCamelize) {
+  if (opts.deCamelizeParams) {
     if (!fleegix.string) {
       throw new Error(
         'deCamelize option depends on fleegix.string module.');

@@ -1,5 +1,5 @@
 
-var test_fleegixDateUtils = new function () {
+fleegixMain.test_fleegixDateUtil = new function () {
     this.test_diffWeekday = function () {
       var interv = fleegix.date.util.dateParts.WEEKDAY;
       var diff = function () {

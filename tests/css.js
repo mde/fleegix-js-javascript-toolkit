@@ -1,8 +1,8 @@
 
-var test_fleegixCss = new function () {
+fleegixMain.test_fleegixCss = new function () {
   this.test_addClassName = [
     function () {
-      var d = _createElem('div');
+      var d = $elem('div');
       d.id = 'fooDiv';
       d.innerHTML = 'Testing fleegix.css.addClass ...';
       document.body.appendChild(d);
@@ -25,7 +25,7 @@ var test_fleegixCss = new function () {
 
   this.test_removeClassName = [
     function () {
-      var d = _createElem('div');
+      var d = $elem('div');
       d.id = 'fooDiv';
       d.innerHTML = 'Testing fleegix.css.removeClass ...';
       document.body.appendChild(d);

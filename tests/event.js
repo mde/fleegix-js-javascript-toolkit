@@ -1,13 +1,13 @@
 
-var test_fleegixEvent = new function () {
+fleegixMain.test_fleegixEvent = new function () {
   this.handleClick = function () {
     var d = $('clickHandlerTest');
     d.firstChild.nodeValue = 'I was just clicked, yay me!';
   };
   this.setup = function () {
-    var d = _createElem('div');
+    var d = $elem('div');
     d.id = 'clickHandlerTest';
-    d.appendChild(_createText('Click Test'));
+    d.appendChild($text('Click Test'));
     fleegix.event.listen(d, 'onclick', test_fleegixEvent, 'handleClick');
     document.body.appendChild(d);
   };
