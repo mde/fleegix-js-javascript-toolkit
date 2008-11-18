@@ -20,31 +20,37 @@ fleegix.json = new function() {
     var str = '';
     switch (typeof obj) {
       case 'object':
-        // Null
-        if (obj === null) {
-           return 'null';
-        }
-        // Arrays
-        else if (obj instanceof Array) {
-          for (var i = 0; i < obj.length; i++) {
-            if (str) { str += ','; }
-            str += fleegix.json.serialize(obj[i]);
-          }
-          return '[' + str + ']';
-        }
-        // Objects
-        else if (typeof obj.toString != 'undefined') {
-          for (var i in obj) {
-            if (str) { str += ','; }
-            str += '"' + i + '":';
-            if (typeof obj[i] == 'undefined') {
-              str += '"undefined"';
-            }
-            else {
+        switch (true) {
+          // Null
+          case obj === null:
+            return 'null';
+            break;
+          // Arrays
+          case obj instanceof Array: 
+            for (var i = 0; i < obj.length; i++) {
+              if (str) { str += ','; }
               str += fleegix.json.serialize(obj[i]);
             }
-          }
-          return '{' + str + '}';
+            return '[' + str + ']';
+            break;
+          // Exceptions don't serialize correctly in Firefox
+          case (fleegix.isFF && obj instanceof DOMException):
+            str += '"' + obj.toString() + '"';
+            break;
+          // All other generic objects
+          case typeof obj.toString != 'undefined':
+            for (var i in obj) {
+              if (str) { str += ','; }
+              str += '"' + i + '":';
+              if (typeof obj[i] == 'undefined') {
+                str += '"undefined"';
+              }
+              else {
+                str += fleegix.json.serialize(obj[i]);
+              }
+            }
+            return '{' + str + '}';
+            break;
         }
         return str;
       case 'unknown':
