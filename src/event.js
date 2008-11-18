@@ -126,13 +126,13 @@ fleegix.event = new function () {
           if (!args.length) {
             try {
               switch (true) {
-                case !!(obj.ownerDocument):
+                case !!obj.ownerDocument:
                   ev = obj.ownerDocument.parentWindow.event;
                   break;
-                case !!(obj.documentElement):
+                case !!obj.documentElement:
                   ev = obj.documentElement.ownerDocument.parentWindow.event;
                   break;
-                case !!(obj.event):
+                case !!obj.event:
                   ev = obj.event;
                   break;
                 default:
@@ -201,7 +201,7 @@ fleegix.event = new function () {
           }
         }
 
-      }
+      };
       if (this.compatibilityMode) {
         if (!obj._fleegixEventListenReg) { obj._fleegixEventListenReg = {}; }
         obj._fleegixEventListenReg[meth] = listenReg;
@@ -397,6 +397,43 @@ fleegix.event = new function () {
     obj['_' + meth + '_suppressErrors'] = true;
   };
 };
+
+fleegix.event.PeriodicExecuter = function (func, interval, waitFirst) {
+  var _this = this;
+  var _paused = false;
+  this.func = func || null;
+  this.interval = interval || null;
+  this.waitFirst = waitFirst || false;
+  this.start = function (waitFirst) {
+    this.waitFirst = waitFirst || this.waitFirst;
+    if (this.waitFirst) {
+      setTimeout(this.run, this.interval);
+    }
+    else {
+      this.run();
+    }
+  };
+  this.run = function () {
+    if (!_paused) {
+      _this.func();
+      setTimeout(_this.run, _this.interval);
+    }
+  };
+  this.pause = function () {
+    _paused = true;
+  };
+  this.resume = function () {
+    _paused = false;
+    this.run();
+  };
+};
+
 // Clean up listeners
-fleegix.event.listen(window, 'onunload', fleegix.event, 'flush');
+fleegix.event.listen(window, 'onunload', function () {
+  try {
+    fleegix.event.flush();
+  }
+  catch (e) {} // Squelch
+});
+
 
