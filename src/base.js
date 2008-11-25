@@ -89,43 +89,66 @@ fleegix.clone = function (o) {
   return ret;
 };
 
-// This stuff gets run inline below, props added to
-// base 'fleegix' obj -- namespaced to avoid global refs
-// Some code taken from the Dojo loader
-fleegix.agentSniffing = new function () {
-  var f = fleegix; // Alias the base 'fleegix' obj
-  var n = navigator;
-  var ua = n.userAgent;
-  var av = n.appVersion;
-  // Browsers
-  f.isWebKit= (ua.indexOf("AppleWebKit") > -1);
-  f.isOpera = (ua.indexOf("Opera") > -1);
-  f.isKhtml = (av.indexOf("Konqueror") > -1) ||
-    (av.indexOf("Safari") > -1);
-  f.isChrome = (av.indexOf("Chrome") > -1);
-  f.isSafari = (av.indexOf("Safari") > -1) && !f.isChrome;
-  f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
-  f.isFF = false;
-  f.isIE = false;
-  try {
-    if (f.isMoz) {
-      f.isFF = (ua.indexOf('Firefox') > -1) ||
-        (ua.indexOf('Iceweasel') > -1); // 'Freetards'
+fleegix.ua = new function () {
+  var ua = navigator.userAgent;
+  var majorVersion = function (ua, re) {
+    var m = re.exec(ua);
+    if (m && m.length > 1) {
+      m = m[1].substr(0, 1);
+      if (!isNaN(m)) {
+        return parseInt(m);
+      }
+      else {
+        return null;
+      }
     }
-    if (document.all && !f.isOpera) {
-      f.isIE = (ua.indexOf('MSIE ') > -1);
+    return null;
+  };
+  // Layout engines
+  this.isWebKit= ua.indexOf("AppleWebKit") > -1;
+  this.isKHTML = ua.indexOf('KHTML') > -1;
+  this.isGecko = ua.indexOf('Gecko') > -1 &&
+    !this.isWebKit && !this.isKHTML;
+  
+  // Browsers
+  this.isOpera = ua.indexOf("Opera") > -1;
+  this.isChrome = ua.indexOf("Chrome") > -1;
+  this.isSafari = ua.indexOf("Safari") > -1 && !this.isChrome;
+  // Firefox, Camino, 'Iceweasel/IceCat' for the freetards
+  this.isFF = ua.indexOf('Firefox') > -1 ||
+    ua.indexOf('Iceweasel') > -1 || ua.indexOf('IceCat') > -1;
+  this.isFirefox = this.isFF; // Alias
+  this.isIE = ua.indexOf('MSIE ') > -1 && !this.isOpera;
+
+  // Mobiles
+  this.isIPhone = ua.indexOf("iPhone") > -1;
+  this.isMobile = this.isIPhone || ua.indexOf("Opera Mini") > -1;
+
+  // OS's
+  this.isMac = ua.indexOf('Mac') > -1;
+  this.isUnix = ua.indexOf('Linux') > -1 ||
+    ua.indexOf('BSD') > -1 || ua.indexOf('SunOS') > -1;
+  this.isLinux = ua.indexOf('Linux') > -1;
+  this.isWindows = ua.indexOf('Windows') > -1 || ua.indexOf('Win');
+  
+  // Major ua version
+  this.majorVersion = null;
+  var reList = {
+    FF: /Firefox\/([0-9\.]*)/,
+    Safari: /Version\/([0-9\.]*) /,
+    IE: /MSIE ([0-9\.]*);/,
+    Opera: /Opera\/([0-9\.]*) /
+  }
+  for (var p in reList) {
+    if (this['is' + p]) {
+      this.majorVersion = majorVersion(ua, reList[p]);
     }
   }
-  // Squelch
-  catch(e) {}
-  f.isIPhone = (av.indexOf("iPhone") > -1);
-  f.isMobile = f.isIPhone || (ua.indexOf("Opera Mini") > -1);
-  // OS's
-  f.isMac = (ua.indexOf('Mac') > -1);
-  f.isUnix = (ua.indexOf('Linux') > -1) ||
-    (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
-  f.isLinux = (ua.indexOf('Linux') > -1);
-  f.isWindows = (ua.indexOf('Windows') > -1);
+
+  // Add to base fleegix obj for backward compat
+  for (var p in this) {
+    fleegix[p] = this[p];
+  }
 };
 
 
