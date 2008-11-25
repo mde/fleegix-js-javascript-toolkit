@@ -109,7 +109,7 @@ fleegix.ua = new function () {
   this.isKHTML = ua.indexOf('KHTML') > -1;
   this.isGecko = ua.indexOf('Gecko') > -1 &&
     !this.isWebKit && !this.isKHTML;
-  
+
   // Browsers
   this.isOpera = ua.indexOf("Opera") > -1;
   this.isChrome = ua.indexOf("Chrome") > -1;
@@ -130,14 +130,15 @@ fleegix.ua = new function () {
     ua.indexOf('BSD') > -1 || ua.indexOf('SunOS') > -1;
   this.isLinux = ua.indexOf('Linux') > -1;
   this.isWindows = ua.indexOf('Windows') > -1 || ua.indexOf('Win');
-  
+
   // Major ua version
   this.majorVersion = null;
   var reList = {
     FF: /Firefox\/([0-9\.]*)/,
     Safari: /Version\/([0-9\.]*) /,
     IE: /MSIE ([0-9\.]*);/,
-    Opera: /Opera\/([0-9\.]*) /
+    Opera: /Opera\/([0-9\.]*) /,
+    Chrome: /Chrome\/([0-9\.]*)/
   }
   for (var p in reList) {
     if (this['is' + p]) {
