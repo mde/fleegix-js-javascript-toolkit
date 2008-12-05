@@ -46,11 +46,15 @@ fleegix.ui.Glyph.prototype = new function () {
   this.cleanup =  function () {
     this.domNode = null;
   };
-  this.clearNode =  function (node) {
-    while (node.hasChildNodes()) {
-      node.removeChild(node.firstChild);
+  this.clearNode =  function (node, useInnerHTML) {
+    if (useInnerHTML) {
+      node.innerHTML = '';
     }
-    node.innerHTML = '';
+    else {
+      while (node.hasChildNodes()) {
+        node.removeChild(node.firstChild);
+      }
+    }
   };
   this.clearAll =  function () {
     if (this.domNode) {
