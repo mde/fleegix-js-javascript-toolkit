@@ -89,43 +89,67 @@ fleegix.clone = function (o) {
   return ret;
 };
 
-// This stuff gets run inline below, props added to
-// base 'fleegix' obj -- namespaced to avoid global refs
-// Some code taken from the Dojo loader
-fleegix.agentSniffing = new function () {
-  var f = fleegix; // Alias the base 'fleegix' obj
-  var n = navigator;
-  var ua = n.userAgent;
-  var av = n.appVersion;
-  // Browsers
-  f.isWebKit= (ua.indexOf("AppleWebKit") > -1);
-  f.isOpera = (ua.indexOf("Opera") > -1);
-  f.isKhtml = (av.indexOf("Konqueror") > -1) ||
-    (av.indexOf("Safari") > -1);
-  f.isChrome = (av.indexOf("Chrome") > -1);
-  f.isSafari = (av.indexOf("Safari") > -1) && !f.isChrome;
-  f.isMoz = ((ua.indexOf('Gecko') > -1) && (!f.isKhtml));
-  f.isFF = false;
-  f.isIE = false;
-  try {
-    if (f.isMoz) {
-      f.isFF = (ua.indexOf('Firefox') > -1) ||
-        (ua.indexOf('Iceweasel') > -1); // 'Freetards'
+fleegix.ua = new function () {
+  var ua = navigator.userAgent;
+  var majorVersion = function (ua, re) {
+    var m = re.exec(ua);
+    if (m && m.length > 1) {
+      m = m[1].substr(0, 1);
+      if (!isNaN(m)) {
+        return parseInt(m);
+      }
+      else {
+        return null;
+      }
     }
-    if (document.all && !f.isOpera) {
-      f.isIE = (ua.indexOf('MSIE ') > -1);
+    return null;
+  };
+  // Layout engines
+  this.isWebKit= ua.indexOf("AppleWebKit") > -1;
+  this.isKHTML = ua.indexOf('KHTML') > -1;
+  this.isGecko = ua.indexOf('Gecko') > -1 &&
+    !this.isWebKit && !this.isKHTML;
+
+  // Browsers
+  this.isOpera = ua.indexOf("Opera") > -1;
+  this.isChrome = ua.indexOf("Chrome") > -1;
+  this.isSafari = ua.indexOf("Safari") > -1 && !this.isChrome;
+  // Firefox, Camino, 'Iceweasel/IceCat' for the freetards
+  this.isFF = ua.indexOf('Firefox') > -1 ||
+    ua.indexOf('Iceweasel') > -1 || ua.indexOf('IceCat') > -1;
+  this.isFirefox = this.isFF; // Alias
+  this.isIE = ua.indexOf('MSIE ') > -1 && !this.isOpera;
+
+  // Mobiles
+  this.isIPhone = ua.indexOf("iPhone") > -1;
+  this.isMobile = this.isIPhone || ua.indexOf("Opera Mini") > -1;
+
+  // OS's
+  this.isMac = ua.indexOf('Mac') > -1;
+  this.isUnix = ua.indexOf('Linux') > -1 ||
+    ua.indexOf('BSD') > -1 || ua.indexOf('SunOS') > -1;
+  this.isLinux = ua.indexOf('Linux') > -1;
+  this.isWindows = ua.indexOf('Windows') > -1 || ua.indexOf('Win');
+
+  // Major ua version
+  this.majorVersion = null;
+  var reList = {
+    FF: /Firefox\/([0-9\.]*)/,
+    Safari: /Version\/([0-9\.]*) /,
+    IE: /MSIE ([0-9\.]*);/,
+    Opera: /Opera\/([0-9\.]*) /,
+    Chrome: /Chrome\/([0-9\.]*)/
+  }
+  for (var p in reList) {
+    if (this['is' + p]) {
+      this.majorVersion = majorVersion(ua, reList[p]);
     }
   }
-  // Squelch
-  catch(e) {}
-  f.isIPhone = (av.indexOf("iPhone") > -1);
-  f.isMobile = f.isIPhone || (ua.indexOf("Opera Mini") > -1);
-  // OS's
-  f.isMac = (ua.indexOf('Mac') > -1);
-  f.isUnix = (ua.indexOf('Linux') > -1) ||
-    (ua.indexOf('BSD') > -1) || (ua.indexOf('SunOS') > -1);
-  f.isLinux = (ua.indexOf('Linux') > -1);
-  f.isWindows = (ua.indexOf('Windows') > -1);
+
+  // Add to base fleegix obj for backward compat
+  for (var p in this) {
+    fleegix[p] = this[p];
+  }
 };
 
 
@@ -455,6 +479,80 @@ fleegix.dom = new function() {
   };
 };
 
+
+fleegix.url = new function () {
+  var self = this;
+
+  this.params = {};
+
+  this.getParamHash = function (str) {
+    var q = str || self.getQuery();
+    var d = {};
+    if (q) {
+      var arr = q.split('&');
+      for (var i = 0; i < arr.length; i++) {
+        var pair = arr[i].split('=');
+        var name = pair[0];
+        var val = pair[1];
+        if (typeof d[name] == 'undefined') {
+          d[name] = val;
+        }
+        else {
+          if (!(d[name] instanceof Array)) {
+            var t = d[name];
+            d[name] = [];
+            d[name].push(t);
+          }
+          d[name].push(val);
+        }
+      }
+    }
+    return d;
+  };
+  this.getParam = function (name, str) {
+    var p = null;
+    if (str) {
+      var h = this.getParamHash(str);
+      p = h[name];
+    }
+    else {
+      p = this.params[name];
+    }
+    return p;
+  };
+  this.setParam = function (name, val, str) {
+    var ret = null;
+    // If there's a query string, set the param
+    if (str) {
+      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
+      var arr = str.match(pat);
+      // If it's there, replace it
+      if (arr) {
+        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
+      }
+      // Otherwise append it
+      else {
+        ret = str + '&' + name + '=' + val;
+      }
+    }
+    // Otherwise create a query string with just that param
+    else {
+      ret = name + '=' + val;
+    }
+    return ret;
+  };
+  this.getQuery = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[1];
+  };
+  this.getBase = function (s) {
+    var l = s ? s : location.href;
+    return l.split('?')[0];
+  };
+  this.params = this.getParamHash();
+};
+// Backward-compat
+fleegix.uri = fleegix.url;
 
 fleegix.css = new function() {
     this.addClass = function (elem, s) {
@@ -905,78 +1003,6 @@ fleegix.event.listen(window, 'onunload', function () {
 });
 
 
-
-fleegix.uri = new function () {
-  var self = this;
-
-  this.params = {};
-
-  this.getParamHash = function (str) {
-    var q = str || self.getQuery();
-    var d = {};
-    if (q) {
-      var arr = q.split('&');
-      for (var i = 0; i < arr.length; i++) {
-        var pair = arr[i].split('=');
-        var name = pair[0];
-        var val = pair[1];
-        if (typeof d[name] == 'undefined') {
-          d[name] = val;
-        }
-        else {
-          if (!(d[name] instanceof Array)) {
-            var t = d[name];
-            d[name] = [];
-            d[name].push(t);
-          }
-          d[name].push(val);
-        }
-      }
-    }
-    return d;
-  };
-  this.getParam = function (name, str) {
-    var p = null;
-    if (str) {
-      var h = this.getParamHash(str);
-      p = h[name];
-    }
-    else {
-      p = this.params[name];
-    }
-    return p;
-  };
-  this.setParam = function (name, val, str) {
-    var ret = null;
-    // If there's a query string, set the param
-    if (str) {
-      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
-      var arr = str.match(pat);
-      // If it's there, replace it
-      if (arr) {
-        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
-      }
-      // Otherwise append it
-      else {
-        ret = str + '&' + name + '=' + val;
-      }
-    }
-    // Otherwise create a query string with just that param
-    else {
-      ret = name + '=' + val;
-    }
-    return ret;
-  };
-  this.getQuery = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[1];
-  };
-  this.getBase = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[0];
-  };
-  this.params = this.getParamHash();
-};
 
 fleegix.xhr = new function () {
   // Public vars
