@@ -52,8 +52,12 @@ fleegix.event.Delegator = function (containerNode, actions,
     while (node.parentNode && node != topNode) {
       if (node.className) {
         for (var c in actions) {
-          if (node.className == c) {
-            return c;
+          // Look through class name(s) set on the node
+          var names = node.className.split(' ');
+          for (var i = 0; i < names.length; i++) {
+            if (names[i] == c) {
+              return c;
+            }
           }
         }
       }
