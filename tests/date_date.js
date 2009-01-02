@@ -1,6 +1,6 @@
 
 fleegixMain.test_fleegixDateDate = new function () {
-    this.test_americaChicagoDST = function () {
+  this.test_americaChicagoDST = function () {
       var testDstLeap = function (arr) {
         var expectedArr = [360, 300, 300, 360];
         var dt;

@@ -1,3 +1,5 @@
 
-var fleegixMain = {};
+var fleegixMain = new function () {
+  this.shared = {};
+};
 
