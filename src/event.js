@@ -398,42 +398,5 @@ fleegix.event = new function () {
   };
 };
 
-fleegix.event.PeriodicExecuter = function (func, interval, waitFirst) {
-  var _this = this;
-  var _paused = false;
-  this.func = func || null;
-  this.interval = interval || null;
-  this.waitFirst = waitFirst || false;
-  this.start = function (waitFirst) {
-    this.waitFirst = waitFirst || this.waitFirst;
-    if (this.waitFirst) {
-      setTimeout(this.run, this.interval);
-    }
-    else {
-      this.run();
-    }
-  };
-  this.run = function () {
-    if (!_paused) {
-      _this.func();
-      setTimeout(_this.run, _this.interval);
-    }
-  };
-  this.pause = function () {
-    _paused = true;
-  };
-  this.resume = function () {
-    _paused = false;
-    this.run();
-  };
-};
-
-// Clean up listeners
-fleegix.event.listen(window, 'onunload', function () {
-  try {
-    fleegix.event.flush();
-  }
-  catch (e) {} // Squelch
-});
 
 
