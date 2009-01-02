@@ -480,79 +480,183 @@ fleegix.dom = new function() {
 };
 
 
+
 fleegix.url = new function () {
-  var self = this;
+  // Private vars
+  var _this = this;
+  var _QS = '\\?|;';
+  var _QS_SIMPLE = new RegExp(_QS);
+  var _QS_CAPTURE = new RegExp('(' + _QS + ')');
 
-  this.params = {};
-
-  this.getParamHash = function (str) {
-    var q = str || self.getQuery();
+  // Private function, used by both getQSParam and setQSParam
+  var _changeQS = function (mode, str, name, val) {
+    var match = _QS_CAPTURE.exec(str);
+    var delim;
+    var base;
+    var query;
+    var obj;
+    var s = '';
+    // If there's a querystring delimiter, save it
+    // for reinsertion into the return value
+    if (match && match.length > 0) {
+      delim = match[0];
+    }
+    // Delimiter -- entire URL, need to decompose
+    if (delim) {
+      base = _this.getBase(str);
+      query = _this.getQS(str);
+    }
+    // Just a querystring passed
+    else {
+      query = str;
+    }
+    obj = _this.qsToObject(query, { arrayizeMulti: true });
+    if (mode == 'set') { obj[name] = val; }
+    else { delete obj[name]; }
+    if (base) {
+      s = base + delim;
+    }
+    s += _this.objectToQS(obj);
+    return s;
+  };
+  /**
+   * Convert the values in a query string (key=val&key=val) to
+   * an Object
+   * @param str -- A querystring
+   * @param o -- JS object of options, current only includes:
+   *   arrayizeMulti: (Boolean) convert mutliple instances of
+   *      the same key into an array of values instead of
+   *      overriding. Defaults to false.
+   * @returns JavaScript key/val object with the values from
+   * the querystring
+   */
+  this.qsToObject = function (str, o) {
+    var opts = o || {};
     var d = {};
-    if (q) {
-      var arr = q.split('&');
+    var arrayizeMulti = opts.arrayizeMulti || false;
+    if (str) {
+      var arr = str.split('&');
       for (var i = 0; i < arr.length; i++) {
         var pair = arr[i].split('=');
         var name = pair[0];
         var val = pair[1];
-        if (typeof d[name] == 'undefined') {
-          d[name] = val;
-        }
-        else {
-          if (!(d[name] instanceof Array)) {
-            var t = d[name];
-            d[name] = [];
-            d[name].push(t);
+        // "We've already got one!" -- arrayize if the flag
+        // is set
+        if (typeof d[name] != 'undefined' && arrayizeMulti) {
+          if (typeof d[name] == 'string') {
+            d[name] = [d[name]];
           }
           d[name].push(val);
+        }
+        // Otherwise just set the value
+        else {
+          d[name] = val;
         }
       }
     }
     return d;
   };
-  this.getParam = function (name, str) {
-    var p = null;
-    if (str) {
-      var h = this.getParamHash(str);
-      p = h[name];
+  /**
+   * Convert a JS Object to querystring (key=val&key=val).
+   * Value in arrays will be added as multiple parameters
+   * @param obj -- an Object containing only scalars and arrays
+   * @returns A querystring containing the values in the
+   * Object
+   */
+  this.objectToQS = function (obj) {
+    var str = '';
+    var val;
+    for (var p in obj) {
+      val = obj[p];
+      if (typeof val == 'string') {
+        str += p + '=' + val + '&';
+      }
+      else if (val.length) {
+        for (var i = 0; i < val.length; i++) {
+          str += p + '=' + val[i] + '&';
+        }
+      }
     }
-    else {
-      p = this.params[name];
+    if (str) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  };
+  this.objectToQs = this.objectToQS; // Case-insensitive alias
+  /**
+   * Retrieve the value of a parameter from a querystring
+   * @param str -- Either a querystring or an entire URL
+   * @param name -- The param to retrieve the value for
+   * @param o -- JS object of options, current only includes:
+   *   arrayizeMulti: (Boolean) convert mutliple instances of
+   *      the same key into an array of values instead of
+   *      overriding. Defaults to false.
+   * @returns The string value of the specified param from
+   * the querystring
+   */
+  this.getQSParam = function (str, name, o) {
+    var p = null;
+    var q = _QS_SIMPLE.test(str) ? _this.getQS(str) : str;
+    var opts = o || {};
+    if (q) {
+      var h = _this.qsToObject(q, opts);
+      p = h[name];
     }
     return p;
   };
-  this.setParam = function (name, val, str) {
-    var ret = null;
-    // If there's a query string, set the param
-    if (str) {
-      var pat = new RegExp('(^|&)(' + name + '=[^\&]*)(&|$)');
-      var arr = str.match(pat);
-      // If it's there, replace it
-      if (arr) {
-        ret = str.replace(arr[0], arr[1] + name + '=' + val + arr[3]);
-      }
-      // Otherwise append it
-      else {
-        ret = str + '&' + name + '=' + val;
-      }
-    }
-    // Otherwise create a query string with just that param
-    else {
-      ret = name + '=' + val;
-    }
-    return ret;
+  this.getQsParam = this.getQSParam; // Case-insensitive alias
+  /**
+   * Set the value of a parameter in a querystring
+   * @param str -- Either a querystring or an entire URL
+   * @param name -- The param to set
+   * @param val -- The value to set the param to
+   * @returns  the URL or querystring, with the new value
+   * set -- if the param was not originally there, it adds it.
+   */
+  this.setQSParam = function (str, name, val) {
+    return _changeQS('set', str, name, val);
   };
-  this.getQuery = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[1];
+  this.setQsParam = this.setQSParam; // Case-insensitive alias
+  /**
+   * Remove a parameter in a querystring
+   * @param str -- Either a querystring or an entire URL
+   * @param name -- The param to remove
+   * @returns  the URL or querystring, with the parameter
+   * removed
+   */
+  this.removeQSParam = function (str, name) {
+    return _changeQS('remove', str, name, null);
   };
+  this.removeQsParam = this.removeQSParam; // Case-insensitive alias
+  this.getQS = function (s) {
+    return s.split(_QS_SIMPLE)[1];
+  };
+  this.getQs = this.getQS; // Case-insensitive alias
   this.getBase = function (s) {
-    var l = s ? s : location.href;
-    return l.split('?')[0];
+    return s.split(_QS_SIMPLE)[0];
   };
-  this.params = this.getParamHash();
 };
-// Backward-compat
-fleegix.uri = fleegix.url;
+// Backward-compat shim
+fleegix.uri = new function () {
+  this.getParamHash = fleegix.url.qsToObject;
+  // Params are reversed, and passed-in QS is
+  // optional -- defaults to local HREF for the
+  // page it's defined on
+  this.getParam = function (name, str) {
+    var s = str || fleegix.url.getQS(document.location.href);
+    return fleegix.url.getQSParam(s, name);
+  };
+  // Params are reversed, and passed-in QS is
+  // optional -- defaults to local HREF for the
+  // page it's defined on
+  this.setParam = function (name, val, str) {
+    var s = str || fleegix.url.getQS(document.location.href);
+    return fleegix.url.setQSParam(s, name, val);
+  };
+  this.getQuery = fleegix.url.getQS;
+  this.getBase = fleegix.url.getBase;
+};
+
 
 fleegix.css = new function() {
     this.addClass = function (elem, s) {
@@ -964,43 +1068,6 @@ fleegix.event = new function () {
   };
 };
 
-fleegix.event.PeriodicExecuter = function (func, interval, waitFirst) {
-  var _this = this;
-  var _paused = false;
-  this.func = func || null;
-  this.interval = interval || null;
-  this.waitFirst = waitFirst || false;
-  this.start = function (waitFirst) {
-    this.waitFirst = waitFirst || this.waitFirst;
-    if (this.waitFirst) {
-      setTimeout(this.run, this.interval);
-    }
-    else {
-      this.run();
-    }
-  };
-  this.run = function () {
-    if (!_paused) {
-      _this.func();
-      setTimeout(_this.run, _this.interval);
-    }
-  };
-  this.pause = function () {
-    _paused = true;
-  };
-  this.resume = function () {
-    _paused = false;
-    this.run();
-  };
-};
-
-// Clean up listeners
-fleegix.event.listen(window, 'onunload', function () {
-  try {
-    fleegix.event.flush();
-  }
-  catch (e) {} // Squelch
-});
 
 
 
@@ -1577,6 +1644,7 @@ fleegix.xhr.Request.prototype.setRequestHeader = function (headerName, headerVal
 
 
 fleegix.json = new function() {
+  var _cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
   this.serialize = function(obj) {
     var str = '';
     switch (typeof obj) {
@@ -1625,6 +1693,43 @@ fleegix.json = new function() {
       default:
         return String(obj);
     }
+  };
+  // Credits: Crockford's excellent json2 parser
+  // http://json.org/json2.js -- License: public domain
+  this.parse = function (text, reviver) {
+      var j;
+      function walk(holder, key) {
+          var k, v, value = holder[key];
+          if (value && typeof value === 'object') {
+              for (k in value) {
+                  if (Object.hasOwnProperty.call(value, k)) {
+                      v = walk(value, k);
+                      if (v !== undefined) {
+                          value[k] = v;
+                      } else {
+                          delete value[k];
+                      }
+                  }
+              }
+          }
+          return reviver.call(holder, key, value);
+      }
+      _cx.lastIndex = 0;
+      if (_cx.test(text)) {
+          text = text.replace(_cx, function (a) {
+              return '\\u' +
+                  ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+          });
+      }
+      if (/^[\],:{}\s]*$/.
+        test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
+        replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+        replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+          j = eval('(' + text + ')');
+          return typeof reviver === 'function' ?
+              walk({'': j}, '') : j;
+      }
+      throw new SyntaxError('JSON not parseable.');
   };
 };
 
