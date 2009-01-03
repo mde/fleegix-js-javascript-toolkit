@@ -21,7 +21,7 @@ fleegix.history = new function () {
   var _historyCheck;
   var _ieHistory = null;
 
-  // Public vars 
+  // Public vars
   this.index = 0;
   this.currentStep = null;
   this.entries = [];
@@ -38,7 +38,7 @@ fleegix.history = new function () {
         "historyFrame").contentDocument;
     }
     return doc;
-  }
+  };
   var _getHistoryStep = function () {
     var ret;
     if (fleegix.ua.isIE) {
@@ -56,7 +56,7 @@ fleegix.history = new function () {
     else {
       return null;
     }
-  }
+  };
   var _doHistoryCheck = function () {
     var step = _getHistoryStep();
     if (step != fleegix.history.currentStep) {
@@ -65,7 +65,7 @@ fleegix.history = new function () {
     }
     _historyCheck = null;
     _historyCheck = window.setTimeout(_doHistoryCheck, 200);
-  }
+  };
 
   // Public methods
   this.init = function () {
