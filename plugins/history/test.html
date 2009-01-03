@@ -1,0 +1,91 @@
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title></title>
+
+<script type="text/javascript" src="../../src/base.js"></script>
+<script type="text/javascript" src="../../src/event.js"></script>
+<script type="text/javascript" src="history.js"></script>
+
+<script type="text/javascript">
+
+function puts(s) {
+  console.log(s);
+}
+
+function init() {
+  $('historyButton').onclick = goNext;
+  fleegix.history.onchange = function () {
+    var step = fleegix.history.currentStep;
+    var s = fleegix.history.getEntry(step);
+    if (s) {
+      setContent(s);
+    }
+  };
+  fleegix.history.init();
+}
+
+var str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var incr = 0;
+
+function goNext() {
+  var s = str.substr(incr, 1);
+  fleegix.history.addEntry(s);
+  setContent(s);
+  incr++;
+}
+
+function setContent(s) {
+  var step = 'currentStep: ' + fleegix.history.currentStep;
+  $('content').innerHTML = s + ' (' + step + ')';
+}
+
+window.onload = init;
+
+</script>
+
+<style type="text/css">
+
+*{
+  font-family: "Lucida Grande", "Verdana", sans-serif;
+}
+#historyFrame {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 0px;
+  height: 0px;
+}
+#prompt p {
+  width: 32em;
+}
+</style>
+
+</head>
+  <body>
+    <div id="prompt">
+      <p>
+        Click the Increment Step button to create new browser
+        history entries, and the browser's Back button to
+        go back.
+      </p>
+      <p>
+        NOTE: This page has to be served from server -- it
+        will NOT work when opened as a local file.
+      </p>
+    </div>
+    <form>
+      <input type="button" id="historyButton"
+        name="historyButton" value="Increment Step">
+    </form>
+    <div id="content">
+    </div>
+    <!-- This iframe has to be in the base page -->
+    <iframe id="historyFrame" src="blank.html"></iframe>
+  </body>
+</html>
+
