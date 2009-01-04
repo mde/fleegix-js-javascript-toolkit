@@ -46,6 +46,20 @@ fleegix.string = new function () {
     var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
     return str.replace(pat, '');
   };
+  this.lpad = function (str, chr, width) {
+    var s = str;
+    while (s.length < width) {
+      s = chr + s;
+    }
+    return s;
+  };
+  this.rpad = function (str, chr, width) {
+    var s = str;
+    while (s.length < width) {
+      s = s + chr;
+    }
+    return s;
+  };
   // Converts someVariableName to some_variable_name
   this.toLowerCaseWithUnderscores = function (s) {
     return s.replace(/([A-Z]+)/g, '_$1').toLowerCase().
