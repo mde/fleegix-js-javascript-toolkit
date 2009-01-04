@@ -1466,4 +1466,4 @@ fleegix.cookie.destroy
 
 fleegix.cookie.remove('loginId');
 
-   Copyright 2007 Matthew Eernisse, mde@fleegix.org.
+   Copyright 2009 Matthew Eernisse, mde@fleegix.org.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Matthew Eernisse (mde@fleegix.org)
+ * Copyright 2009 Matthew Eernisse (mde@fleegix.org)
  * and SitePoint Pty. Ltd, www.sitepoint.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
