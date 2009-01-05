@@ -114,7 +114,6 @@ fleegix.url = new function () {
    * NOTE: This is used by form.serialize
    */
   this.objectToQS = function (obj, o) {
-    console.log(obj);
     var opts = o || {};
     var str = '';
     var pat = opts.stripTags ? /<[^>]*>/g : null;
@@ -122,7 +121,6 @@ fleegix.url = new function () {
       var s = '';
       var v = obj[n];
       if (v != undefined) {
-        console.log(v);
         // Multiple vals -- array
         if (v.length && typeof v != 'string') {
           var sep = '';
@@ -170,7 +168,6 @@ fleegix.url = new function () {
         }
       }
     }
-    console.log('str: ' + str);
     str = str.substr(0, str.length - 1);
     return str;
   };
