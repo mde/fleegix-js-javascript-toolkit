@@ -5,7 +5,7 @@ src/cookie.js
 src/json.js
 src/base.js
 src/fx.js
-src/uri.js
+src/url.js
 src/event.js
 src/dom.js
 src/string.js
