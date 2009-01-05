@@ -25,82 +25,17 @@ fleegix.form = {};
 /**
  * Serializes the data from all the inputs in a Web form
  * into a query-string style string.
- * @param docForm -- Reference to a DOM node of the form element
- * @param formatOpts -- JS object of options for how to format
- * the return string. Supported options:
- *   collapseMulti: (Boolean) take values from elements that
- *      can return multiple values (multi-select, checkbox groups)
- *      and collapse into a single, comman-delimited value
- *      (e.g., thisVar=asdf,qwer,zxcv)
- *   stripTags: (Boolean) strip markup tags from any values
- *   includeEmpty: (Boolean) include keys in the string for
- *     all elements, even if they have no value set (e.g.,
- *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
- *   pedantic: (Boolean) include the values of elements like
- *      button or image
- *   deCamelizeParams: (Boolean) change param names from
- *     camelCase to lowercase_with_underscores
+ * @param f -- Reference to a DOM node of the form element
+ * @param opts -- JS object of options for how to format
+ * the return string. See fleegix.url.objectToQS for usage.
  * @returns query-string style String of variable-value pairs
  */
-fleegix.form.serialize = function (f, o) {
-  var h = fleegix.form.toObject(f, o);
-  var opts = o || {};
-  var str = '';
-  var pat = null;
-
-  if (opts.stripTags) { pat = /<[^>]*>/g; }
-  for (var n in h) {
-    var s = '';
-    var v = h[n];
-    if (v) {
-      // Single val -- string
-      if (typeof v == 'string') {
-        s = opts.stripTags ? v.replace(pat, '') : v;
-        str += n + '=' + encodeURIComponent(s);
-      }
-      // Multiple vals -- array
-      else {
-        var sep = '';
-        if (opts.collapseMulti) {
-          sep = ',';
-          str += n + '=';
-        }
-        else {
-          sep = '&';
-        }
-        for (var j = 0; j < v.length; j++) {
-          s = opts.stripTags ? v[j].replace(pat, '') : v[j];
-          s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
-            encodeURIComponent(s);
-          str += s + sep;
-        }
-        str = str.substr(0, str.length - 1);
-      }
-      str += '&';
-    }
-    else {
-      if (opts.includeEmpty) { str += n + '=&'; }
-    }
+fleegix.form.serialize = function (f, opts) {
+  var h = fleegix.form.toObject(f, opts);
+  if (typeof fleegix.url == 'undefined') {
+    throw new Error('fleegix.form.serialize depends on the fleegix.url module.');
   }
-  // Convert all the camelCase param names to Ruby/Python style
-  // lowercase_with_underscores
-  if (opts.deCamelizeParams) {
-    if (!fleegix.string) {
-      throw new Error(
-        'deCamelize option depends on fleegix.string module.');
-    }
-    var arr = str.split('&');
-    var arrItems;
-    str = '';
-    for (var i = 0; i < arr.length; i++) {
-      arrItems = arr[i].split('=');
-      if (arrItems[0]) {
-        str += fleegix.string.deCamelize(arrItems[0]) +
-          '=' + arrItems[1] + '&';
-      }
-    }
-  }
-  str = str.substr(0, str.length - 1);
+  var str = fleegix.url.objectToQS(h, opts);
   return str;
 };
 

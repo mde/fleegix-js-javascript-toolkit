@@ -74,7 +74,7 @@ fleegix.url = new function () {
       for (var i = 0; i < arr.length; i++) {
         var pair = arr[i].split('=');
         var name = pair[0];
-        var val = pair[1];
+        var val = decodeURIComponent(pair[1]);
         // "We've already got one!" -- arrayize if the flag
         // is set
         if (typeof d[name] != 'undefined' && arrayizeMulti) {
@@ -95,26 +95,83 @@ fleegix.url = new function () {
    * Convert a JS Object to querystring (key=val&key=val).
    * Value in arrays will be added as multiple parameters
    * @param obj -- an Object containing only scalars and arrays
+   * @param o -- JS object of options for how to format
+   * the return string. Supported options:
+   *   collapseMulti: (Boolean) take values from elements that
+   *      can return multiple values (multi-select, checkbox groups)
+   *      and collapse into a single, comman-delimited value
+   *      (e.g., thisVar=asdf,qwer,zxcv)
+   *   stripTags: (Boolean) strip markup tags from any values
+   *   includeEmpty: (Boolean) include keys in the string for
+   *     all elements, even if they have no value set (e.g.,
+   *     even if elemB has no value: elemA=foo&elemB=&elemC=bar)
+   *   pedantic: (Boolean) include the values of elements like
+   *      button or image
+   *   deCamelizeParams: (Boolean) change param names from
+   *     camelCase to lowercase_with_underscores
    * @returns A querystring containing the values in the
    * Object
+   * NOTE: This is used by form.serialize
    */
-  this.objectToQS = function (obj) {
+  this.objectToQS = function (obj, o) {
+    console.log(obj);
+    var opts = o || {};
     var str = '';
-    var val;
-    for (var p in obj) {
-      val = obj[p];
-      if (typeof val == 'string') {
-        str += p + '=' + val + '&';
+    var pat = opts.stripTags ? /<[^>]*>/g : null;
+    for (var n in obj) {
+      var s = '';
+      var v = obj[n];
+      if (v != undefined) {
+        console.log(v);
+        // Multiple vals -- array
+        if (v.length && typeof v != 'string') {
+          var sep = '';
+          if (opts.collapseMulti) {
+            sep = ',';
+            str += n + '=';
+          }
+          else {
+            sep = '&';
+          }
+          for (var j = 0; j < v.length; j++) {
+            s = opts.stripTags ? v[j].replace(pat, '') : v[j];
+            s = (!opts.collapseMulti) ? n + '=' + encodeURIComponent(s) :
+              encodeURIComponent(s);
+            str += s + sep;
+          }
+          str = str.substr(0, str.length - 1);
+        }
+        // Single val -- string
+        else {
+          s = opts.stripTags ? v.replace(pat, '') : v;
+          str += n + '=' + encodeURIComponent(s);
+        }
+        str += '&';
       }
-      else if (val.length) {
-        for (var i = 0; i < val.length; i++) {
-          str += p + '=' + val[i] + '&';
+      else {
+        if (opts.includeEmpty) { str += n + '=&'; }
+      }
+    }
+    // Convert all the camelCase param names to Ruby/Python style
+    // lowercase_with_underscores
+    if (opts.deCamelizeParams) {
+      if (!fleegix.string) {
+        throw new Error(
+          'deCamelize option depends on fleegix.string module.');
+      }
+      var arr = str.split('&');
+      var arrItems;
+      str = '';
+      for (var i = 0; i < arr.length; i++) {
+        arrItems = arr[i].split('=');
+        if (arrItems[0]) {
+          str += fleegix.string.deCamelize(arrItems[0]) +
+            '=' + arrItems[1] + '&';
         }
       }
     }
-    if (str) {
-      str = str.substr(0, str.length - 1);
-    }
+    console.log('str: ' + str);
+    str = str.substr(0, str.length - 1);
     return str;
   };
   this.objectToQs = this.objectToQS; // Case-insensitive alias
