@@ -223,9 +223,10 @@ fleegix.date.util.convertOneBase = function (d) {
   return d == 0 ? 7 : d;
 };
 
-fleegix.date.util.getTwoDigitYear = function () {
+fleegix.date.util.getTwoDigitYear = function (yr) {
   // Add a millenium to take care of years before the year 1000,
   // (e.g, the year 7) since we're only taking the last two digits
+  // If we overshoot, it doesn't matter
   var millenYear = yr + 1000;
   var str = millenYear.toString();
   str = str.substr(2); // Get the last two digits
