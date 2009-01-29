@@ -31,7 +31,7 @@ fleegix.date.Date = function () {
   var utc = false;
 
   // No args -- create a floating date based on the current local offset
-  if (args.length == 0) {
+  if (args.length === 0) {
     dt = new Date();
   }
   // Date string or timestamp -- assumes floating
@@ -71,6 +71,7 @@ fleegix.date.Date = function () {
   this._useCache = false;
   this._tzInfo = {};
   this._tzAbbr = '';
+  this._day = 0;
   this.year = 0;
   this.month = 0;
   this.date = 0;
@@ -81,11 +82,11 @@ fleegix.date.Date = function () {
   this.timezone = tz || null;
   this.utc = utc || false;
   this.setFromDateObjProxy(dt);
-}
+};
 
 fleegix.date.Date.prototype = {
   getDate: function () { return this.date; },
-  getDay: function () {},
+  getDay: function () { return this._day; },
   getFullYear: function () { return this.year; },
   getMonth: function () { return this.month; },
   getYear: function () { return this.year; },
@@ -256,6 +257,7 @@ fleegix.date.Date.prototype = {
     this.minutes = fromUTC ? dt.getUTCMinutes() : dt.getMinutes();
     this.seconds = fromUTC ? dt.getUTCSeconds() : dt.getSeconds();
     this.milliseconds = fromUTC ? dt.getUTCMilliseconds() : dt.getMilliseconds();
+    this._day = fromUTC ? dt.getUTCDay() : dt.getDay();
     this._useCache = false;
   },
   getUTCDateProxy: function () {
@@ -289,11 +291,17 @@ fleegix.date.Date.prototype = {
     this.timezone = tz;
     this._useCache = false;
   },
+  removeTimezone: function () {
+    this.utc = false;
+    this.timezone = null;
+    this._useCache = false;
+  },
   civilToJulianDayNumber: function (y, m, d) {
+    var a;
     // Adjust for zero-based JS-style array
     m++;
     if (m > 12) {
-      var a = parseInt(m/12);
+      a = parseInt(m/12, 10);
       m = m % 12;
       y += a;
     }
@@ -301,7 +309,7 @@ fleegix.date.Date.prototype = {
       y -= 1;
       m += 12;
     }
-    var a = Math.floor(y / 100);
+    a = Math.floor(y / 100);
     var b = 2 - a + Math.floor(a / 4);
     jDt = Math.floor(365.25 * (y + 4716)) +
       Math.floor(30.6001 * (m + 1)) +
@@ -314,15 +322,15 @@ fleegix.date.Date.prototype = {
       dt.getHours(), dt.getMinutes(), dt.getSeconds());
     return d.getTimezoneOffset();
   }
-}
+};
 
 
 fleegix.date.timezone = new function() {
   var _this = this;
   var monthMap = { 'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3,'may': 4, 'jun': 5,
-    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11 }
-  var dayMap = {'sun': 0,'mon' :1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6 }
-  var regionMap = {'EST':'northamerica','MST':'northamerica','HST':'northamerica','EST5EDT':'northamerica','CST6CDT':'northamerica','MST7MDT':'northamerica','PST8PDT':'northamerica','America':'northamerica','Pacific':'australasia','Atlantic':'europe','Africa':'africa','Indian':'africa','Antarctica':'antarctica','Asia':'asia','Australia':'australasia','Europe':'europe','WET':'europe','CET':'europe','MET':'europe','EET':'europe'}
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11 };
+  var dayMap = {'sun': 0,'mon' :1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6 };
+  var regionMap = {'EST':'northamerica','MST':'northamerica','HST':'northamerica','EST5EDT':'northamerica','CST6CDT':'northamerica','MST7MDT':'northamerica','PST8PDT':'northamerica','America':'northamerica','Pacific':'australasia','Atlantic':'europe','Africa':'africa','Indian':'africa','Antarctica':'antarctica','Asia':'asia','Australia':'australasia','Europe':'europe','WET':'europe','CET':'europe','MET':'europe','EET':'europe'};
   var regionExceptions = {'Pacific/Honolulu':'northamerica','Atlantic/Bermuda':'northamerica','Atlantic/Cape_Verde':'africa','Atlantic/St_Helena':'africa','Indian/Kerguelen':'antarctica','Indian/Chagos':'asia','Indian/Maldives':'asia','Indian/Christmas':'australasia','Indian/Cocos':'australasia','America/Danmarkshavn':'europe','America/Scoresbysund':'europe','America/Godthab':'europe','America/Thule':'europe','Asia/Yekaterinburg':'europe','Asia/Omsk':'europe','Asia/Novosibirsk':'europe','Asia/Krasnoyarsk':'europe','Asia/Irkutsk':'europe','Asia/Yakutsk':'europe','Asia/Vladivostok':'europe','Asia/Sakhalin':'europe','Asia/Magadan':'europe','Asia/Kamchatka':'europe','Asia/Anadyr':'europe','Africa/Ceuta':'europe','America/Argentina/Buenos_Aires':'southamerica','America/Argentina/Cordoba':'southamerica','America/Argentina/Tucuman':'southamerica','America/Argentina/La_Rioja':'southamerica','America/Argentina/San_Juan':'southamerica','America/Argentina/Jujuy':'southamerica','America/Argentina/Catamarca':'southamerica','America/Argentina/Mendoza':'southamerica','America/Argentina/Rio_Gallegos':'southamerica','America/Argentina/Ushuaia':'southamerica','America/Aruba':'southamerica','America/La_Paz':'southamerica','America/Noronha':'southamerica','America/Belem':'southamerica','America/Fortaleza':'southamerica','America/Recife':'southamerica','America/Araguaina':'southamerica','America/Maceio':'southamerica','America/Bahia':'southamerica','America/Sao_Paulo':'southamerica','America/Campo_Grande':'southamerica','America/Cuiaba':'southamerica','America/Porto_Velho':'southamerica','America/Boa_Vista':'southamerica','America/Manaus':'southamerica','America/Eirunepe':'southamerica','America/Rio_Branco':'southamerica','America/Santiago':'southamerica','Pacific/Easter':'southamerica','America/Bogota':'southamerica','America/Curacao':'southamerica','America/Guayaquil':'southamerica','Pacific/Galapagos':'southamerica','Atlantic/Stanley':'southamerica','America/Cayenne':'southamerica','America/Guyana':'southamerica','America/Asuncion':'southamerica','America/Lima':'southamerica','Atlantic/South_Georgia':'southamerica','America/Paramaribo':'southamerica','America/Port_of_Spain':'southamerica','America/Montevideo':'southamerica','America/Caracas':'southamerica'};
 
   function builtInLoadZoneFile(fileName, sync) {
@@ -353,9 +361,9 @@ fleegix.date.timezone = new function() {
   function parseTimeString(str) {
     var pat = /(\d+)(?::0*(\d*))?(?::0*(\d*))?([wsugz])?$/;
     var hms = str.match(pat);
-    hms[1] = parseInt(hms[1]);
-    hms[2] = hms[2] ? parseInt(hms[2]) : 0;
-    hms[3] = hms[3] ? parseInt(hms[3]) : 0;
+    hms[1] = parseInt(hms[1], 10);
+    hms[2] = hms[2] ? parseInt(hms[2], 10) : 0;
+    hms[3] = hms[3] ? parseInt(hms[3], 10) : 0;
     return hms;
   }
   function getZone(dt, tz) {
@@ -372,12 +380,12 @@ fleegix.date.timezone = new function() {
     for(var i = 0; i < zoneList.length; i++) {
       var z = zoneList[i];
       if (!z[3]) { break; }
-      var yea = parseInt(z[3]);
+      var yea = parseInt(z[3], 10);
       var mon = 11;
       var dat = 31;
       if (z[4]) {
         mon = monthMap[z[4].substr(0, 3).toLowerCase()];
-        dat = parseInt(z[5]);
+        dat = parseInt(z[5], 10);
       }
       var t = z[6] ? z[6] : '23:59:59';
       t = parseTimeString(t);
@@ -458,7 +466,7 @@ fleegix.date.timezone = new function() {
               var t = parseTimeString(r[5]);
               // The stated date of the month
               var d = new Date(Date.UTC(dt.getUTCFullYear(), mon,
-                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
+                parseInt(r[4].substr(5), 10), t[1], t[2], t[3]));
               var dtDay = d.getUTCDay();
               // Set to the first correct weekday after the stated date
               var incr = (day < dtDay) ? (day - dtDay + 7) : (day - dtDay);
@@ -468,7 +476,7 @@ fleegix.date.timezone = new function() {
               var t = parseTimeString(r[5]);
               // The stated date of the month
               var d = new Date(Date.UTC(dt.getUTCFullYear(), mon,
-                parseInt(r[4].substr(5)), t[1], t[2], t[3]));
+                parseInt(r[4].substr(5), 10), t[1], t[2], t[3]));
               var dtDay = d.getUTCDay();
               // Set to first correct weekday before the stated date
               var incr = (day > dtDay) ? (day - dtDay - 7) : (day - dtDay);
@@ -649,14 +657,19 @@ fleegix.date.timezone = new function() {
     if (this.loadingScheme == this.loadingSchemes.LAZY_LOAD) {
       // Get the correct region for the zone
       var zoneFile = getRegionForTimezone(tz);
-      if (!this.loadedZones[zoneFile]) {
-        // Get the file and parse it -- use synchronous XHR
-        var res = this.loadZoneFile(zoneFile, true);
-        if (res.length) {
-          this.parseZones(res);
-        }
-        else {
-          throw new Error('Error loading zone file for ' + zoneFile);
+      if (!zoneFile) {
+        throw new Error('Not a valid timezone ID.');
+      }
+      else {
+        if (!this.loadedZones[zoneFile]) {
+          // Get the file and parse it -- use synchronous XHR
+          var res = this.loadZoneFile(zoneFile, true);
+          if (res.length) {
+            this.parseZones(res);
+          }
+          else {
+            throw new Error('Error loading zone file for ' + zoneFile);
+          }
         }
       }
     }
