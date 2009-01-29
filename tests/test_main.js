@@ -5,6 +5,7 @@ windmill.jsTest.require('date_util.js');
 windmill.jsTest.require('event.js');
 windmill.jsTest.require('xhr.js');
 windmill.jsTest.require('url.js');
+windmill.jsTest.require('string_hotlink.js');
 
 var test_main = new function () {
   this.test_fleegixCookie = fleegixMain.test_fleegixCookie;
@@ -13,4 +14,5 @@ var test_main = new function () {
   this.test_fleegixDateUtil = fleegixMain.test_fleegixDateUtil;
   this.test_fleegixEvent = fleegixMain.test_fleegixEvent;
   this.test_fleegixUrl = fleegixMain.test_fleegixUrl;
+  this.test_fleegixStringHotlink = fleegixMain.test_fleegixStringHotlink;
 };
