@@ -58,6 +58,9 @@ fleegix.string = new function () {
     if (str.length > len) {
       return str.substr(0, (len - t.length)) + t;
     }
+    else {
+      return str;
+    }
   };
   // Converts someVariableName to some_variable_name
   this.toLowerCaseWithUnderscores = function (s) {
