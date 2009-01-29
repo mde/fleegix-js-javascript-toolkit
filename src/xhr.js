@@ -429,7 +429,12 @@ fleegix.xhr = new function () {
     switch(req.responseFormat) {
       // XML
       case 'xml':
-        resp = xhrObj.responseXML;
+        if (req.xmlDocFromResponseText && typeof fleegix.xml != 'undefined') {
+          resp = fleegix.xml.createDoc(xhrObj.responseText);
+        }
+        else {
+          resp = xhrObj.responseXML;
+        }
         break;
       // The object itself
       case 'object':
@@ -574,6 +579,7 @@ fleegix.xhr.Request = function () {
   this.handleAll = null;
   this.handleTimeout = null;
   this.responseFormat = fleegix.xhr.responseFormats.TXT; // TXT, XML, OBJ
+  this.xmlDocFromResponseText = false;
   this.mimeType = null;
   this.username = '';
   this.password = '';
