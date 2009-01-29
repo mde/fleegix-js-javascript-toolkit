@@ -15,8 +15,8 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-fleegix.xml = new function (){
-  var pat = /^[\s\n\r]+|[\s\n\r]+$/g;
+fleegix.xml = new function () {
+  var pat = /^[\s\n\r\t]+|[\s\n\r\t]+$/g;
   var expandToArr = function (orig, val) {
     if (orig) {
       var r = null;
@@ -37,6 +37,10 @@ fleegix.xml = new function (){
   this.parse = function (node, tagName) {
     var obj = {};
     var kids = [];
+    var k;
+    var key;
+    var t;
+    var val;
     if (tagName) {
       kids = node.getElementsByTagName(tagName);
     }
@@ -44,28 +48,29 @@ fleegix.xml = new function (){
       kids = node.childNodes;
     }
     for (var i = 0; i < kids.length; i++) {
-      var k = kids[i];
+      k = kids[i];
       // Element nodes (blow by the stupid Mozilla linebreak nodes)
       if (k.nodeType == 1) {
-        var key = k.tagName;
+        key = k.tagName;
         // Tags with content
         if (k.firstChild) {
           // Node has only one child
           if(k.childNodes.length == 1) {
-            var t =  k.firstChild.nodeType;
+            t =  k.firstChild.nodeType;
             // Leaf nodes - text, CDATA, comment
             if (t == 3 || t == 4 || t == 8) {
               // Either set plain value, or if this is a same-named
               // tag, start stuffing values into an array
-              obj[key] = expandToArr(obj[key],
-                k.firstChild.nodeValue.replace(pat, ''));
+              val = k.firstChild.nodeValue.replace(pat, '');
+              obj[key] = expandToArr(obj[key], val);
             }
+            // Node has a single child branch node, recurse
             else if (t == 1) {
               // Rinse and repeat
               obj[key] = expandToArr(obj[key], this.parse(k.firstChild));
             }
           }
-          // Node has children -- branch node, recurse
+          // Node has children branch nodes, recurse
           else {
             // Rinse and repeat
             obj[key] = expandToArr(obj[key], this.parse(k));
@@ -78,6 +83,28 @@ fleegix.xml = new function (){
       }
     }
     return obj;
+  };
+  // Create an XML document from string
+  this.createDoc = function (str) {
+    // Mozilla
+    if (typeof DOMParser != "undefined") {
+      return (new DOMParser()).parseFromString(str, "application/xml");
+    }
+    // Internet Explorer
+    else if (typeof ActiveXObject != "undefined") {
+      var doc = XML.newDocument( );
+      doc.loadXML(str);
+      return doc;
+    }
+    else {
+      // Try loading the document from a data: URL
+      // Credits: Sarissa library (sarissa.sourceforge.net)
+      var url = "data:text/xml;charset=utf-8," + encodeURIComponent(str);
+      var request = new XMLHttpRequest();
+      request.open("GET", url, false);
+      request.send(null);
+      return request.responseXML;
+    }
   };
   // Returns a single, top-level XML document node
   // Ideal for grabbing embedded XML data from a page
