@@ -18,9 +18,25 @@ if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.event == 'undefined') {
   throw('fleegix.event.delegator depends on the base fleegix.event module in fleegix.js.'); }
 
-fleegix.event.Periodic = function (func, interval, waitFirst) {
+fleegix.event.Periodic = function () {
   var _this = this;
   var _paused = false;
+
+  var args = Array.prototype.slice.apply(arguments);
+  var context;
+  var methodName;
+  if (typeof args[0] != 'function') {
+    context = args.shift();
+    methodName = args.shift();
+  }
+  else {
+    var func = args.shift();
+  }
+  var interval = args.shift();
+  var waitFirst = args.shift();
+
+  this.context = context || null;
+  this.methodName = methodName || null;
   this.func = func || null;
   this.interval = interval || null;
   this.waitFirst = waitFirst || false;
@@ -35,7 +51,12 @@ fleegix.event.Periodic = function (func, interval, waitFirst) {
   };
   this.run = function () {
     if (!_paused) {
-      _this.func();
+      if (_this.context) {
+        _this.context[_this.methodName].call(_this.context);
+      }
+      else {
+        _this.func();
+      }
       setTimeout(_this.run, _this.interval);
     }
   };
