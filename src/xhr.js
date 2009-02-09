@@ -232,7 +232,7 @@ fleegix.xhr = new function () {
   var _syncRequest = null;
   // The id for the setTimeout used in the the
   // request timeout watcher
-  _processingWatcherId = null;
+  var _processingWatcherId = null;
 
   // Private methods
   // ================================
