@@ -9,6 +9,7 @@
 
 <script type="text/javascript" src="../../src/base.js"></script>
 <script type="text/javascript" src="../../src/event.js"></script>
+<script type="text/javascript" src="../../src/json.js"></script>
 <script type="text/javascript" src="history.js"></script>
 
 <script type="text/javascript">
@@ -19,29 +20,29 @@ function puts(s) {
 
 function init() {
   $('historyButton').onclick = goNext;
-  fleegix.history.onchange = function () {
-    var step = fleegix.history.currentStep;
-    var s = fleegix.history.getEntry(step);
-    if (s) {
-      setContent(s);
-    }
+  fleegix.history.onchange = function (entry) {
+    setContent(entry);
   };
-  fleegix.history.init();
+  fleegix.history.init('');
 }
 
 var str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var incr = 0;
 
 function goNext() {
-  var s = str.substr(incr, 1);
-  fleegix.history.addEntry(s);
+  var s = str.substr(incr, 3);
+  fleegix.history.addEntry('section=' + s + '&asdf=qwer', s);
   setContent(s);
   incr++;
 }
 
 function setContent(s) {
-  var step = 'currentStep: ' + fleegix.history.currentStep;
-  $('content').innerHTML = s + ' (' + step + ')';
+  var html = s;
+  var step = fleegix.history.currentStep;
+  if (typeof step == 'number') {
+    html += ' (currentStep: ' + step + ')';
+  }
+  $('content').innerHTML = html;
 }
 
 window.onload = init;
@@ -52,6 +53,8 @@ window.onload = init;
 
 *{
   font-family: "Lucida Grande", "Verdana", sans-serif;
+}
+#historyForm {
 }
 #historyFrame {
   position: absolute;
@@ -86,6 +89,9 @@ window.onload = init;
     </div>
     <!-- This iframe has to be in the base page -->
     <iframe id="historyFrame" src="blank.html"></iframe>
+    <form id="historyForm">
+      <textarea name="historyEntries"></textarea>
+    </form>
   </body>
 </html>
 
