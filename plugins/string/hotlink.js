@@ -17,6 +17,7 @@
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.string == 'undefined') { fleegix.string = {}; }
 fleegix.string.hotlink = new function () {
+  var _this = this;
   var _hrefPat = /(https?:\/\/|www.)([-\w]+(?:\.[-\w]+)*(:\d+)?(\/(([~\w\+%-]|([,.;@:][^\s$]))+)?)*((\?|;)[\w\+%&=.;:-]+)?(\#[\w\-\.]*)?)/g;
   var _emailPat = /[\w\.\+-=]+@[\w\.-]+\.[\w]{2,3}/g;  
   this.url = function (str) {
@@ -31,10 +32,15 @@ fleegix.string.hotlink = new function () {
   this.email = function (str) {
     var t = str || '';
     ret = t.replace(_emailPat, function (s) {
-      var href = s.indexOf('www') === 0 ? 'http://' + s : s;
-      return '<a href="mailto:' + href + '">' + s + '</a>';
+      return '<a href="mailto:' + s + '">' + s + '</a>';
     });
     return ret;
+  };
+  this.all = function (str) {
+    var t = str || '';
+    t = _this.url(t);
+    t = _this.email(t);
+    return t;
   };
 };
 
