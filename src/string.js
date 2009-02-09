@@ -53,15 +53,6 @@ fleegix.string = new function () {
     }
     return s;
   };
-  this.truncate = function (str, len, tail) {
-    var t = tail || '';
-    if (str.length > len) {
-      return str.substr(0, (len - t.length)) + t;
-    }
-    else {
-      return str;
-    }
-  };
   // Converts someVariableName to some_variable_name
   this.toLowerCaseWithUnderscores = function (s) {
     return s.replace(/([A-Z]+)/g, '_$1').toLowerCase().
