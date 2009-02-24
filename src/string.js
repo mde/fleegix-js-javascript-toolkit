@@ -76,11 +76,13 @@ fleegix.string = new function () {
   };
   this.escapeXML = function (s) {
     return s.replace(/&/gm, '&amp;').replace(/</gm, '&lt;').
-      replace(/>/gm, '&gt;').replace(/"/gm, '&quot;');
+        replace(/>/gm, '&gt;').replace(/"/gm, '&quot;').
+        replace(/'/gm, '&#39;');
   };
   this.unescapeXML = function (s) {
     return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
-      replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
+        replace(/&gt;/gm, '>').replace(/&quot;/gm, '"').
+        replace(/&#39;/gm, "'");;
   };
 };
 
