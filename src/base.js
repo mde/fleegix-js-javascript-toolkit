@@ -33,6 +33,12 @@ var $text = function (s) {
   return document.createTextNode(s);
 };
 
+fleegix.bind = function (func, context) {
+  return function () {
+    func.apply(context, arguments);
+  };
+};
+
 fleegix.extend = function (/* Super-class constructor function */ superClass,
   /* Sub-class constructor function */ subClass) {
   return function () {
