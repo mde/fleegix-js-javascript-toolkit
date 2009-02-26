@@ -33,6 +33,12 @@ var $text = function (s) {
   return document.createTextNode(s);
 };
 
+fleegix.bind = function (func, context) {
+  return function () {
+    func.apply(context, arguments);
+  };
+};
+
 fleegix.extend = function (/* Super-class constructor function */ superClass,
   /* Sub-class constructor function */ subClass) {
   return function () {
@@ -1795,7 +1801,54 @@ fleegix.json = new function() {
 
 
 fleegix.string = new function () {
-  var ltr = /^\s+/; var rtr = /\s+$/; var tr = /^\s+|\s+$/g;
+  // Regexes used in trimming functions
+  var _LTR = /^\s+/;
+  var _RTR = /\s+$/;
+  var _TR = /^\s+|\s+$/g;
+  // From/to char mappings -- for the XML escape,
+  // unescape, and test for escapable chars
+  var _CHARS = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#39;'
+  };
+  // Builds the escape/unescape methods using a common
+  // map of characters
+  var _buildEscapes = function (direction) {
+    return function (str) {
+      s = str;
+      var fr, to;
+      for (var p in _CHARS) {
+        fr = direction == 'to' ? p : _CHARS[p];
+        to = direction == 'to' ? _CHARS[p] : p;
+        s = s.replace(new RegExp(fr, 'gm'), to);
+      }
+      return s;
+    };
+  };
+  // Builds a method that tests for any of the escapable
+  // characters -- useful for avoiding double-escaping if
+  // you're not sure whether a string is already escaped
+  var _buildEscapeTest = function () {
+    return function (s) {
+      var pat = '';
+      for (var p in _CHARS) {
+        pat += p + '|';
+      }
+      pat = pat.substr(0, pat.length - 1);
+      pat = new RegExp(pat, "gm");
+      return pat.test(s);
+    };
+  };
+  // Escape special chars to entities
+  this.escapeXML = _buildEscapes('to');
+  // Unescape entities to special chars
+  this.unescapeXML = _buildEscapes('from');
+  // Test if a string includes special chars that
+  // require escaping
+  this.needsEscape = _buildEscapeTest();
   this.toArray = function (str) {
     var arr = [];
     for (var i = 0; i < str.length; i++) {
@@ -1807,15 +1860,15 @@ fleegix.string = new function () {
     return this.toArray(str).reverse().join('');
   };
   this.ltrim = function (str, chr) {
-    var pat = chr ? new RegExp('^' + chr + '+') : ltr;
+    var pat = chr ? new RegExp('^' + chr + '+') : _LTR;
     return str.replace(pat, '');
   };
   this.rtrim = function (str, chr) {
-    var pat = chr ? new RegExp(chr + '+$') : rtr;
+    var pat = chr ? new RegExp(chr + '+$') : _RTR;
     return str.replace(pat, '');
   };
   this.trim = function (str, chr) {
-    var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : tr;
+    var pat = chr ? new RegExp('^' + chr + '+|' + chr + '+$', 'g') : _TR;
     return str.replace(pat, '');
   };
   this.lpad = function (str, chr, width) {
@@ -1852,14 +1905,6 @@ fleegix.string = new function () {
   };
   this.capitalize = function (s) {
     return s.substr(0, 1).toUpperCase() + s.substr(1);
-  };
-  this.escapeXML = function (s) {
-    return s.replace(/&/gm, '&amp;').replace(/</gm, '&lt;').
-      replace(/>/gm, '&gt;').replace(/"/gm, '&quot;');
-  };
-  this.unescapeXML = function (s) {
-    return s.replace(/&amp;/gm, '&').replace(/&lt;/gm, '<').
-      replace(/&gt;/gm, '>').replace(/&quot;/gm, '"');
   };
 };
 
@@ -2043,3 +2088,2258 @@ fleegix.form.toObject= function (f, o) {
 };
 // Alias for backward compat
 fleegix.form.toHash = fleegix.form.toObject;
+
+if (typeof fleegix.date == 'undefined') { fleegix.date = {}; }
+fleegix.date.util = {};
+
+fleegix.date.util.weekdayLong = ['Sunday', 'Monday', 'Tuesday',
+  'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+fleegix.date.util.weekdayShort = ['Sun', 'Mon', 'Tue', 'Wed',
+  'Thu', 'Fri', 'Sat'];
+fleegix.date.util.monthLong = ['January', 'February', 'March',
+  'April', 'May', 'June', 'July', 'August', 'September',
+  'October', 'November', 'December'];
+fleegix.date.util.monthShort = ['Jan', 'Feb', 'Mar', 'Apr',
+  'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+fleegix.date.util.meridian = {
+  'AM': 'AM',
+  'PM': 'PM'
+}
+
+fleegix.date.util.supportedFormats = {
+  // abbreviated weekday name according to the current locale
+  'a': function (dt) { return fleegix.date.util.weekdayShort[dt.getDay()]; },
+  // full weekday name according to the current locale
+  'A': function (dt) { return fleegix.date.util.weekdayLong[dt.getDay()]; },
+  // abbreviated month name according to the current locale
+  'b': function (dt) { return fleegix.date.util.monthShort[dt.getMonth()]; },
+  'h': function (dt) { return fleegix.date.util.strftime(dt, '%b'); },
+  // full month name according to the current locale
+  'B': function (dt) { return fleegix.date.util.monthLong[dt.getMonth()]; },
+  // preferred date and time representation for the current locale
+  'c': function (dt) { return fleegix.date.util.strftime(dt, '%a %b %d %T %Y'); },
+  // century number (the year divided by 100 and truncated
+  // to an integer, range 00 to 99)
+  'C': function (dt) { return fleegix.date.util.calcCentury(dt.getFullYear());; },
+  // day of the month as a decimal number (range 01 to 31)
+  'd': function (dt) { return fleegix.date.util.leftPad(dt.getDate(), 2, '0'); },
+  // same as %m/%d/%y
+  'D': function (dt) { return fleegix.date.util.strftime(dt, '%m/%d/%y') },
+  // day of the month as a decimal number, a single digit is
+  // preceded by a space (range ' 1' to '31')
+  'e': function (dt) { return fleegix.date.util.leftPad(dt.getDate(), 2, ' '); },
+  // month as a decimal number, a single digit is
+  // preceded by a space (range ' 1' to '12')
+  'f': function () { return fleegix.date.util.strftimeNotImplemented('f'); },
+  // same as %Y-%m-%d
+  'F': function (dt) { return fleegix.date.util.strftime(dt, '%Y-%m-%d');  },
+  // like %G, but without the century.
+  'g': function () { return fleegix.date.util.strftimeNotImplemented('g'); },
+  // The 4-digit year corresponding to the ISO week number
+  // (see %V).  This has the same format and value as %Y,
+  // except that if the ISO week number belongs to the
+  // previous or next year, that year is used instead.
+  'G': function () { return fleegix.date.util.strftimeNotImplemented('G'); },
+  // hour as a decimal number using a 24-hour clock (range
+  // 00 to 23)
+  'H': function (dt) { return fleegix.date.util.leftPad(dt.getHours(), 2, '0'); },
+  // hour as a decimal number using a 12-hour clock (range
+  // 01 to 12)
+  'I': function (dt) { return fleegix.date.util.leftPad(
+    fleegix.date.util.hrMil2Std(dt.getHours()), 2, '0'); },
+  // day of the year as a decimal number (range 001 to 366)
+  'j': function (dt) { return fleegix.date.util.leftPad(
+    fleegix.date.util.calcDays(dt), 3, '0'); },
+  // Hour as a decimal number using a 24-hour clock (range
+  // 0 to 23 (space-padded))
+  'k': function (dt) { return fleegix.date.util.leftPad(dt.getHours(), 2, ' '); },
+  // Hour as a decimal number using a 12-hour clock (range
+  // 1 to 12 (space-padded))
+  'l': function (dt) { return fleegix.date.util.leftPad(
+    fleegix.date.util.hrMil2Std(dt.getHours()), 2, ' '); },
+  // month as a decimal number (range 01 to 12)
+  'm': function (dt) { return fleegix.date.util.leftPad((dt.getMonth()+1), 2, '0'); },
+  // minute as a decimal number
+  'M': function (dt) { return fleegix.date.util.leftPad(dt.getMinutes(), 2, '0'); },
+  // Linebreak
+  'n': function () { return '\n'; },
+  // either `am' or `pm' according to the given time value,
+  // or the corresponding strings for the current locale
+  'p': function (dt) { return fleegix.date.util.getMeridian(dt.getHours()); },
+  // time in a.m. and p.m. notation
+  'r': function (dt) { return fleegix.date.util.strftime(dt, '%I:%M:%S %p'); },
+  // time in 24 hour notation
+  'R': function (dt) { return fleegix.date.util.strftime(dt, '%H:%M'); },
+  // second as a decimal number
+  'S': function (dt) { return fleegix.date.util.leftPad(dt.getSeconds(), 2, '0'); },
+  // Tab char
+  't': function () { return '\t'; },
+  // current time, equal to %H:%M:%S
+  'T': function (dt) { return fleegix.date.util.strftime(dt, '%H:%M:%S'); },
+  // weekday as a decimal number [1,7], with 1 representing
+  // Monday
+  'u': function (dt) { return fleegix.date.util.convertOneBase(dt.getDay()); },
+  // week number of the current year as a decimal number,
+  // starting with the first Sunday as the first day of the
+  // first week
+  'U': function () { return fleegix.date.util.strftimeNotImplemented('U'); },
+  // week number of the year (Monday as the first day of the
+  // week) as a decimal number [01,53]. If the week containing
+  // 1 January has four or more days in the new year, then it
+  // is considered week 1. Otherwise, it is the last week of
+  // the previous year, and the next week is week 1.
+  'V': function () { return fleegix.date.util.strftimeNotImplemented('V'); },
+  // week number of the current year as a decimal number,
+  // starting with the first Monday as the first day of the
+  // first week
+  'W': function () { return fleegix.date.util.strftimeNotImplemented('W'); },
+  // day of the week as a decimal, Sunday being 0
+  'w': function (dt) { return dt.getDay(); },
+  // preferred date representation for the current locale
+  // without the time
+  'x': function (dt) { return fleegix.date.util.strftime(dt, '%D'); },
+  // preferred time representation for the current locale
+  // without the date
+  'X': function (dt) { return fleegix.date.util.strftime(dt, '%T'); },
+  // year as a decimal number without a century (range 00 to
+  // 99)
+  'y': function (dt) { return fleegix.date.util.getTwoDigitYear(dt.getFullYear()); },
+  // year as a decimal number including the century
+  'Y': function (dt) { return fleegix.date.util.leftPad(dt.getFullYear(), 4, '0'); },
+  // time zone or name or abbreviation
+  'z': function () { return fleegix.date.util.strftimeNotImplemented('z'); },
+  'Z': function () { return fleegix.date.util.strftimeNotImplemented('Z'); },
+  // Literal percent char
+  '%': function (dt) { return '%'; }
+};
+
+fleegix.date.util.getSupportedFormats = function () {
+  var str = '';
+  for (var i in fleegix.date.util.supportedFormats) { str += i; }
+  return str;
+}
+
+fleegix.date.util.supportedFormatsPat = new RegExp('%[' +
+  fleegix.date.util.getSupportedFormats() + ']{1}', 'g');
+
+fleegix.date.util.strftime = function (dt, format) {
+  var d = null;
+  var pats = [];
+  var dts = [];
+  var str = format;
+
+  // If no dt, use current date
+  d = dt ? dt : new Date();
+  // Allow either Date obj or UTC stamp
+  d = typeof dt == 'number' ? new Date(dt) : dt;
+
+  // Grab all instances of expected formats into array
+  while (pats = fleegix.date.util.supportedFormatsPat.exec(format)) {
+    dts.push(pats[0]);
+  }
+
+  // Process any hits
+  for (var i = 0; i < dts.length; i++) {
+    key = dts[i].replace(/%/, '');
+    str = str.replace('%' + key,
+      fleegix.date.util.supportedFormats[key](d));
+  }
+  return str;
+
+};
+
+fleegix.date.util.strftimeNotImplemented = function (s) {
+  throw('fleegix.date.util.strftime format "' + s + '" not implemented.');
+};
+
+fleegix.date.util.leftPad = function (instr, len, spacer) {
+  var str = instr.toString();
+  // spacer char optional, default to space
+  var sp = spacer ? spacer : ' ';
+  while (str.length < len) {
+    str = sp + str;
+  }
+  return str;
+};
+
+/**
+ * Calculate the century to which a particular year belongs
+ * @param y Integer year number
+ * @return Integer century number
+ */
+fleegix.date.util.calcCentury = function (y) {
+  var ret = parseInt(y/100);
+  ret = ret.toString();
+  return fleegix.date.util.leftPad(ret);
+};
+
+/**
+ * Calculate the day number in the year a particular date is on
+ * @param dt JavaScript date object
+ * @return Integer day number in the year for the given date
+ */
+fleegix.date.util.calcDays = function(dt) {
+  var first = new Date(dt.getFullYear(), 0, 1);
+  var diff = 0;
+  var ret = 0;
+  first = first.getTime();
+  diff = (dt.getTime() - first);
+  ret = parseInt(((((diff/1000)/60)/60)/24))+1;
+  return ret;
+};
+
+/**
+ * Adjust from 0-6 base week to 1-7 base week
+ * @param d integer for day of week
+ * @return Integer day number for 1-7 base week
+ */
+fleegix.date.util.convertOneBase = function (d) {
+  return d == 0 ? 7 : d;
+};
+
+fleegix.date.util.getTwoDigitYear = function (yr) {
+  // Add a millenium to take care of years before the year 1000,
+  // (e.g, the year 7) since we're only taking the last two digits
+  // If we overshoot, it doesn't matter
+  var millenYear = yr + 1000;
+  var str = millenYear.toString();
+  str = str.substr(2); // Get the last two digits
+  return str
+};
+
+/**
+ * Return 'AM' or 'PM' based on hour in 24-hour format
+ * @param h Integer for hour in 24-hour format
+ * @return String of either 'AM' or 'PM' based on hour number
+ */
+fleegix.date.util.getMeridian = function (h) {
+  return h > 11 ? fleegix.date.util.meridian.PM :
+    fleegix.date.util.meridian.AM;
+};
+
+/**
+ * Convert a 24-hour formatted hour to 12-hour format
+ * @param hour Integer hour number
+ * @return String for hour in 12-hour format -- may be string length of one
+ */
+fleegix.date.util.hrMil2Std = function (hour) {
+  var h = typeof hour == 'number' ? hour : parseInt(hour);
+  var str = h > 12 ? h - 12 : h;
+  str = str == 0 ? 12 : str;
+  return str;
+};
+
+/**
+ * Convert a 12-hour formatted hour with meridian flag to 24-hour format
+ * @param hour Integer hour number
+ * @param pm Boolean flag, if PM hour then set to true
+ * @return String for hour in 24-hour format
+ */
+fleegix.date.util.hrStd2Mil = function  (hour, pm) {
+  var h = typeof hour == 'number' ? hour : parseInt(hour);
+  var str = '';
+  // PM
+  if (pm) {
+    str = h < 12 ? (h+12) : h;
+  }
+  // AM
+  else {
+    str = h == 12 ? 0 : h;
+  }
+  return str;
+};
+
+// Constants for use in fleegix.date.util.add
+fleegix.date.util.dateParts = {
+  YEAR: 0, MONTH: 1, DAY: 2, HOUR: 3, MINUTE: 4, SECOND: 5,
+    MILLISECOND: 6, QUARTER: 7, WEEK: 8, WEEKDAY: 9
+};
+
+/**
+ * Add to a Date in intervals of different size, from
+ * milliseconds to years
+ * @param dt -- Date (or timestamp Number), date to increment
+ * @param interv -- Number, a constant representing the interval,
+ *    e.g. YEAR, MONTH, DAY.  See fleegix.date.util.dateParts
+ * @param incr -- Number, how much to add to the date
+ * @return Integer day number for 1-7 base week
+ */
+fleegix.date.util.add = function (dt, interv, incr) {
+  if (typeof dt == 'number') { dt = new Date(dt); }
+  function fixOvershoot(){
+    if (sum.getDate() < dt.getDate()){
+      sum.setDate(0);
+    }
+  }
+  var sum = new Date(dt);
+  with (fleegix.date.util.dateParts) {
+    switch(interv){
+      case YEAR:
+        sum.setFullYear(dt.getFullYear()+incr);
+        // Keep increment/decrement from 2/29 out of March
+        fixOvershoot();
+        break;
+      case QUARTER:
+        // Naive quarter is just three months
+        incr*=3;
+        // fallthrough...
+      case MONTH:
+        sum.setMonth(dt.getMonth()+incr);
+        // Reset to last day of month if you overshoot
+        fixOvershoot();
+        break;
+      case WEEK:
+        incr*=7;
+        // fallthrough...
+      case DAY:
+        sum.setDate(dt.getDate() + incr);
+        break;
+      case WEEKDAY:
+        //FIXME: assumes Saturday/Sunday weekend, but even this is not fixed.
+        // There are CLDR entries to localize this.
+        var dat = dt.getDate();
+        var weeks = 0;
+        var days = 0;
+        var strt = 0;
+        var trgt = 0;
+        var adj = 0;
+        // Divide the increment time span into weekspans plus leftover days
+        // e.g., 8 days is one 5-day weekspan / and two leftover days
+        // Can't have zero leftover days, so numbers divisible by 5 get
+        // a days value of 5, and the remaining days make up the number of weeks
+        var mod = incr % 5;
+        if (mod == 0) {
+          days = (incr > 0) ? 5 : -5;
+          weeks = (incr > 0) ? ((incr-5)/5) : ((incr+5)/5);
+        }
+        else {
+          days = mod;
+          weeks = parseInt(incr/5);
+        }
+        // Get weekday value for orig date param
+        strt = dt.getDay();
+        // Orig date is Sat / positive incrementer
+        // Jump over Sun
+        if (strt == 6 && incr > 0) {
+          adj = 1;
+        }
+        // Orig date is Sun / negative incrementer
+        // Jump back over Sat
+        else if (strt == 0 && incr < 0) {
+          adj = -1;
+        }
+        // Get weekday val for the new date
+        trgt = strt + days;
+        // New date is on Sat or Sun
+        if (trgt == 0 || trgt == 6) {
+          adj = (incr > 0) ? 2 : -2;
+        }
+        // Increment by number of weeks plus leftover days plus
+        // weekend adjustments
+        sum.setDate(dat + (7*weeks) + days + adj);
+        break;
+      case HOUR:
+        sum.setHours(sum.getHours()+incr);
+        break;
+      case MINUTE:
+        sum.setMinutes(sum.getMinutes()+incr);
+        break;
+      case SECOND:
+        sum.setSeconds(sum.getSeconds()+incr);
+        break;
+      case MILLISECOND:
+        sum.setMilliseconds(sum.getMilliseconds()+incr);
+        break;
+      default:
+        // Do nothing
+        break;
+    }
+  }
+  return sum; // Date
+};
+
+/**
+ * Get the difference in a specific unit of time (e.g., number
+ * of months, weeks, days, etc.) between two dates.
+ * @param date1 -- Date (or timestamp Number)
+ * @param date2 -- Date (or timestamp Number)
+ * @param interv -- Number, a constant representing the interval,
+ *    e.g. YEAR, MONTH, DAY.  See fleegix.date.util.dateParts
+ * @return Integer, number of (interv) units apart that
+ *    the two dates are
+ */
+fleegix.date.util.diff = function (date1, date2, interv) {
+//  date1
+//    Date object or Number equivalent
+//
+//  date2
+//    Date object or Number equivalent
+//
+//  interval
+//    A constant representing the interval, e.g. YEAR, MONTH, DAY.  See fleegix.date.util.dateParts.
+
+  // Accept timestamp input
+  if (typeof date1 == 'number') { date1 = new Date(date1); }
+  if (typeof date2 == 'number') { date2 = new Date(date2); }
+  var yeaDiff = date2.getFullYear() - date1.getFullYear();
+  var monDiff = (date2.getMonth() - date1.getMonth()) + (yeaDiff * 12);
+  var msDiff = date2.getTime() - date1.getTime(); // Millisecs
+  var secDiff = msDiff/1000;
+  var minDiff = secDiff/60;
+  var houDiff = minDiff/60;
+  var dayDiff = houDiff/24;
+  var weeDiff = dayDiff/7;
+  var delta = 0; // Integer return value
+
+  with (fleegix.date.util.dateParts) {
+    switch (interv) {
+      case YEAR:
+        delta = yeaDiff;
+        break;
+      case QUARTER:
+        var m1 = date1.getMonth();
+        var m2 = date2.getMonth();
+        // Figure out which quarter the months are in
+        var q1 = Math.floor(m1/3) + 1;
+        var q2 = Math.floor(m2/3) + 1;
+        // Add quarters for any year difference between the dates
+        q2 += (yeaDiff * 4);
+        delta = q2 - q1;
+        break;
+      case MONTH:
+        delta = monDiff;
+        break;
+      case WEEK:
+        // Truncate instead of rounding
+        // Don't use Math.floor -- value may be negative
+        delta = parseInt(weeDiff);
+        break;
+      case DAY:
+        delta = dayDiff;
+        break;
+      case WEEKDAY:
+        var days = Math.round(dayDiff);
+        var weeks = parseInt(days/7);
+        var mod = days % 7;
+
+        // Even number of weeks
+        if(mod == 0){
+          days = weeks*5;
+        }else{
+          // Weeks plus spare change (< 7 days)
+          var adj = 0;
+          var aDay = date1.getDay();
+          var bDay = date2.getDay();
+
+          weeks = parseInt(days/7);
+          mod = days % 7;
+          // Mark the date advanced by the number of
+          // round weeks (may be zero)
+          var dtMark = new Date(date1);
+          dtMark.setDate(dtMark.getDate()+(weeks*7));
+          var dayMark = dtMark.getDay();
+
+          // Spare change days -- 6 or less
+          if(dayDiff > 0){
+            switch(true){
+              // Range starts on Sat
+              case aDay == 6:
+                adj = -1;
+                break;
+              // Range starts on Sun
+              case aDay == 0:
+                adj = 0;
+                break;
+              // Range ends on Sat
+              case bDay == 6:
+                adj = -1;
+                break;
+              // Range ends on Sun
+              case bDay == 0:
+                adj = -2;
+                break;
+              // Range contains weekend
+              case (dayMark + mod) > 5:
+                adj = -2;
+                break;
+              default:
+                // Do nothing
+                break;
+            }
+          }else if(dayDiff < 0){
+            switch (true) {
+              // Range starts on Sat
+              case aDay == 6:
+                adj = 0;
+                break;
+              // Range starts on Sun
+              case aDay == 0:
+                adj = 1;
+                break;
+              // Range ends on Sat
+              case bDay == 6:
+                adj = 2;
+                break;
+              // Range ends on Sun
+              case bDay == 0:
+                adj = 1;
+                break;
+              // Range contains weekend
+              case (dayMark + mod) < 0:
+                adj = 2;
+                break;
+              default:
+                // Do nothing
+                break;
+            }
+          }
+          days += adj;
+          days -= (weeks*2);
+        }
+        delta = days;
+
+        break;
+      case HOUR:
+        delta = houDiff;
+        break;
+      case MINUTE:
+        delta = minDiff;
+        break;
+      case SECOND:
+        delta = secDiff;
+        break;
+      case MILLISECOND:
+        delta = msDiff;
+        break;
+      default:
+        // Do nothing
+        break;
+    }
+  }
+  // Round for fractional values and DST leaps
+  return Math.round(delta); // Number (integer)
+};
+
+
+
+if (typeof fleegix.hash == 'undefined') { fleegix.hash = {}; }
+fleegix.hash.UNDEFINED_VALUE;
+fleegix.hash.Hash = function (d) {
+  this.count = 0;
+  this.items = {}; // Hash keys and their values
+  this.order = []; // Array for sort order
+  if (d) { this.defaultValue = d; };
+};
+fleegix.hash.Hash.prototype = new function () {
+  // Private methods
+  var getRandomKey = function () {
+    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+    var len = 16;
+    var str = '';
+    var mls = new Date().getTime();
+    for (var i = 0; i < len; i++) {
+      // In Safari 2 Math.random returns the same random
+      // sequence after firing up the browser -- return
+      // something randomish
+      if (navigator.userAgent.indexOf('Safari/41') > -1) {
+        rnum = (((mls / (i + 1)) + mls) % chars.length);
+      }
+      else {
+        var rnum = (Math.random() * chars.length);
+      }
+      rnum = Math.floor(rnum);
+      str += chars.substring(rnum, rnum + 1);
+    }
+    return str;
+  };
+  // Interface methods
+  this.addItem = function (key, val) {
+    if (typeof key != 'string') {
+      throw('Hash only allows string keys.');
+    }
+    return this.setByKey(key, val);
+  };
+  this.addItemCreateKey = function (val) {
+    var key = getRandomKey();
+    this.setByKey(key, val);
+    return key;
+  };
+  this.getItem = function (p) {
+    if (typeof p == 'string') {
+      return this.getByKey(p);
+    }
+    else if (typeof p == 'number') {
+      return this.getByIndex(p);
+    }
+  };
+  this.setItem = function (p, val) {
+    if (typeof p == 'string') {
+      this.setByKey(p, val);
+    }
+    else if (typeof p == 'number') {
+      this.setByIndex(p, val);
+    }
+  };
+  this.removeItem = function (p) {
+    if (typeof p == 'string') {
+      this.removeByKey(p);
+    }
+    else if (typeof p == 'number') {
+      this.removeByIndex(p);
+    }
+  };
+  this.getByKey = function (key) {
+    return this.items[key];
+  };
+  this.setByKey = function (key, val) {
+    var v = null;
+    if (typeof val == 'undefined') {
+      v = this.defaultValue;
+    }
+    else { v = val; }
+    if (typeof this.items[key] == 'undefined') {
+      this.order[this.count] = key;
+      this.count++;
+    }
+    this.items[key] = v;
+    return this.items[key];
+  };
+  this.removeByKey = function (key) {
+    if (typeof this.items[key] != 'undefined') {
+      var pos = null;
+      delete this.items[key]; // Remove the value
+      // Find the key in the order list
+      for (var i = 0; i < this.order.length; i++) {
+        if (this.order[i] == key) {
+          pos = i;
+        }
+      }
+      this.order.splice(pos, 1); // Remove the key
+      this.count--; // Decrement the length
+    }
+  };
+  this.getByIndex = function (ind) {
+    return this.items[this.order[ind]];
+  };
+  this.setByIndex = function (ind, val) {
+    if (ind < 0 || ind >= this.count) {
+      throw('Index out of bounds. Hash length is ' + this.count);
+    }
+    this.items[this.order[ind]] = val;
+  };
+  this.removeByIndex = function (pos) {
+    var ret = this.items[this.order[pos]];
+    if (typeof ret != 'undefined') {
+      delete this.items[this.order[pos]]
+      this.order.splice(pos, 1);
+      this.count--;
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+  this.hasKey = function (key) {
+    return typeof this.items[key] != 'undefined';
+  };
+  this.hasValue = function (val) {
+    for (var i = 0; i < this.order.length; i++) {
+      if (this.items[this.order[i]] == val) {
+        return true;
+      }
+    }
+    return false;
+  };
+  this.allKeys = function (str) {
+    return this.order.join(str);
+  };
+  this.replaceKey = function (oldKey, newKey) {
+    // If item for newKey exists, nuke it
+    if (this.hasKey(newKey)) {
+      this.removeItem(newKey);
+    }
+    this.items[newKey] = this.items[oldKey];
+    delete this.items[oldKey];
+    for (var i = 0; i < this.order.length; i++) {
+      if (this.order[i] == oldKey) {
+        this.order[i] = newKey;
+      }
+    }
+  };
+  this.insertAtIndex = function (pos, key, val) {
+    this.order.splice(pos, 0, key);
+    this.items[key] = val;
+    this.count++;
+    return true;
+  };
+  this.insertAfterKey = function (refKey, key, val) {
+    var pos = this.getPos(refKey);
+    this.insertAtPos(pos, key, val);
+  };
+  this.getPosition = function (key) {
+    var order = this.order;
+    if (typeof order.indexOf == 'function') {
+      return order.indexOf(key);
+    }
+    else {
+      for (var i = 0; i < order.length; i++) {
+        if (order[i] == key) { return i;}
+      }
+    }
+  }
+  this.each = function (func, o) {
+    var opts = o || {};
+    var len = this.order.length;
+    var start = opts.start ? opts.start : 0;
+    var ceiling = opts.items ? (start + opts.items) : len;
+    ceiling = (ceiling > len) ? len : ceiling;
+    for (var i = start; i < ceiling; i++) {
+      var key = this.order[i];
+      var val = this.items[key];
+      if (opts.keyOnly) {
+        func(key);
+      }
+      else if (opts.valueOnly) {
+        func(val);
+      }
+      else {
+        func(val, key);
+      }
+    }
+    return true;
+  };
+  this.eachKey = function (func) {
+    this.each(func, { keyOnly: true });
+  };
+  this.eachValue = function (func) {
+    this.each(func, { valueOnly: true });
+  };
+  this.clone = function () {
+    var h = new fleegix.hash.Hash();
+    for (var i = 0; i < this.order.length; i++) {
+      var key = this.order[i];
+      var val = this.items[key];
+      h.setItem(key, val);
+    }
+    return h;
+  };
+  this.concat = function (hNew) {
+    for (var i = 0; i < hNew.order.length; i++) {
+      var key = hNew.order[i];
+      var val = hNew.items[key];
+      this.setItem(key, val);
+    }
+  };
+  this.push = function (key, val) {
+    this.insertAtIndex(this.count, key, val);
+    return this.count;
+  };
+  this.pop = function () {
+    var pos = this.count-1;
+    var ret = this.items[this.order[pos]];
+    if (typeof ret != 'undefined') {
+      this.removeAtPos(pos);
+      return ret;
+    }
+    else {
+      return fleegix.hash.UNDEFINED_VALUE;
+    }
+  };
+  this.unshift = function (key, val) {
+    this.insertAtIndex(0, key, val);
+    return this.count;
+  };
+  this.shift = function (key, val) {
+    var pos = 0;
+    var ret = this.items[this.order[pos]];
+    if (typeof ret != 'undefined') {
+      this.removeAtPos(pos);
+      return ret;
+    }
+    else {
+      return fleegix.hash.UNDEFINED_VALUE;
+    }
+  };
+  this.splice = function (index, numToRemove, hash) {
+    var _this = this;
+    // Removal
+    if (numToRemove > 0) {
+      // Items
+      var limit = index + numToRemove;
+      for (var i = index; i < limit; i++) {
+        delete this.items[this.order[i]];
+      }
+      // Order
+      this.order.splice(index, numToRemove);
+    }
+    // Adding 
+    if (hash) {
+      // Items
+      for (var i in hash.items) {
+        this.items[i] = hash.items[i];
+      }
+      // Order
+      var args = hash.order;
+      args.unshift(0);
+      args.unshift(index);
+      this.order.splice.apply(this.order, args);
+    }
+    this.count = this.order.length;
+  };
+  this.sort = function (s) {
+    var c = s || fleegix.hash.sorts.ASCENDING_NOCASE;
+    var arr = [];
+    if (typeof c != 'function') {
+      throw('Hash sort requires a valid comparator function.');
+    }
+    var comp = function (a, b) {
+      return c(a.val, b.val);
+    }
+    for (var i = 0; i < this.order.length; i++) {
+      var key = this.order[i];
+      arr[i] = { key: key, val: this.items[key] };
+    }
+    arr.sort(comp);
+    this.order = [];
+    for (var i = 0; i < arr.length; i++) {
+      this.order.push(arr[i].key);
+    }
+  };
+  this.sortByKey = function (s) {
+    var comp = s || fleegix.hash.sorts.ASCENDING_NOCASE;
+    if (typeof compar != 'function') {
+      throw('Hash sort requires a valid comparator function.');
+    }
+    this.order.sort(comp);
+  };
+  this.reverse = function () {
+    this.order.reverse();
+  };
+};
+
+// Stock comparators for sorts
+fleegix.hash.sorts = {
+  ASCENDING_WITH_CASE: function (a, b) {
+    return (a >= b) ?  1 : -1;
+  },
+  DESCENDING_WITH_CASE: function (a, b) {
+    return (a < b) ?  1 : -1;
+  },
+  ASCENDING_NOCASE: function (a, b) {
+    return (a.toLowerCase() >=
+      b.toLowerCase()) ? 1 : -1;
+  },
+  DESCENDING_NOCASE: function (a, b) {
+    return (a.toLowerCase() <
+      b.toLowerCase()) ? 1 : -1;
+  }
+};
+
+
+
+if (typeof fleegix.ui == 'undefined') { fleegix.ui = {}; }
+fleegix.ui.GlyphRegistry = {};
+fleegix.ui.defaultUnits = 'px';
+fleegix.ui.Glyph = function (domNode, id) {
+  this.domNode = domNode || null;
+  this.id = id || domNode.id;
+  if (!this.id) { throw new Error('Glyph must have an id.'); }
+  // Positioning fu
+  this.top = 0;
+  this.left = 0;
+  this.width = 0;
+  this.height = 0;
+  // Data
+  this.data = null;
+  // Hierarchicalness
+  this.parent = null;
+  this.children = [];
+  // Flag for init-only code that has to run
+  this.hasBeenRendered = false;
+  // Visibility flag
+  this.visible = true;
+  // List of Glyphes
+  fleegix.ui.GlyphRegistry[id] = this;
+  // Place to keep data
+  this.data = null;
+};
+fleegix.ui.Glyph.prototype = new function () {
+  this.cleanup =  function () {
+    this.domNode = null;
+  };
+  this.clearNode =  function (node, useInnerHTML) {
+    if (useInnerHTML) {
+      node.innerHTML = '';
+    }
+    else {
+      while (node.hasChildNodes()) {
+        node.removeChild(node.firstChild);
+      }
+    }
+  };
+  this.clearAll =  function () {
+    if (this.domNode) {
+      this.clearNode(this.domNode);
+    }
+    var ch = this.children;
+    if (ch && ch.length) {
+      for (var i = 0; i < ch.length; i++) {
+        ch[i].clearAll();
+      }
+    }
+  };
+  this.setPosition =  function (left, top) {
+    this.setTop(top);
+    this.setLeft(left);
+  };
+  this.setSize =  function (width, height) {
+    this.setWidth(width);
+    this.setHeight(height);
+  };
+  this.setTop =  function (top) {
+    if (typeof top != 'undefined') {
+      this.top = top;
+    }
+    n = this.top;
+    if (fleegix.ui.defaultUnits == 'px') {
+      n = parseInt(n, 10);
+    }
+    this.domNode.style.position = 'absolute';
+    this.domNode.style.top = n + fleegix.ui.defaultUnits;
+  };
+  this.setLeft =  function (left) {
+    if (typeof left != 'undefined') {
+      this.left = left;
+    }
+    n = this.left;
+    if (fleegix.ui.defaultUnits == 'px') {
+      n = parseInt(n, 10);
+    }
+    this.domNode.style.position = 'absolute';
+    this.domNode.style.left = n + fleegix.ui.defaultUnits;
+  };
+  this.setWidth =  function (width) {
+    if (typeof width != 'undefined') {
+      this.width = width;
+    }
+    n = this.width;
+    if (typeof n == 'number') {
+      if (fleegix.ui.defaultUnits == 'px') {
+        n = parseInt(n, 10);
+      }
+      n = n.toString() + fleegix.ui.defaultUnits
+    }
+    this.domNode.style.width = n;
+  };
+  this.setHeight =  function (height) {
+    if (typeof height != 'undefined') {
+      this.height = height;
+    }
+    n = this.height;
+    if (typeof n == 'number') {
+      if (fleegix.ui.defaultUnits == 'px') {
+        n = parseInt(n, 10);
+      }
+      n = n.toString() + fleegix.ui.defaultUnits
+    }
+    this.domNode.style.height = n;
+  };
+  this.appendToDomNode = function (node) {
+    if (!this.domNode) {
+      throw new Error('Glyph "' + this.id + '" has no domNode.');
+    }
+    else {
+      node.appendChild(this.domNode);
+    }
+  }
+  this.hide =  function (visOnly) {
+    if (visOnly) {
+      this.domNode.style.visibility = 'hidden';
+    }
+    else {
+      this.domNode.style.display = 'none';
+    }
+    this.visible = false;
+  };
+  this.show =  function (visOnly) {
+    if (visOnly) {
+      this.domNode.style.visibility = 'visible';
+    }
+    else {
+      this.domNode.style.display = 'block';
+    }
+    this.visible = true;
+  };
+  this.renderSelf =  function () {};
+  this.update = function (p) {
+    var params = p || {};
+    for (var n in params) { this[n] = params[n]; }
+  };
+  this.render = function () {
+    // Run the init function on first render if it's defined
+    if (!this.hasBeenRendered && typeof this.init == 'function') {
+      this.init();
+    }
+    if (typeof this.renderSelf == 'function') {
+      this.renderSelf();
+    };
+    var children = this.children;
+    var child;
+    for (var i = 0; i < children.length; i++) {
+      child = children[i];
+      child.render();
+    }
+    this.hasBeenRendered = true;
+  };
+  this.addChild = function (c) {
+    this.children.push(c);
+    c.parent = this;
+    this[c.id] = c;
+    this.domNode.appendChild(c.domNode);
+  };
+  this.center = function () {
+    if (!fleegix.dom) {
+      throw new Error('This method depends on the fleegix.dom module in fleegix.js base.');
+    }
+    else {
+      this.domNode.style.position = 'absolute';
+      fleegix.dom.center(this.domNode);
+    }
+  };
+};
+
+
+
+
+fleegix.i18n = new function () {
+  var _this = this;
+  this.localizedStrings = {};
+  this.getText = function () {
+    var args = Array.prototype.slice.apply(arguments);
+    var key = args.shift();
+    var str = _this.localizedStrings[key] || "[[" + key + "]]";
+    for (var i = 0; i < args.length; i++){
+        str = str.replace(new RegExp('\\{' + i + '\\}', 'g'), args[i]);
+    }
+    return str;
+  };
+  this.setLocalizedStrings = function (obj) {
+    this.localizedStrings = obj || {};
+  };
+};
+
+
+fleegix.html = new function () {
+  var _createElem = function (s) {
+    return document.createElement(s); };
+  var _createText = function (s) {
+    return document.createTextNode(s); };
+  this.createSelect = function (o) {
+    var sel = document.createElement('select');
+    var options = [];
+    var appendElem = null;
+
+    // createSelect({ name: 'foo', id: 'foo', multi: true,
+    //  options: [{ text: 'Howdy', value: '123' },
+    //  { text: 'Hey', value: 'ABC' }], className: 'fooFoo' });
+    appendElem = arguments[1];
+    options = o.options;
+    for (var p in o) {
+      if (p != 'options') {
+        sel[p] = o[p];
+      }
+    }
+    // Add the options for the select
+    if (options) {
+      this.setSelectOptions(sel, options);
+    }
+    return sel;
+  };
+
+  this.setSelectOptions = function (selectElement, options){
+    while (selectElement.firstChild){
+       selectElement.removeChild(selectElement.firstChild);
+    }
+    for (var i = 0; i < options.length; i++) {
+      var opt = _createElem('option');
+      opt.value = options[i].value || '';
+      opt.appendChild(_createText(options[i].text));
+      selectElement.appendChild(opt);
+      if (options[i].selected){
+        selectElement.selectedIndex = i;
+      }
+    }
+  };
+
+  this.setSelect = function (sel, val) {
+    var index = 0;
+    var opts = sel.options;
+    for (var i = 0; i < opts.length; i++) {
+      if (opts[i].value == val) {
+        index = i;
+        break;
+      }
+    }
+    sel.selectedIndex = index;
+  };
+
+  this.createInput = function (o) {
+    var input = null;
+    var str = '';
+
+    // createInput({ type: 'password', name: 'foo', id: 'foo',
+    //    value: 'asdf', className: 'fooFoo' });
+    // Neither IE nor Safari 2 can handle DOM-generated radio
+    // or checkbox inputs -- they stupidly assume name and id
+    // attributes should be identical. The solution: kick it
+    // old-skool with conditional branching and innerHTML
+    if ((document.all || navigator.userAgent.indexOf('Safari/41') > -1) &&
+      (o.type == 'radio' || o.type == 'checkbox')) {
+      str = '<input type="' + o.type + '"' +
+        ' name="' + o.name + '"' +
+        ' id ="' + o.id + '"';
+      if (o.value) {
+        str += ' value="' + o.value + '"';
+      }
+      if (o.size) {
+        str += ' size="' + o.size + '"';
+      }
+      if (o.maxlength) {
+        str += ' maxlength="' + o.maxlength + '"';
+      }
+      if (o.checked) {
+        str += ' checked="checked"';
+      }
+      if (o.className) {
+        str += ' class="' + o.className + '"';
+      }
+      str += '/>';
+
+      var s = _createElem('span');
+      s.innerHTML = str;
+      input = s.firstChild;
+      s.removeChild(input);
+    }
+    // Standards-compliant browsers -- all form inputs
+    // IE/Safari 2 -- everything but radio button and checkbox
+    else {
+      input = document.createElement('input');
+      for (var p in o) {
+        input[p] = o[p];
+      }
+
+    }
+    return input;
+  };
+
+};
+
+if (typeof fleegix.drag == 'undefined') { fleegix.drag = {}; }
+fleegix.drag.xPos = null;
+fleegix.drag.yPos = null;
+// Manager singleton
+fleegix.drag.DragManager = new function () {
+  var _this = this;
+  this.registry = [];
+  this.raiseMap = {};
+  this.dragMap = {};
+  this.currentDraggable = null;
+  this.currentZIndex = 99999;
+  this.addDragWindow = function (containerNode, handleNode, shadowNode) {
+    if (!containerNode.id) {
+      throw('Draggable DOM nodes must have an id'); }
+    if (!handleNode) { handleNode = containerNode; }
+    var setupDrag =
+      function (e) { _this.setUpDrag.apply(_this, [e]); };
+    fleegix.event.listen(handleNode, 'onmousedown', setupDrag);
+    var raiseDraggable =
+      function (e) { _this.raiseDraggable.apply(_this, [e]); };
+    fleegix.event.listen(containerNode,
+      'onmousedown', raiseDraggable);
+    var d = new fleegix.drag.DragWindow({
+      containerNode: containerNode, shadowNode: shadowNode });
+    this.registry.push(d);
+    this.raiseMap[containerNode.id] = d;
+    this.dragMap[handleNode.id] = d;
+    this.raiseDraggable(containerNode.id);
+  };
+  this.setUpDrag = function (e) {
+    var elem = e.target;
+    var d = this.dragMap[elem.id];
+    // Look up the DOM hierarchy until we find
+    //something in the map of raiseable nodes
+    while (!d && elem != document.body) {
+      if (elem.parentNode) {
+        elem = elem.parentNode;
+        d = this.dragMap[elem.id];
+      }
+    }
+    if (d) {
+      this.currentDraggable = d;
+      this.currentDraggable.startDrag();
+    }
+  };
+  this.raiseDraggable = function (p) {
+    var key = '';
+    if (typeof p == 'string') {
+      var d = this.raiseMap[p];
+    }
+    else {
+      var elem = p.target;
+      var d = this.raiseMap[elem.id];
+      // Look up the DOM hierarchy until we find
+      //something in the map of raiseable nodes
+      while (!d && elem != document.body) {
+        if (elem.parentNode) {
+          elem = elem.parentNode;
+          d = this.raiseMap[elem.id];
+        }
+      }
+    }
+    this.currentZIndex++;
+    d.containerNode.style.zIndex = this.currentZIndex;
+    if (d.shadowNode) {
+      d.shadowNode.style.zIndex = this.currentZIndex - 1; 
+    }
+  };
+  this.mouseMoveHandler = function (e) {
+    var d = fleegix.drag;
+    d.xPos = e.clientX;
+    d.yPos = e.clientY;
+    if (_this.currentDraggable) {
+      _this.currentDraggable.drag();
+    }
+  };
+  this.mouseUpHandler = function (e) {
+    if (_this.currentDraggable) {
+      _this.currentDraggable.drop();
+      _this.currentDraggable = null;
+    }
+  };
+};
+// Draggable DragWindow pseudoclass
+fleegix.drag.DragWindow = function (p) {
+  var params = p || {};
+  this.containerNode = null;
+  this.shadowNode = null;
+  this.handleNode = null;
+  this.clickOffsetX = 0;
+  this.clickOffsetY = 0;
+  for (var n in params) { this[n] = params[n] }
+};
+fleegix.drag.DragWindow.prototype.startDrag = function () {
+  var d = fleegix.drag;
+  this.clickOffsetX = d.xPos -
+    parseInt(this.containerNode.style.left);
+  this.clickOffsetY = d.yPos -
+    parseInt(this.containerNode.style.top);
+  // Turn off text selection in IE while dragging
+  document.onselectstart = function () { return false; };
+};
+fleegix.drag.DragWindow.prototype.drag = function () {
+  var d = fleegix.drag;
+  var x = (d.xPos - this.clickOffsetX) + 'px';
+  var y = (d.yPos - this.clickOffsetY) + 'px';
+  this.containerNode.style.left = x;
+  this.containerNode.style.top = y;
+  if (this.shadowNode) {
+    this.shadowNode.style.left = x;
+    this.shadowNode.style.top = y;
+  }
+  // Hacky way of preventing text selection in FF
+  // for the entire doc -- inserting a CSS rule for
+  // -moz-user-select for all elements or something
+  // seems like a lot of work
+  document.body.focus();
+};
+fleegix.drag.DragWindow.prototype.drop = function () {
+  // Re-enable text selection in IE
+  document.onselectstart = null;
+};
+// Event listeners for dragging, raising DragWindow, dropping
+fleegix.event.listen(document, 'onmousemove',
+  fleegix.drag.DragManager, 'mouseMoveHandler');
+fleegix.event.listen(document, 'onmouseup',
+  fleegix.drag.DragManager, 'mouseUpHandler');
+
+/*
+ * Copyright 2009 Matthew Eernisse (mde@fleegix.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+if (typeof fleegix == 'undefined') { throw('Requires fleegix base namespace.'); }
+if (typeof fleegix.xhr == 'undefined') { throw('Requires fleegix.xhr namespace.'); }
+if (typeof fleegix.template == 'undefined') { fleegix.template = {}; }
+// single params Object can have the following properties:
+// markup -- String, a string of markup with vars to interpolate
+//    if this exists, markupFile will be ignored
+// markupFile -- String, a path to a file containing string data
+//    then used to set the markup prop
+// data -- Object, keyword/vals to use for the variable substitution
+// requireAllKeys -- Boolean, if set to true, any variables in the
+//    template file that don't have corresponding keys in the
+//    data object will still show in the template as
+//    ${ variable_name }. If set to false, those variables in
+//    the template are replaced with empty strings
+// preventCache -- Boolean, setting to true will always pull
+//    down a fresh copy of the template -- otherwise the template
+//    string gets stored in fleegix.template.templateTextCache so that
+//    different UI elements sharing the same template file won't
+//    all have to make the server round-trip to get their template
+//    string.
+fleegix.template.Templater = function (p) {
+  var params = p || {};
+  var opts = params.options || {};
+  this.markup = params.markup || '';
+  this.markupFile = '';
+  this.data = params.data || {};
+  this.requireAllKeys = typeof params.requireAllKeys == 'boolean' ?
+    params.requireAllKeys : true;
+  if (!this.markup) {
+    var _this = this;
+    var noCache = typeof this.preventCache == 'undefined' ?
+      false : this.preventCache;
+    this.markupFile = params.markupFile;
+    var s = fleegix.template.templateTextCache[this.markupFile];
+    if (!s || noCache) {
+      var p = {
+        url: this.markupFile,
+        method: 'GET',
+        preventCache: noCache,
+        async: false
+      };
+      s = fleegix.xhr.doReq(p);
+      fleegix.template.templateTextCache[this.markupFile] = s;
+    }
+    this.markup = s;
+  }
+};
+fleegix.template.Templater.prototype.templatize =
+  function (domNode) {
+  var str = this.getTemplatedMarkup();
+  domNode.innerHTML = str;
+  return domNode;
+};
+fleegix.template.Templater.prototype.getTemplatedMarkup =
+  function () {
+  var pat = /\$\{ *(.*?) *\}/g;
+  var subPat = /[${} ]/g;
+  var str = this.markup;
+  var match = str.match(pat);
+  if (match) {
+    for (var i = 0; i < match.length; i++) {
+      m = match[i];
+      key = m.replace(subPat, '');
+      var data = this.data[key] ? this.data[key] : '';
+      if (data || !this.requireAllKeys) {
+        str = str.replace(m, data);
+      }
+    }
+  }
+  return str;
+};
+fleegix.template.templateTextCache = {};
+
+
+
+/*
+ * Copyright 2009 Matthew Eernisse (mde@fleegix.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+if (typeof fleegix == 'undefined') { fleegix = {}; }
+
+fleegix.ejs = {};
+
+fleegix.ejs.templateTextCache = {};
+
+fleegix.ejs.Template = function (p) {
+  var UNDEF;
+  var params = p || {};
+
+  this.mode = null;
+  this.templateText = params.text ||
+    // If you don't want to use Fleegix.js,
+    // override getTemplateTextFromNode to use
+    // textarea node value for template text
+    this.getTemplateTextFromNode(params.node);
+  this.afterLoaded = params.afterLoaded;
+  this.source = '';
+  this.markup = UNDEF;
+  // Try to get from URL
+  if (typeof this.templateText == 'undefined') {
+    // If you don't want to use Fleegix.js,
+    // override getTemplateTextFromUrl to use
+    // files for template text
+    this.getTemplateTextFromUrl(params);
+  }
+};
+
+fleegix.ejs.Template.prototype = new function () {
+  var _REGEX = /(<%%)|(%%>)|(<%=)|(<%#)|(<%)|(%>\n)|(%>)|(\n)/;
+  this.modes = {
+    EVAL: 'eval',
+    OUTPUT: 'output',
+    APPEND: 'append',
+    COMMENT: 'comment',
+    LITERAL: 'literal'
+  };
+  this.getTemplateTextFromNode = function (node) {
+    // Requires the fleegix.xhr module
+    if (typeof fleegix.string == 'undefined') {
+      throw('Requires fleegix.string module.'); }
+    var ret;
+    if (node) {
+      ret = node.value;
+      ret = fleegix.string.unescapeXML(ret);
+      ret = fleegix.string.trim(ret);
+    }
+    return ret;
+  };
+  this.getTemplateTextFromUrl = function (params) {
+    // Requires the fleegix.xhr module
+    if (typeof fleegix.xhr == 'undefined') {
+      throw('Requires fleegix.xhr module.'); }
+    var _this = this;
+    var url = params.url;
+    var noCache = params.preventCache || false;
+    var text = fleegix.ejs.templateTextCache[url];
+    // Found text in cache, and caching is turned on
+    if (text && !noCache) {
+      this.templateText = text;
+    }
+    // Otherwise go grab the text
+    else {
+      // Callback for setting templateText and caching --
+      // used for both sync and async loading
+      var callback = function (s) {
+        _this.templateText = s;
+        fleegix.ejs.templateTextCache[url] = s;
+        // Use afterLoaded hook if set
+        if (typeof _this.afterLoaded == 'function') {
+          _this.afterLoaded();
+        }
+      };
+      var opts;
+      if (params.async) {
+        opts = {
+          url: url,
+          method: 'GET',
+          preventCache: noCache,
+          async: true,
+          handleSuccess: callback
+        };
+        // Get templ text asynchronously, wait for
+        // loading to exec the callback
+        fleegix.xhr.send(opts);
+      }
+      else {
+        opts = {
+          url: url,
+          method: 'GET',
+          preventCache: noCache,
+          async: false
+        };
+        // Get the templ text inline and pass directly to
+        // the callback
+        text = fleegix.xhr.send(opts);
+        callback(text);
+      }
+    }
+  };
+  this.process = function (p) {
+    var params = p || {};
+    this.data = params.data || {};
+    var domNode = params.node;
+    // Cache/reuse the generated template source for speed
+    this.source = this.source || '';
+    if (!this.source) { this.generateSource(); }
+    
+    // Eval the template with the passed data
+    // Use 'with' to give local scoping to data obj props
+    // ========================
+    var _output = ''; // Inner scope var for eval output
+    with (this.data) {
+      eval(this.source); 
+    }
+    this.markup = _output;
+
+    if (domNode) {
+      domNode.innerHTML = this.markup;
+    }
+    return this.markup;
+  };
+  this.generateSource = function () {
+    var line = '';
+    var matches = this.parseTemplateText();
+    if (matches) {
+      for (var i = 0; i < matches.length; i++) {
+        line = matches[i];
+        if (line) {
+          this.scanLine(line);
+        }
+      }
+    }
+  };
+  this.parseTemplateText = function() {
+    var str = this.templateText;
+    var pat = _REGEX;
+    var result = pat.exec(str);
+    var arr = [];
+    while (result) {
+      var firstPos = result.index;
+      var lastPos = pat.lastIndex;
+      if (firstPos !== 0) {
+        arr.push(str.substring(0, firstPos));
+        str = str.slice(firstPos);
+      }
+      arr.push(result[0]);
+      str = str.slice(result[0].length);
+      result = pat.exec(str);
+    }
+    if (str !== '') {
+      arr.push(str);
+    }
+    return arr;
+  };
+  this.scanLine = function (line) {
+    var _this = this;
+    var _addOutput = function () {
+      line = line.replace(/\n/, '\\n');
+      line = line.replace(/"/g, '\\"');
+      _this.source += '_output += "' + line + '";';
+    };
+    switch (line) {
+      case '<%':
+        this.mode = this.modes.EVAL;
+        break;
+      case '<%=':
+        this.mode = this.modes.OUTPUT;
+        break;
+      case '<%#':
+        this.mode = this.modes.COMMENT;
+        break;
+      case '<%%':
+        this.mode = this.modes.LITERAL;
+        this.source += '_output += "' + line + '";';
+        break;
+      case '%>':
+      case '%>\n':
+        if (this.mode == this.modes.LITERAL) {
+          _addOutput();
+        }
+        this.mode = null;
+        break;
+      default:
+        // In script mode, depends on type of tag
+        if (this.mode) {
+          switch (this.mode) {
+            // Just executing code
+            case this.modes.EVAL:
+              this.source += line;
+              break;
+            // Exec and output
+            case this.modes.OUTPUT:
+              // Add the exec'd result to the output
+              this.source += '_output += ' + line + ';';
+              break;
+            case this.modes.COMMENT:
+              // Do nothing
+              break;
+            // Literal <%% mode, append as raw output
+            case this.modes.LITERAL:
+              _addOutput();
+              break;
+          }
+        }
+        // In string mode, just add the output
+        else {
+          _addOutput();
+        }
+    }
+  };
+};
+
+
+
+if (typeof fleegix.form == 'undefined') { fleegix.form = {}; }
+if (typeof fleegix.form.toObject == 'undefined') {
+  throw('fleegix.form.diff depends on the base fleegix.form module in fleegix.js.'); }
+
+fleegix.form.diff = function (formUpdated, formOrig, opts) {
+  var o = opts || {};
+  // Accept either form or hash-conversion of form
+  var hUpdated = formUpdated.elements ?
+    fleegix.form.toObject(formUpdated) : formUpdated;
+  var hOrig = formOrig.elements ?
+    fleegix.form.toObject(formOrig) : formOrig;
+  var diffs = [];
+  var count = 0;
+
+  function addDiff(n, hA, hB, secondPass) {
+    if (!diffs[n]) {
+      count++;
+      diffs[n] = secondPass?
+        { origVal: hB[n], newVal: hA[n] } :
+        { origVal: hA[n], newVal: hB[n] };
+    }
+  }
+
+  function diffSweep(hA, hB, secondPass) {
+    for (n in hA) {
+      // Elem doesn't exist in B
+      if (typeof hB[n] == 'undefined') {
+        // If intersectionOnly flag set, ignore stuff that's
+        // not in both sets
+        if (o.intersectionOnly) { continue; };
+        // Otherwise we want the union, note the diff
+        addDiff(n, hA, hB, secondPass);
+      }
+      // Elem exists in both
+      else {
+        v = hA[n];
+        // Multi-value -- array, hA[n] actually has values
+        if (v instanceof Array) {
+          if (!hB[n] || (hB[n].toString() != v.toString())) {
+            addDiff(n, hA, hB, secondPass);
+          }
+        }
+        // Single value -- null or string
+        else {
+          if (hB[n] != v) {
+            addDiff(n, hA, hB, secondPass);
+          }
+        }
+      }
+    }
+  }
+  // First sweep check all items in updated
+  diffSweep(hUpdated, hOrig, false);
+  // Second sweep, check all items in orig
+  diffSweep(hOrig, hUpdated, true);
+
+  // Return an obj with the count and the hash of diffs
+  return {
+    count: count,
+    diffs: diffs
+  };
+};
+
+
+
+fleegix.xml = new function () {
+  var pat = /^[\s\n\r\t]+|[\s\n\r\t]+$/g;
+  var expandToArr = function (orig, val) {
+    if (orig) {
+      var r = null;
+      if (orig instanceof Array == false) {
+        r = [];
+        r.push(orig);
+      }
+      else { r = orig; }
+      r.push(val);
+      return r;
+    }
+    else { return val; }
+  };
+  // Parses an XML doc or doc fragment into a JS obj
+  // Values for multiple same-named tags a placed in
+  // an array -- ideas for improvement to hierarchical
+  // parsing from Kevin Faulhaber (kjf@kjfx.net)
+  this.parse = function (node, tagName) {
+    var obj = {};
+    var kids = [];
+    var k;
+    var key;
+    var t;
+    var val;
+    if (tagName) {
+      kids = node.getElementsByTagName(tagName);
+    }
+    else {
+      kids = node.childNodes;
+    }
+    for (var i = 0; i < kids.length; i++) {
+      k = kids[i];
+      // Element nodes (blow by the stupid Mozilla linebreak nodes)
+      if (k.nodeType == 1) {
+        key = k.tagName;
+        // Tags with content
+        if (k.firstChild) {
+          // Node has only one child
+          if(k.childNodes.length == 1) {
+            t =  k.firstChild.nodeType;
+            // Leaf nodes - text, CDATA, comment
+            if (t == 3 || t == 4 || t == 8) {
+              // Either set plain value, or if this is a same-named
+              // tag, start stuffing values into an array
+              val = k.firstChild.nodeValue.replace(pat, '');
+              obj[key] = expandToArr(obj[key], val);
+            }
+            // Node has a single child branch node, recurse
+            else if (t == 1) {
+              // Rinse and repeat
+              obj[key] = expandToArr(obj[key], this.parse(k.firstChild));
+            }
+          }
+          // Node has children branch nodes, recurse
+          else {
+            // Rinse and repeat
+            obj[key] = expandToArr(obj[key], this.parse(k));
+          }
+        }
+        // Empty tags -- create an empty entry
+        else {
+          obj[key] = expandToArr(obj[key], null);
+        }
+      }
+    }
+    return obj;
+  };
+  // Create an XML document from string
+  this.createDoc = function (str) {
+    // Mozilla
+    if (typeof DOMParser != "undefined") {
+      return (new DOMParser()).parseFromString(str, "application/xml");
+    }
+    // Internet Explorer
+    else if (typeof ActiveXObject != "undefined") {
+      var doc = XML.newDocument( );
+      doc.loadXML(str);
+      return doc;
+    }
+    else {
+      // Try loading the document from a data: URL
+      // Credits: Sarissa library (sarissa.sourceforge.net)
+      var url = "data:text/xml;charset=utf-8," + encodeURIComponent(str);
+      var request = new XMLHttpRequest();
+      request.open("GET", url, false);
+      request.send(null);
+      return request.responseXML;
+    }
+  };
+  // Returns a single, top-level XML document node
+  // Ideal for grabbing embedded XML data from a page
+  // (i.e., XML 'data islands')
+  this.getXMLDoc = function (id, tagName) {
+    var arr = [];
+    var doc = null;
+    if (document.all) {
+      var str = document.getElementById(id).innerHTML;
+      doc = new ActiveXObject("Microsoft.XMLDOM");
+      doc.loadXML(str);
+      doc = doc.documentElement;
+    }
+    // Moz/compat can access elements directly
+    else {
+      arr =
+        window.document.body.getElementsByTagName(tagName);
+      doc = arr[0];
+    }
+    return doc;
+  };
+};
+
+
+if (typeof fleegix.event == 'undefined') {
+  throw('fleegix.event.delegator depends on the base fleegix.event module in fleegix.js.'); }
+
+fleegix.event.Delegator = function (containerNode, actions,
+  options) {
+  var _this = this;
+  this.containerNode = containerNode;
+  // List of CSS class names and their corresponding
+  // click-actions
+  this.actions = actions || {};
+  // Optional execution context for called actions
+  var opts = options || {};
+  this.context = opts.context || null;
+  // Assume we want to stop any further action
+  this.stopPropagation =
+    typeof opts.stopPropagation != 'undefined' ?
+    opts.stopPropagation : true;
+  this.preventDefault =
+    typeof opts.preventDefault != 'undefined' ?
+    opts.preventDefault : true;
+
+  // Add another action
+  this.addClickAction = function (className, act) {
+    this.actions[className] = act;
+  };
+  this.getClickAction = function (e) {
+    var actions = this.actions;
+    var containerNode = this.containerNode;
+    var node = e.target;
+    var topNode = containerNode || document.body;
+    // Look upward from the click target to the
+    // a predefined parent -- if any of the parentNodes
+    // have an action class attached, return the
+    // class and bail out
+    while (node.parentNode && node != topNode) {
+      if (node.className) {
+        for (var c in actions) {
+          // Look through class name(s) set on the node
+          var names = node.className.split(' ');
+          for (var i = 0; i < names.length; i++) {
+            if (names[i] == c) {
+              return c;
+            }
+          }
+        }
+      }
+      node = node.parentNode;
+    }
+    return null;
+  };
+  this.handleClick = function (e) {
+    var context = this.context;
+    var key = _this.getClickAction(e);
+    // If there's a CSS class in the click chain with
+    // a matching action, exec the action
+    if (key) {
+      var act = this.actions[key];
+      if (context) {
+        act.call(context, e);
+      }
+      else {
+        act(e);
+      }
+      if (this.stopPropagation) {
+        fleegix.event.stopPropagation(e);
+      }
+      if (this.preventDefault) {
+        fleegix.event.preventDefault(e);
+      }
+    }
+  };
+  fleegix.event.listen(containerNode, 'onclick',
+    this, 'handleClick');
+};
+
+
+if (typeof fleegix.event == 'undefined') {
+  throw('fleegix.event.delegator depends on the base fleegix.event module in fleegix.js.'); }
+
+fleegix.event.Periodic = function () {
+  var _this = this;
+  var _paused = false;
+
+  var args = Array.prototype.slice.apply(arguments);
+  var context;
+  var methodName;
+  if (typeof args[0] != 'function') {
+    context = args.shift();
+    methodName = args.shift();
+  }
+  else {
+    var func = args.shift();
+  }
+  var interval = args.shift();
+  var waitFirst = args.shift();
+
+  this.context = context || null;
+  this.methodName = methodName || null;
+  this.func = func || null;
+  this.interval = interval || null;
+  this.waitFirst = waitFirst || false;
+  this.start = function (waitFirst) {
+    this.waitFirst = waitFirst || this.waitFirst;
+    if (this.waitFirst) {
+      setTimeout(this.run, this.interval);
+    }
+    else {
+      this.run();
+    }
+  };
+  this.run = function () {
+    if (!_paused) {
+      if (_this.context) {
+        _this.context[_this.methodName].call(_this.context);
+      }
+      else {
+        _this.func();
+      }
+      setTimeout(_this.run, _this.interval);
+    }
+  };
+  this.pause = function () {
+    _paused = true;
+  };
+  this.resume = function () {
+    _paused = false;
+    this.run();
+  };
+};
+
+// Clean up listeners
+fleegix.event.listen(window, 'onunload', function () {
+  try {
+    fleegix.event.flush();
+  }
+  catch (e) {} // Squelch
+});
+
+/*
+ * Copyright 2009 Matthew Eernisse (mde@fleegix.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+if (typeof fleegix == 'undefined') {
+  throw new Error('fleegix.history depends on fleegix base module.');
+}
+fleegix.history = new function () {
+  var _this = this;
+  // Private vars
+  var _historyCheck;
+  var _ieHistory = 0;
+
+  // Public vars
+  this.index = 0;
+  this.currentStep = 0;
+  this.entries = [];
+  this.entriesMap = {};
+  this.ieKeyArray = [];
+  this.bookmarkable = true;
+  this.domain = null;
+
+  // Private methods
+  var _getHistoryDoc = function () {
+    var doc;
+    if (fleegix.ua.isIE) {
+      doc = document.getElementById(
+        "historyFrame").contentWindow.document;
+    }
+    else {
+      // Show the hash in the main document
+      if (_this.bookmarkable) {
+        doc = document;
+      }
+      // Hide the hash in the iframe
+      else {
+        doc = document.getElementById(
+          "historyFrame").contentDocument;
+      }
+    }
+    return doc;
+  };
+  var _getHistoryStep = function () {
+    var ret;
+    if (fleegix.ua.isIE) {
+      ret = _ieHistory;
+    }
+    else {
+      ret = _getHistoryDoc().location.hash.replace('#', '');
+      ret = _this.entriesMap[ret];
+    }
+    if (!isNaN(ret)) {
+      ret = parseInt(ret, 10);
+    }
+    else {
+      ret = 0;
+    }
+    return ret;
+  };
+  var _doHistoryCheck = function () {
+    var step = _getHistoryStep();
+    var entry;
+    if (step != fleegix.history.currentStep) {
+      fleegix.history.currentStep = _getHistoryStep();
+      entry = _this.getEntry(fleegix.history.currentStep);
+      fleegix.history.onchange(entry);
+    }
+    _historyCheck = null;
+    _historyCheck = window.setTimeout(_doHistoryCheck, 200);
+  };
+
+  // Public methods
+  this.init = function (entry) {
+    var form = $('historyForm');
+    var entries = form.historyEntries.value;
+    if (entries.length) {
+      var deserial = fleegix.json.parse(entries);
+      for (var p in deserial) {
+        this[p] = deserial[p];
+      }
+    }
+    else {
+      this.addEntry(entry);
+    }
+    if (!document.getElementById("historyFrame")) {
+      throw new Error(
+        'This history code requires an iframe with the id of ' +
+        '"historyFrame" to exist in the initial page load.');
+    }
+    // Set-up the polling:
+    _historyCheck = window.setTimeout(_doHistoryCheck, 200);
+    fleegix.event.listen(window, 'onbeforeunload', fleegix.history,
+      'finish');
+  };
+
+  this.addEntry = function () {
+    var key;
+    var entry;
+    if (arguments.length == 1) {
+      entry = arguments[0];
+    }
+    else {
+      key = arguments[0];
+      entry = arguments[1];
+    }
+    var curr = this.currentStep;
+    var start = curr + 1;
+    var removeCount = this.entries.length - curr;
+    this.entries.splice(start, removeCount);
+    this.entries.push(entry);
+    this.index = this.entries.length - 1;
+    key = key || this.index;
+    return this.incrementHistory(key);
+  };
+  this.getEntry = function (i) {
+    return this.entries[i];
+  };
+  this.incrementHistory = function (key) {
+    var doc = _getHistoryDoc();
+    this.currentStep = this.index;
+    this.entriesMap[key] = this.index;
+    // Use the document.write hack to avoid needless
+    // round-trip in IE
+    if (fleegix.ua.isIE) {
+      var docDomain = this.domain ?
+          'document.domain="' + this.domain + '";' : '';
+      _this.ieKeyArray[this.index] = key;
+      doc.open("javascript:'<html></html>'");
+      doc.write('<html><head><scri' +
+        'pt type="text/javascript">' + docDomain +
+        'parent.fleegix.history.' +
+        'onIncremented(' + this.index + ');</scri' +
+        'pt></head><body></body></html>');
+      doc.close();
+    }
+    // Safari doesn't update the history for changes
+    // to iframe hashes -- doing a fake form post
+    // to the hash gets around this. No round-trip
+    // seems to occur here
+    else if (fleegix.ua.isSafari && !this.bookmarkable) {
+      doc.body.innerHTML = '<form name="x" action="#' +
+        this.index + '" method="GET"></form>';
+      doc.forms[0].submit();
+    }
+    else {
+      if (key != 0) {
+        doc.location.hash = '#' + key;
+      }
+    }
+    this.index++;
+    _this.serializeHistory();
+    return true;
+  };
+  this.onIncremented = function (i) {
+    _ieHistory = i;
+    if (_this.bookmarkable) {
+      if (i == 0) {
+        location.hash = '';
+      }
+      else {
+        location.hash = '#' + _this.ieKeyArray[i];
+      }
+    }
+  };
+  this.serializeHistory = function () {
+    if (_this.entries.length > 0) {
+      var form = $('historyForm');
+      var serial = {
+        entries: _this.entries,
+        entriesMap: _this.entriesMap,
+        ieKeyArray: _this.ieKeyArray
+      };
+      serial = fleegix.json.serialize(serial);
+      form.historyEntries.value = serial;
+    }
+  };
+  this.finish = function () {
+    _this.serializeHistory();
+    if (_historyCheck) {
+      window.clearTimeout(_historyCheck);
+    }
+  };
+  this.onchange = function () {};
+};
+
+
+if (typeof fleegix.string == 'undefined') { fleegix.string = {}; }
+fleegix.string.hotlink = new function () {
+  var _this = this;
+  var _hrefPat = /(https?:\/\/|www.)([-\w]+(?:\.[-\w]+)*(:\d+)?(\/(([~\w\+%-]|([,.;@:][^\s$]))+)?)*((\?|;)[\w\+%&=.;:-]+)?(\#[\w\-\.]*)?)/g;
+  var _emailPat = /[\w\.\+-=]+@[\w\.-]+\.[\w]{2,3}/g;  
+  this.url = function (str) {
+    var t = str || '';
+    ret = t.replace(_hrefPat, function (s) {
+      // Prepend http:// for www-only URLs
+      var href = s.indexOf('www') === 0 ? 'http://' + s : s;
+      return '<a href="' + href + '">' + s + '</a>';
+    });
+    return ret;
+  };
+  this.email = function (str) {
+    var t = str || '';
+    ret = t.replace(_emailPat, function (s) {
+      return '<a href="mailto:' + s + '">' + s + '</a>';
+    });
+    return ret;
+  };
+  this.all = function (str) {
+    var t = str || '';
+    t = _this.url(t);
+    t = _this.email(t);
+    return t;
+  };
+};
+
+
+
+if (typeof fleegix.string == 'undefined') { fleegix.string = {}; }
+
+fleegix.string.truncate = function (str, len, tail) {
+  var t = tail || '';
+  if (str.length > len) {
+    return str.substr(0, (len - t.length)) + t;
+  }
+  else {
+    return str;
+  }
+};
+
+fleegix.string.truncateHTML = function (str, len, tail) {
+  // The returned string of content
+  var s = '';
+  // Any tail to append after truncation -- e.g. ellipses
+  var t = tail || '';
+  // Split pattern for HTML tags
+  var pat = /(<[^>]*>)/;
+  // Opening HTML tag -- used as a flag that there's an
+  // HTML tag sitting open when truncation happens
+  var openTag = null;
+  // Used to close any open tag
+  var closeTag = '';
+  // An array of merged content and tags, e.g., ['foo',
+  // '<strong>', 'bar', '</strong>']
+  var arr = [];
+  // Current length of the string to return
+  var currLen = 0;
+  // Lookahead to see if we'll overshoot the max length
+  var nextLen = 0;
+  // Truncated final segment of the string
+  var trunc;
+  // Each item in the merged tag/content array
+  var item;
+
+  // Build the merged array of tags/content
+  var result = pat.exec(str);
+  while (result) {
+    var firstPos = result.index;
+    var lastPos = pat.lastIndex;
+    if (firstPos !== 0) {
+      arr.push(str.substring(0, firstPos));
+      str = str.slice(firstPos);
+    }
+    arr.push(result[0]);
+    str = str.slice(result[0].length);
+    result = pat.exec(str);
+  }
+  if (str !== '') {
+    arr.push(str);
+  }
+
+  // Parse each item in the tag/content array
+  // Have to parse in all cases -- no simple test to see
+  // if you can just return the entire string
+  // Global regex replace would work, but who knows
+  // how much if any faster that is
+  for (var i = 0; i < arr.length; i++) {
+    item = arr[i];
+    switch (true) {
+      // Closing tag
+      case item.indexOf('</') == 0:
+        s += item;
+        openTag = null;
+        break;
+      // Opening tag
+      case item.indexOf('<') == 0:
+        s += item;
+        openTag = item;
+        break;
+      // Text
+      default:
+        nextLen += item.length;
+        // If adding the content will overshoot the limit
+        // use the truncation fu
+        if (nextLen >= len) {
+          // Chop the string to the amount needed to complete
+          // the max length, minus the amount for the tail string if any
+          // NOTE: Content segment can be less than the length of the
+          // tail string -- this can result in a fudge factor of the length
+          // of the tail for the entire string
+          trunc = item.substr(0, (len - currLen) - t.length);
+          s += trunc;
+          // If we're sitting on an open HTML tag
+          if (openTag) {
+            // If there's content in the final truncated string,
+            // just append a closing tag of the same kind as
+            // the opening tag
+            if (trunc.length) {
+              closeTag = openTag.split(
+                  /\s|>/)[0].replace('<', '</') + '>';
+              s += closeTag;
+            }
+            // If there's no content in the truncated string,
+            // just strip out the previous open tag
+            else {
+              s = s.replace(openTag, '');
+            }
+          }
+          // Append the tail, if any, and return
+          s += t;
+          return s;
+        }
+        else {
+          s += item;
+        }
+        currLen = nextLen;
+      }
+  }
+  return s;
+};
+
+
