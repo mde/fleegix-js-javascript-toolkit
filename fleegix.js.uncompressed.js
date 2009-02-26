@@ -4202,7 +4202,7 @@ if (typeof fleegix.string == 'undefined') { fleegix.string = {}; }
 fleegix.string.hotlink = new function () {
   var _this = this;
   var _hrefPat = /(https?:\/\/|www.)([-\w]+(?:\.[-\w]+)*(:\d+)?(\/(([~\w\+%-]|([,.;@:][^\s$]))+)?)*((\?|;)[\w\+%&=.;:-]+)?(\#[\w\-\.]*)?)/g;
-  var _emailPat = /[\w\.\+-=]+@[\w\.-]+\.[\w]{2,3}/g;  
+  var _emailPat = /[\w\.\+-=]+@[\w\.-]+\.[\w]{2,3}/g;
   this.url = function (str) {
     var t = str || '';
     ret = t.replace(_hrefPat, function (s) {

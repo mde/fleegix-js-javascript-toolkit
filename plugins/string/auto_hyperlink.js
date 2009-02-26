@@ -16,7 +16,7 @@
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
 if (typeof fleegix.string == 'undefined') { fleegix.string = {}; }
-fleegix.string.hotlink = new function () {
+fleegix.string.autoHyperlink = new function () {
   var _this = this;
   var _hrefPat = /(https?:\/\/|www.)([-\w]+(?:\.[-\w]+)*(:\d+)?(\/(([~\w\+%-]|([,.;@:][^\s$]))+)?)*((\?|;)[\w\+%&=.;:-]+)?(\#[\w\-\.]*)?)/g;
   var _emailPat = /[\w\.\+-=]+@[\w\.-]+\.[\w]{2,3}/g;
