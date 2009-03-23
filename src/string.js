@@ -46,11 +46,12 @@ fleegix.string = new function () {
   // Builds a method that tests for any of the escapable
   // characters -- useful for avoiding double-escaping if
   // you're not sure whether a string is already escaped
-  var _buildEscapeTest = function () {
+  var _buildEscapeTest = function (direction) {
     return function (s) {
       var pat = '';
       for (var p in _CHARS) {
-        pat += p + '|';
+        pat += direction == 'to' ? p : _CHARS[p];
+        pat += '|';
       }
       pat = pat.substr(0, pat.length - 1);
       pat = new RegExp(pat, "gm");
@@ -63,7 +64,8 @@ fleegix.string = new function () {
   this.unescapeXML = _buildEscapes('from');
   // Test if a string includes special chars that
   // require escaping
-  this.needsEscape = _buildEscapeTest();
+  this.needsEscape = _buildEscapeTest('to');
+  this.needsUnescape = _buildEscapeTest('from');
   this.toArray = function (str) {
     var arr = [];
     for (var i = 0; i < str.length; i++) {
