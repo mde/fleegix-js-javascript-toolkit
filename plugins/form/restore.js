@@ -15,7 +15,7 @@
  *
 */
 if (typeof fleegix == 'undefined') { var fleegix = {}; }
-if (typeof fleegix.form == 'undefined') { var fleegix.form = {}; }
+if (typeof fleegix.form == 'undefined') { fleegix.form = {}; }
 
 fleegix.form.restore = function (form, str, o) {
   var opts = o || {};
