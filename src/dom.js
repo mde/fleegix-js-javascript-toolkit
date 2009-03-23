@@ -39,6 +39,16 @@ fleegix.dom = new function() {
   this.getViewportHeight = function () {
     return getViewportMeasure('Height');
   };
+  this.getViewportScrollTop = function () {
+    return window.pageYOffset ||
+        document.body.scrollTop ||
+        document.documentElement.scrollTop || 0;
+  };
+  this.getViewportScrollLeft = function () {
+    window.pageXOffset ||
+        document.body.scrollLeft ||
+        document.documentElement.scrollLeft || 0;
+  };
   this.center = function (node) {
     var nW = node.offsetWidth;
     var nH = node.offsetHeight;
