@@ -1,0 +1,1135 @@
+<h1>Plugins: fleegix.hash.Hash</h1>
+
+<hr/>
+
+<p>
+  Sortable collection object which allows items to be
+  indexed both by string key or by index.
+</p>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/hash/hash.js?raw=true">Download
+  fleegix.hash.Hash (7KB)</a>
+</p>
+
+<h2>Contents</h2>
+
+<ul>
+  <li>
+    <a href="#addItem">addItem</a>
+  </li>
+  <li>
+    <a href="#addItemCreateKey">addItemCreateKey</a>
+  </li>
+  <li>
+    <a href="#getItem">getItem</a>
+  </li>
+  <li>
+    <a href="#setItem">setItem</a>
+  </li>
+  <li>
+    <a href="#removeItem">removeItem</a>
+  </li>
+  <li>
+    <a href="#getByKey">getByKey</a>
+  </li>
+  <li>
+    <a href="#setByKey">setByKey</a>
+  </li>
+  <li>
+    <a href="#removeByKey">removeByKey</a>
+  </li>
+  <li>
+    <a href="#getByIndex">getByIndex</a>
+  </li>
+  <li>
+    <a href="#setByIndex">setByIndex</a>
+  </li>
+  <li>
+    <a href="#removeByIndex">removeByIndex</a>
+  </li>
+  <li>
+    <a href="#hasKey">hasKey</a>
+  </li>
+  <li>
+    <a href="#hasValue">hasValue</a>
+  </li>
+  <li>
+    <a href="#getAllKeys">getAllKeys</a>
+  </li>
+  <li>
+    <a href="#replaceKey">replaceKey</a>
+  </li>
+  <li>
+    <a href="#insertAtIndex">insertAtIndex</a>
+  </li>
+  <li>
+    <a href="#insertAfterKey">insertAfterKey</a>
+  </li>
+  <li>
+    <a href="#push">push</a>
+  </li>
+  <li>
+    <a href="#pop">pop</a>
+  </li>
+  <li>
+    <a href="#unshift">unshift</a>
+  </li>
+  <li>
+    <a href="#shift">shift</a>
+  </li>
+  <li>
+    <a href="#splice">splice</a>
+  </li>
+  <li>
+    <a href="#each">each</a>
+  </li>
+  <li>
+    <a href="#eachKey">eachKey</a>
+  </li>
+  <li>
+    <a href="#eachValue">eachValue</a>
+  </li>
+  <li>
+    <a href="#concat">concat</a>
+  </li>
+  <li>
+    <a href="#sort">sort</a>
+  </li>
+  <li>
+    <a href="#sortByKey">sortByKey</a>
+  </li>
+  <li>
+    <a href="#reverse">reverse</a>
+  </li>
+</ul>
+
+<a name="addItem"></a>
+
+<h2>addItem</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  addItem(key, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(String)</span> -- A string key
+  to use for accessing the item.
+</p>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Adds a new item into the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var badSciFi = new fleegix.hash.Hash();
+badSciFi.addItem("Connery", "Zardoz");
+badSciFi.addItem("York", "Logan's Run");
+badSciFi.addItem("Douglas", "Saturn 3");</code></pre>
+
+<a name="addItemCreateKey"></a>
+
+<h2>addItemCreateKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  addItemCreateKey(value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Adds a new item into the Hash and returns a random string
+  key for it.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var foo = new fleegix.hash.Hash();
+var key = foo.addItemCreateKey('howdy');
+key;
+=> "P0rp6asXWMJBQAms"
+foo.getItem(key);
+=> "howdy"</code></pre>
+
+<a name="getItem"></a>
+
+<h2>getItem</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  getItem(key/index);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key/index <span class="dataType">(String/Number)</span> --
+  The key or index to use for accessing the item.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Retrieves an item from the Hash using either string key,
+  or its index position according to the sort.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getItem(2);
+=> "Saturn 3"
+badSciFi.getItem("York");
+=> "Logan's Run"</code></pre>
+
+<a name="setItem"></a>
+
+<h2>setItem</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  setByIndex(key/index, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key/index <span class="dataType">(String/Number)</span> --
+  The string key or index to use for accessing the item.
+</p>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Sets an existing Hash item to the desired value.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.setItem('Connery', 'Zardoz');
+badSciFi.getItem('Connery');
+=> "Zardoz"
+badSciFi.setItem(0, 'Outland');
+badSciFi.getItem(0);
+=> "Outland"</code></pre>
+
+<a name="removeItem"></a>
+
+<h2>removeItem</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  removeItem(key/index);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key/index <span class="dataType">(String/Number)</span> --
+  The string key or index for the Hash item to remove.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Removes the desired item in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3;
+badSciFi.removeItem(0);
+badSciFi.count;
+=> 2
+badSciFi.removeItem('York');
+typeof badSciFi.getItem('York');
+=> "undefined"</code></pre>
+
+<a name="getByKey"></a>
+
+<h2>getByKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  getByKey(key);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(String)</span> -- A string key
+  to use for accessing the item.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Retrieves an item from the Hash using its string key.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getByKey('Connery');
+=> "Zardoz"</code></pre>
+
+<a name="setByKey"></a>
+
+<h2>setByKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  setByKey(key, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(String)</span> -- A string key
+  to use for accessing the item.
+</p>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Sets an existing Hash item to the desired value.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.setByKey('Connery', 'Outland');
+badSciFi.getByKey('Connery');
+=> "Outland"</code></pre>
+
+<a name="removeByKey"></a>
+
+<h2>removeByKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  removeByKey(key);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(String)</span> -- A string key
+  for the Hash item to remove.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Removes the desired item in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.removeByKey('Connery');
+typeof badSciFi.getByKey('Connery');
+=> "undefined"</code></pre>
+
+<a name="getByIndex"></a>
+
+<h2>getByIndex</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  getByIndex(index);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  index <span class="dataType">(Number)</span> -- The index
+  to use for accessing the item.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Retrieves an item from the Hash using its index position
+  according to the sort.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getByIndex(2);
+=> "Saturn 3"</code></pre>
+
+<a name="setByIndex"></a>
+
+<h2>setByIndex</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  setByIndex(index, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  index <span class="dataType">(Number)</span> -- The index
+  to use for accessing the item.
+</p>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Sets an existing Hash item to the desired value.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.setByIndex(0, 'Outland');
+badSciFi.getByIndex(0);
+=> "Outland"</code></pre>
+
+<a name="removeByIndex"></a>
+
+<h2>removeByIndex</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  removeByIndex(index);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  index <span class="dataType">(Number)</span> -- The index
+  for the Hash item to remove.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Removes the desired item in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3;
+badSciFi.removeByIndex(0);
+badSciFi.count;
+=> 2</code></pre>
+
+<a name="hasKey"></a>
+
+<h2>hasKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  hasKey(key);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(String)</span> -- A string key
+  to check for the existence of in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Checks for the existence of a particular key in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.hasKey('Shatner');
+=> false
+badSciFi.addItem('Shatner',
+  'Any classic Star Trek episode');
+badSciFi.hasKey('Shatner');
+=> true</code></pre>
+
+<a name="hasValue"></a>
+
+<h2>hasValue</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  hasValue(value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  key <span class="dataType">(Any)</span> -- A value to
+  to check for the existence of in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Checks for the existence of a particular key in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.hasValue("Westworld");
+=> false
+badSciFi.hasValue("Logan's Run");
+=> true</code></pre>
+
+<a name="getAllKeys"></a>
+
+<h2>getAllKeys</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  getAllKeys();
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  (None)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Returns a comma-delimited list of all the Hash keys. 
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getAllKeys();
+=> "Connery,York,Douglas"</code></pre>
+
+<a name="replaceKey"></a>
+
+<h2>replaceKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  replaceKey(oldKey, newKey);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  oldKey, newKey <span class="dataType">(String)</span> --
+  the original and replacement string keys for the desired
+  item in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Replaces a string key for an item in the Hash with a new one.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getItem("York");
+=> "Logan's Run"
+badSciFi.replaceKey("York", "Ustinov");
+badSciFi.getItem("Ustinov");
+=> "Logan's Run"</code></pre>
+
+<a name="insertAtIndex"></a>
+
+<h2>insertAtIndex</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  insertAtIndex(index, key, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  index <span class="dataType">(Number)</span> -- The index
+  position in the Hash to insert the new item.
+</p>
+
+<p>
+  key <span class="dataType">(String)</span> -- The string key
+  for the new item.
+</p>
+
+<p>
+  value <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Inserts a new item at the specified index position in
+  the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.getItem(1);
+=> "Logan's Run"
+badSciFi.insertAtIndex(1, 'Russell',
+  'Big Trouble In Little China');
+badSciFi.getItem(1);
+=> "Big Trouble in Little China"
+badSciFi.getItem(2);
+=> "Logan's Run"</code></pre>
+
+<a name="insertAfterKey"></a>
+
+<h2>insertAfterKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  insertAfterKey(locationKey, itemKey, itemValue);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  locationKey <span class="dataType">(String)</span> -- The
+  key for the item to insert the new item after in the Hash.
+</p>
+
+<p>
+  itemKey <span class="dataType">(String)</span> -- The string
+  key for the new item.
+</p>
+
+<p>
+  itemValue <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Inserts a new item after the item with the specified key
+  in the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.insertAfterKey('York',
+  'Lambert', 'Highlander 2');
+badSciFi.getItem(1);
+=> "Logan's Run"
+badSciFi.getItem(2);
+=> "Highlander 2"</code></pre>
+
+<a name="push"></a>
+
+<h2>push</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  push(itemKey, itemValue)
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  itemKey <span class="dataType">(String)</span> -- The string
+  key for the new item.
+</p>
+
+<p>
+  itemValue <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+
+<h3>Description</h3>
+
+<p>
+  Adds a new item with the specified key and value at the end
+  position of the current sort of the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3
+badSciFi.getItem(2);
+=> "Highlander 2"
+badSciFi.push('Thomas', 'Battle Beyond the Stars');
+badSciFi.count;
+=> 4
+badSciFi.getItem(3);
+=> "Battle Beyond the Stars"
+</code></pre>
+
+<a name="pop"></a>
+
+<h2>pop</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  pop()
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  (None)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Returns the last item in the Hash according to the current
+  sort, and removes it from the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3
+badSciFi.pop();
+=> "Saturn 3"
+badSciFi.count;
+=> 2
+badSciFi.pop();
+=> "Logan's Run"
+badSciFi.count;
+=> 1</code></pre>
+
+<a name="unshift"></a>
+
+<h2>unshift</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  unshift(itemKey, itemValue)
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  itemKey <span class="dataType">(String)</span> -- The string
+  key for the new item.
+</p>
+
+<p>
+  itemValue <span class="dataType">(any datatype)</span> --
+  the item to be saved in the Hash.
+</p>
+
+
+<h3>Description</h3>
+
+<p>
+  Adds a new item with the specified key and value at the first
+  position of the current sort of the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3
+badSciFi.getItem(0);
+=> "Zardoz"
+badSciFi.unshift('Thomas', 'Battle Beyond the Stars');
+badSciFi.count;
+=> 4
+badSciFi.getItem(0);
+=> "Battle Beyond the Stars"
+</code></pre>
+
+<a name="shift"></a>
+
+<h2>shift</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  shift()
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  (None)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Returns the first item in the Hash according to the current
+  sort, and removes it from the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count;
+=> 3
+badSciFi.shift();
+=> "Zardoz"
+badSciFi.count;
+=> 2</code></pre>
+
+<a name="splice"></a>
+
+<h2>splice</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  splice(index, howMany, hash)
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  index <span class="dataType">(Number)</span> -- Position in
+  the Hash to begin adding/removing.
+</p>
+
+<p>
+  howMany <span class="dataType">(Number)</span> --
+  Number of items to remove.
+</p>
+
+<p>
+  hash <span class="dataType">(fleegix.hash.Hash)</span> --
+  Hash of items to insert in the desired position.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Changes the content of the Hash by removing elements, and/or
+  inserting the items of a passed-in Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var badSciFi = new fleegix.hash.Hash();
+badSciFi.addItem("Connery", "Zardoz");
+badSciFi.addItem("York", "Logan's Run");
+badSciFi.addItem("Douglas", "Saturn 3");
+badSciFi.count;
+=> 3
+
+var insertHash = new fleegix.hash.Hash();
+insertHash.addItem('Thomas', 'Battle Beyond The Stars');
+insertHash.addItem('Brown', 'Yor, the Hunter From the Future');
+
+// Remove 1 item at position 1, add the items
+// in insertHash at at that same position
+badSciFi.splice(1, 1, insertHash);
+badSciFi.count;
+=> 4
+
+badSciFi.getItem(0)
+=> "Zardoz"
+badSciFi.getItem(1)
+=> "Battle Beyond the Stars"
+badSciFi.getItem(2)
+=> "Yor, the Hunter From the Future"
+badSciFi.getItem(3)
+=> "Saturn 3"</code></pre>
+
+<a name="each"></a>
+
+<h2>each</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  each(iterateFunc);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  iterateFunc <span class="dataType">(Function)</span> --
+  Function to be called against each item in the Hash. Should
+  take two parameters, the value and the key.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Calls the passed function once for each item in the Hash,
+  passing it the value and the key as parameters.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var f = function (value, key) {
+  print(key + " is in the movie " + value + ".");
+};
+badSciFi.each(f);
+=> "Connery is in Zardoz."
+=> "York is in Logan's Run."
+=> "Douglas is in Saturn 3."</code></pre>
+
+<a name="eachKey"></a>
+
+<h2>eachKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  eachKey(iterateFunc);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  iterateFunc <span class="dataType">(Function)</span> --
+  Function to be called against each item in the Hash. Should
+  take one parameter, the key of the Hash item.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Calls the passed function once for each item in the Hash,
+  passing it the key as a parameter.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var f = function (key) {
+  print(key + " is in a bad sci-fi flick.");
+};
+badSciFi.each(f);
+=> "Connery is in a bad sci-fi flick."
+=> "York is in a bad sci-fi flick."
+=> "Douglas is in a bad sci-fi flick."</code></pre>
+
+<a name="eachValue"></a>
+
+<h2>eachValue</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  eachValue(iterateFunc);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  iterateFunc <span class="dataType">(Function)</span> --
+  Function to be called against each item in the Hash. Should
+  take one parameter, the value of the Hash item.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Calls the passed function once for each item in the Hash,
+  passing it the value as a parameter.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var f = function (value) {
+  print(value + " is so bad it's good.");
+};
+badSciFi.each(f);
+=> "Zardoz is so bad it's good."
+=> "Logan's Run is so bad it's good."
+=> "Saturn 3 is so bad it's good."</code></pre>
+
+<a name="concat"></a>
+
+<h2>concat</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  concat(otherHash);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  otherHash <span class="dataType">(fleegix.hash.Hash)</span>
+  -- New hash to append to the original one.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Adds a new Hash to the end of the calling one.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>newBadSciFi = fleegix.hash.Hash();
+newBadSciFi.addItem('Lambert', 'Highlander 2');
+newBadSciFi.addItem('Russell',
+  'Big Trouble in Little China');
+badSciFi.count;
+=> 3
+badSciFi.concat(newBadSciFi);
+badSciFi.count;
+=> 5</code></pre>
+
+<a name="sort"></a>
+
+<h2>sort</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  sort([comparator]);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  comparator <span class="dataType">(Function)</span> Function
+  to use for comparison in sort -- if not passed, defaults
+  to case-insensitive, ascending alphabetical sort. (See
+  fleegix.hash.sorts.)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Sorts the items in the Hash into the desired order according
+  to their values.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count
+=> 3
+badSciFi.sort();
+badSciFi.getItem(2);
+=> "Zardoz"
+badSciFi.sort(fleegix.hash.sorts.DESCENDING_NOCASE);
+badSciFi.getItem(0);
+=> "Zardoz"</code></pre>
+
+<a name="sortByKey"></a>
+
+<h2>sortByKey</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  sortByKey([comparator]);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  comparator <span class="dataType">(Function)</span> Function
+  to use for comparison in sort -- if not passed, defaults
+  to case-insensitive, ascending alphabetical sort. (See
+  fleegix.hash.sorts.)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Sorts the items in the Hash into the desired order according
+  to their keys.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count
+=> 3
+badSciFi.sortByKey();
+badSciFi.getItem(2);
+=> "York"
+badSciFi.sortByKey(fleegix.hash.sorts.DESCENDING_NOCASE);
+badSciFi.getItem(0);
+=> "York"</code></pre>
+
+<a name="reverse"></a>
+
+<h2>reverse</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  reverse();
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  (None)
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Reverses the current sort order of the Hash.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>badSciFi.count
+=> 3
+badSciFi.sortByKey();
+badSciFi.getItem(2);
+=> "York"
+badSciFi.reverse();
+badSciFi.getItem(0);
+=> "York"</code></pre>
+
+
+

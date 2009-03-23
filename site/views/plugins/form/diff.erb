@@ -1,0 +1,94 @@
+<h1>Plugins: fleegix.form.diff</h1>
+
+<hr/>
+
+<p>
+  Shows the difference between the field values in different
+  forms (or serialized forms). Gives the original as well as
+  changed values.
+</p>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/form/diff.js?raw=true">Download
+  fleegix.form.diff (2.6KB)</a>
+</p>
+
+<h2>fleegix.form.diff</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.diff(updatedForm, originalForm, [diffOptions]);</p>
+
+<h3>Parameters</h3>
+
+<p>updatedForm <span class="dataType">(Object)</span> -- Form (or form
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to another form.</p>
+
+<p>originalForm <span class="dataType">(Object)</span> -- Another form (or
+converted to keyword/value object with fleegix.form.toHash)
+that you want to compare to the first one.</p>
+
+<p>diffOptions <span class="dataType">(Object)</span> -- Currently only one option:</p>
+<dl>
+  <dd>intersectionOnly: false -- If this flag is set to true,
+    will only return fields that are in both forms. The
+    default behavior is to return fields as 'different'
+    if they are only in one form and not the other (i.e.,
+    a union).</dd>
+</dl>
+
+<h3>Description</h3>
+
+<p>
+  This module allows you to tell how many fields, and which
+  fields, are different between two forms -- as well as the
+  original and new value for all the changed fields.
+</p>
+
+<p>
+  One practical use for this method is figuring what has changed
+  in a form since it initially loaded on the page. The easy
+  way to do this is to make a backup of the form values with
+  fleegix.form.toHash, and then compare the updated form to
+  the original form data in the backed-up object.
+</p>
+
+<p>This method returns an object with two properties:</p>
+<ol>
+  <li>count: The number of changed fields</li>
+  <li>
+    diffs: a keyword/value object containing an item for each field
+    that has changed. The keyword of each item is the name of the field,
+    and the value is a small object with origVal and newVal properties
+    containing the old and new values of the field.
+  </li>
+</ol>
+
+<h3>Examples</h3>
+
+<pre><code>// Get a ref to the form
+var someForm = document.getElementById('someFormId');
+
+// Set the value of a text box to 'foo'
+someForm.someField.value = 'foo';
+
+// Make a copy of the data in the form
+var origState = fleegix.form.toObject(someForm);
+
+// Change the text box value to something else
+someForm.someField.value = 'bar';
+
+// Let's see what changed
+var changes = fleegix.form.diff(someForm, origState);
+
+changes.count;
+=> '1'
+changes.diffs.someField.newVal;
+=> 'bar'
+changes.diffs.someField.origVal;
+=> 'foo'</code></pre>
+
+
+
+

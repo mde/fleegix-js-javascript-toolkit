@@ -1,0 +1,169 @@
+<h1>Building</h1>
+
+<hr/>
+
+<h2>Overview</h2>
+
+<p>
+  The Fleegix.js build system uses <a
+  href="http://rake.rubyforge.org/">Rake</a>, "a simple Ruby
+  build program with capabilities similar to make." Why
+  Rake? I'm a big fan of Ruby, and Rake is simple, flexible,
+  and powerful.
+</p>
+
+<p>
+  Here's what you can currently do with the build system:
+</p>
+
+<ul>
+  <li>
+    Build a compressed fleegix.js from the source files.
+  </li>
+
+  <li>
+    Selectively add plugins to your built fleegix.js file.
+  </li>
+
+  <li>
+    Do a plugins-only build to use Fleegix.js plugins with
+    other JS toolkits.
+  </li>
+</ul>
+
+<p>
+  Here's what you'll need to use the build system as-is,
+  out of the box:
+</p>
+
+<ul>
+  <li>
+    The <a href="http://www.ruby-lang.org/en/">Ruby
+    language</a>. (There are people who don't already have
+    it? :))
+  </li>
+
+  <li>
+    <a href="http://rake.rubyforge.org/">Rake</a>. (If
+    you have <a
+    href="http://rubyforge.org/projects/rubygems/">RubyGems</a>,
+    you can install it with <code>gem install --remote
+    rake</code>.
+  </li>
+
+  <li>
+    The <a href="http://www.julienlecomte.net/yuicompressor/">YUI Compressor </a>. (It's a Java app, so you also need Java.)
+  </li>
+</ul>
+
+<h2>Basic Use</h2>
+
+<p>
+  The default task just builds a compressed fleegix.js file
+  in the project root directory using all the .js files in
+  the src directory.
+</p>
+
+<p>
+  The build system uses the <a
+  href="http://www.julienlecomte.net/yuicompressor/">YUI
+  Compressor</a> by default, so you'll need to download that
+  and set $YUI_COMPRESSOR_PATH in the RakeFile to point to
+  it. I put it in a 'lib' directory in the project root,
+  so mine looks like this:
+</p>
+
+<pre><code>$YUI_COMPRESSOR_PATH = 'lib/yuicompressor-2.1.2.jar'</pre></code>
+
+<p>
+  You can run the default task simply by typing
+  <code>rake</code> (with no parameters) in the project base
+  directory. The output will look something like this:
+</p>
+
+<pre><code>mde@by-tor fleegix_js $ rake
+Getting list of base source files ...
+Reading and concatenating source files ...
+Built fleegix.js.uncompresed.js
+Compressing concatenated file ...
+Built fleegix.js
+Done.</pre></code>
+
+<p>
+  If you don't have Java or the YUI Compressor, or you
+  just want to do the compression yourself, you can pass
+  the <code>compression=false</code> flag to Rake, or set
+  $COMPRESSION in the RakeFile to <code>false</code>. You'll end
+  up with a usable, but uncompressed fleegix.js.uncompressed.js
+  file.
+</p>
+
+<h2>Adding Plugins</h2>
+
+<p>
+  To add plugins to your built fleegix.js file, pass
+  Rake a comma-separated list of plugin files in the
+  <code>plugins</code> parameter. The 'plugins' directory is
+  assumed, so all you need to do is pass it the name of the
+  subdirectory and .js file, like this:
+</p>
+
+<pre><code>rake plugins="hash/hash.js, popup/popup.js, xml/xml.js"</code></pre>
+
+<h2>Plugin-Only Builds</h2>
+
+<p>
+  If you want to use some of the Fleegix.js plugins without
+  the base fleegix.js toolkit (there are few dependencies, so
+  this works fine in most cases), you can build a compressed
+  fleegix_plugins.js file of only your selected plugins. Just
+  pass Rake the <code>plugins_only=true</code> flag, like so:
+</p>
+
+<pre><code>rake plugins_only=true plugins="xml/xml.js, hash/hash.js"</code></pre>
+
+<p>
+  Plugin-only builds give you a fleegix_plugins.js file.
+</p>
+
+<h2>Profiles</h2>
+
+<p>
+  You can save build parameters for reuse in JSON-formatted
+  profile files. Using profiles requires the <a
+  href="http://json.rubyforge.org/">Ruby JSON library</a>.
+</p>
+
+<p>
+  Pass the path to this file to Rake in the
+  <code>profile</code> parameter. I keep my build profiles in
+  a 'profiles' directory in the project base, so one of mine
+  might look like this:
+</p>
+
+<pre><code>rake profile=profiles/epiphanyradio.json</code></pre>
+
+<p>
+  The <a href="http://epiphanyradio.org/">EpiphanyRadio</a>
+  site uses the XML parser and the Popup library, so its
+  profile file contains this:
+</p>
+
+<pre><code>{ "plugins": "popup/popup.js, xml/xml.js" }</code></pre>
+
+<p>
+  Some other examples might look like this:
+</p>
+
+<pre><code>{ "plugins_only": true, "plugins": "popup/popup.js, xml/xml.js" }
+{ "compression": false, "plugins": "date/utils.js" }</code></pre>
+
+<h2>Cleanup</h2>
+
+<p>
+  Use the <code>rake clean</code> command to remove all the
+  built .js files from the root project directory.
+</p>
+
+
+

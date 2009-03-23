@@ -1,0 +1,213 @@
+<h1>Plugins: fleegix.color.convert</h1>
+
+<hr/>
+
+<p>
+  Color conversion functions, including:
+</p>
+
+<ul>
+  <li>
+    <a href="#hex2rgb">fleegix.color.convert.hex2rgb</a>
+  </li>
+  <li>
+    <a href="#rgb2hex">fleegix.color.convert.rgb2hex</a>
+  </li>
+  <li>
+    <a href="#hsv2rgb">fleegix.color.convert.hsv2rgb</a>
+  </li>
+  <li>
+    <a href="#rgb2hsv">fleegix.color.convert.rgb2hsv</a>
+  </li>
+</ul>
+
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/color/convert.js?raw=true">Download
+  fleegix.color.convert (4KB)</a>
+</p>
+
+<a name="hex2rgb"></a>
+
+<h2>fleegix.color.convert.hex2rgb</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.color.convert.hex2rgb(hexString);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  hexString <span class="dataType">(String)</span> -- A hex
+  string representing a color (e.g., #f00, #ccccaa).
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Takes a string representing a color in hex format, and
+  converts it to RGB format. Returns an array of the three
+  numbers -- output range for the each of the values is 0-255.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var rgb = fleegix.color.convert.hex2rgb('#99a');</code></pre>
+
+<a name="rgb2hex"></a>
+
+<h2>fleegix.color.convert.rgb2hex</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.color.convert.rgb2hex(r, g, b);
+</p>
+
+<p>
+  fleegix.color.convert.rgb2hex(rgbArray);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  r <span class="dataType">(Number)</span> -- The red value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  g <span class="dataType">(Number)</span> -- The green value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  b <span class="dataType">(Number)</span> -- The blue value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  rgbArray <span class="dataType">(Array)</span> -- An array
+  of three numbers representing r, g, b in a range of 0-255.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Takes a three numbers representing a color in RGB format, and
+  converts it to a string in hex format.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var hex = fleegix.color.convert.rgb2hex(153, 153, 170);
+var rgb = [110, 110, 110];
+var hex = fleegix.color.convert.rgb2hex(rgb);</code></pre>
+
+<a name="hsv2rgb"></a>
+
+<h2>fleegix.color.convert.hsv2rgb</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.color.convert.hsv2rgb(h, s ,v);
+</p>
+
+<p>
+  fleegix.color.convert.hsv2rgb(hsvArray);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  h <span class="dataType">(Number)</span> -- The hue value
+  for the desired color. Input range is 0-360.
+</p>
+
+<p>
+  s <span class="dataType">(Number)</span> -- The saturation
+  value for the desired color. Input range is 0-100.
+</p>
+
+<p>
+  v <span class="dataType">(Number)</span> -- The hue value
+  for the desired color. Input range is 0-100.
+</p>
+
+<p>
+  hsvArray <span class="dataType">(Array)</span> -- An array
+  of three numbers representing h, s, v in the ranges described
+  above.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Takes three values for hue, saturation, and value representing
+  a color, and converts them to RGB format. Returns an array
+  of the three numbers -- output range for the each of the
+  values is 0-255.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var rgb = fleegix.color.convert.hsv2rgb(310, 20, 20);
+var hsv = [300, 12, 12];
+var rgb = fleegix.color.convert.hsv2rgb(rgb);
+</code></pre>
+
+<a name="rgb2hsv"></a>
+
+<h2>fleegix.color.convert.rgb2hsv</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.color.convert.rgb2hsv(r, g, b);
+</p>
+
+<p>
+  fleegix.color.convert.rgb2hsv(rgbArray);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  r <span class="dataType">(Number)</span> -- The red value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  g <span class="dataType">(Number)</span> -- The green value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  b <span class="dataType">(Number)</span> -- The blue value
+  for the desired color. Input range is 0-255.
+</p>
+
+<p>
+  rgbArray <span class="dataType">(Array)</span> -- An array
+  of three numbers representing r, g, b in a range of 0-255.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Takes a three numbers representing a color in RGB format,
+  and converts them to HSV format. Returns an array of the
+  three numbers -- output ranges are [0-360, 0-100, 0-100]
+  for [h, s, v].
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var rgb = fleegix.color.convert.hsv2rgb(310, 20, 20);
+var hsv = [300, 12, 12];
+var rgb = fleegix.color.convert.hsv2rgb(rgb);
+</code></pre>
+
+

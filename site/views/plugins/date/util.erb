@@ -1,0 +1,218 @@
+<h1>Plugins: fleegix.date.util</h1>
+
+<hr/>
+
+<p>
+  Some useful methods for dealing with dates, including:
+</p>
+
+<ul>
+  <li>
+    <a href="#strftime">fleegix.date.util.strftime</a>
+    -- formats dates based on a string input.
+  </li>
+  <li>
+    <a href="#add">fleegix.date.util.add</a>
+    -- increments a date the desired number of units.
+  </li>
+  <li>
+    <a href="#diff">fleegix.date.util.diff</a>
+    -- gets the time difference between two dates.
+  </li>
+</ul>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/date/util.js?raw=true">Download
+  fleegix.date.util (19KB)</a>
+</p>
+
+<a name="strftime"></a>
+
+<h2>fleegix.date.util.strftime</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.date.util.strftime(dt, formatString);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  dt <span class="dataType">(Object/Date or Number)</span> -- The date
+  to be formatted, JS Date or numeric timestamp.
+</p>
+
+<p>
+  formatString <span class="dataType">(String)</span> --
+  Indicates how the date is to be formatted.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Formats a date or time according to a given format string --
+  identical to the strftime function found in many scripting
+  languages such as Perl, Ruby, or PHP.
+</p>
+
+<h3>Formattting</h3>
+
+<p>
+  The format string may include the following specifiers:
+</p>
+
+<style type="text/css">
+  #strftimeFormatting td {
+    vertical-align: top;
+  }
+  .strftimeSeparator {
+    padding-left: 8px;
+    padding-right: 8px;
+    text-align: center;
+  }
+</style>
+<table id="strftimeFormatting">
+  <tr><td>%a</td><td class="strftimeSeparator">--</td><td>Abbreviated weekday name (ex. Thu)</td></tr>
+  <tr><td>%A</td><td class="strftimeSeparator">--</td><td>Full weekday name (ex. Thursday)</td></tr>
+  <tr><td>%b</td><td class="strftimeSeparator">--</td><td>Abbreviated month name (ex. Nov)</td></tr>
+  <tr><td>%B</td><td class="strftimeSeparator">--</td><td>Full month name (ex. November)</td></tr>
+  <tr><td>%c</td><td class="strftimeSeparator">--</td><td>Appropriate date and time representation (ex. Thu Nov 03 13:10:35 2005)</td></tr>
+  <tr><td>%C</td><td class="strftimeSeparator">--</td><td>Century number (the year divided by 100 and truncated to an integer, range 00 to 99), single digits are preceded by zero (ex. 20)</td></tr>
+  <tr><td>%d</td><td class="strftimeSeparator">--</td><td>Day of month (range 01 to 31), single digits are preceded by zero (ex. 03)</td></tr>
+  <tr><td>%D</td><td class="strftimeSeparator">--</td><td>Date as %m/%d/%y (ex. 11/03/05)</td></tr>
+  <tr><td>%e</td><td class="strftimeSeparator">--</td><td>Day of the month as a decimal number (range ' 1' to '31') -- a single digit is preceded by a space (ex. ' 3')</td></tr>
+  <tr><td>%F</td><td class="strftimeSeparator">--</td><td>Same as %Y-%m-%d</td></tr>
+  <tr><td>%h</td><td class="strftimeSeparator">--</td><td>Same as %b (ex. Nov)</td></tr>
+  <tr><td>%H</td><td class="strftimeSeparator">--</td><td>Hour as a decimal number using a 24-hour clock (range 00 to 23), single digits are preceded by zero (ex. 13)</td></tr>
+  <tr><td>%I</td><td class="strftimeSeparator">--</td><td>Hour as a decimal number using a 12-hour clock (range 01 to 12), single digits are preceded by zero (ex. 01)</td></tr>
+  <tr><td>%j</td><td class="strftimeSeparator">--</td><td>Day of the year as a decimal number (range 001 to 366) -- zero-padded to three digits (ex. 307)</td></tr>
+  <tr><td>%k</td><td class="strftimeSeparator">--</td><td>Hour as a decimal number using a 24-hour clock (range ' 0' to '23'), single digits are preceded by a space (ex. '13')</td></tr>
+  <tr><td>%l</td><td class="strftimeSeparator">--</td><td>Hour as a decimal number using a 12-hour clock (range ' 1' to '12'), single digits are preceded by a space (ex. ' 1')</td></tr>
+  <tr><td>%m</td><td class="strftimeSeparator">--</td><td>Month as a decimal number (range 01 to 12), single digits are preceded by zero (ex. 11)</td></tr>
+  <tr><td>%M</td><td class="strftimeSeparator">--</td><td>Minute as a decimal number (range 00 to 59), single digits are preceded by zero (ex. 10)</td></tr>
+  <tr><td>%n</td><td class="strftimeSeparator">--</td><td>Linefeed character ('\n')</td></tr>
+  <tr><td>%p</td><td class="strftimeSeparator">--</td><td>Either 'AM' or 'PM' according to the given time value (ex. PM)</td></tr>
+  <tr><td>%r</td><td class="strftimeSeparator">--</td><td>Appropriate time representation in 12-hour clock format with %p (ex. 01:10:35 PM)</td></tr>
+  <tr><td>%R</td><td class="strftimeSeparator">--</td><td>Time as %H:%M (ex. 13:10)</td></tr>
+  <tr><td>%S</td><td class="strftimeSeparator">--</td><td>Second as a decimal number (range 00 to 59), single digits are preceded by zero (ex. 35)</td></tr>
+  <tr><td>%t</td><td class="strftimeSeparator">--</td><td>Tab character ('\t')</td></tr>
+  <tr><td>%T</td><td class="strftimeSeparator">--</td><td>Time as %H:%M:%S (ex. 13:10:35)</td></tr>
+  <tr><td>%u</td><td class="strftimeSeparator">--</td><td>Weekday as a decimal number (range 1 to 7), with 1 representing Monday (ex. 4)</td></tr>
+  <tr><td>%w</td><td class="strftimeSeparator">--</td><td>Weekday as a decimal number (range 0 to 6), with 0 representing Sunday (ex. 4)</td></tr>
+  <tr><td>%x</td><td class="strftimeSeparator">--</td><td>Appropriate date representation without the time (ex. 11/03/05)</td></tr>
+  <tr><td>%X</td><td class="strftimeSeparator">--</td><td>Appropriate time representation without the date (ex. 01:10:35)</td></tr>
+  <tr><td>%y</td><td class="strftimeSeparator">--</td><td>Year as a decimal number without a century (range 00 to 99), single digits are preceded by zero (ex. 05)</td></tr>
+  <tr><td>%Y</td><td class="strftimeSeparator">--</td><td>Year as a decimal number including the century (ex. 2005)</td></tr>
+  <tr><td>%%</td><td class="strftimeSeparator">--</td><td>A literal percent character (ex. %)</td></tr>
+</table>
+
+<h3>Examples</h3>
+
+<pre><code>var bd = new Date('12/27/1968');
+fleegix.date.util.strftime(bd, 'My birthdate was %A, %B %e, %Y.');
+=> 'My birthdate was Friday, December 27, 1968.'
+
+var dt = new Date('10/01/2112');
+fleegix.date.util.strftime(dt, 'I found a guitar in %B of %Y.');
+=> 'I found a guitar in October of 2112.'</code></pre>
+
+<a name="add"></a>
+
+<h2>fleegix.date.util.add</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  someHash.add(someKey, value);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  dt <span class="dataType">(Object/Date or Number)</span> -- The date
+  to be incremented/decremented.
+</p>
+
+<p>
+  interval <span class="dataType">(constant, see
+  fleegix.date.util.dateParts)</span> -- the unit (e.g.,
+  days, weeks, hours, minutes) of time that the date is to
+  be incremented/decremented.
+</p>
+
+<p>
+  count <span class="dataType">(Number)</span> -- The number
+  of the desired units to increment/decrement the date.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Increments/decrements a date by some number of a specified
+  unit of time (e.g., adds three weeks, subtracts eight hours).
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var dateParts = fleegix.date.util.dateParts;
+// Add 10 years
+var bd = new Date('12/27/1968');
+bd = fleegix.date.util.add(bd, dateParts.YEAR, 10);
+=> Wed Dec 27 1978 00:00:00 GMT-0600 (CST)
+
+// Subtract 2 hours
+var dt = new Date(2112, 9, 1, 12, 45);
+dt = fleegix.date.util.add(dt, dateParts.HOUR, -2);
+=> Sat Oct 01 2112 10:45:00 GMT-0500 (CDT)</code></pre>
+
+<a name="diff"></a>
+
+<h2>fleegix.date.util.diff</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.date.util.diff(dtA, dtB, interval);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  dtA, dbB <span class="dataType">(Object/Date or Number)</span> -- The dates
+  to be compared.
+</p>
+
+<p>
+  interval <span class="dataType">(constant, see
+  fleegix.date.util.dateParts)</span> -- the unit (e.g., days,
+  weeks, hours, minutes) of time to use when comparing the
+  two dates.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Returns the time difference between two dates, measured in a specified
+  unit of time (e.g., how many days between, how many hours between, how
+  many weeks between).
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>var dateParts = fleegix.date.util.dateParts;
+
+// Number of months between these dates
+var dt1 = new Date('01/01/2112');
+var dt2 = new Date('10/01/2112');
+var diff = fleegix.date.util.diff(dt1, dt2, dateParts.MONTH);
+=> 9
+
+// Number of weekdays between these dates
+var dt1 = new Date('09/11/2007');
+var dt2 = new Date('09/28/2007');
+var diff = fleegix.date.util.diff(dt1, dt2, dateParts.WEEKDAY);
+=> 13</code></pre>
+
+
+

@@ -1,0 +1,57 @@
+<h1>Plugins: fleegix.xml</h1>
+
+<hr/>
+
+<p>
+  A compact XML parser that deserializes an XML document into
+  an JavaScript Object hierarchy.
+</p>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/xml/xml.js?raw=true">Download
+  fleegix.xml (3KB)</a>
+</p>
+
+<h2>fleegix.xml.parse</h2>
+
+<h3>Syntax</h3>
+
+<p>
+  fleegix.xml.parse(xmlDoc, [tagName]);
+</p>
+
+<h3>Parameters</h3>
+
+<p>
+  xmlDoc <span class="dataType">(Object)</span> --
+  DOM-compatible XML Document object.
+</p>
+
+<p>
+  tagName <span class="dataType">(String)</span> -- Tag
+  name to expedite parsing a list of same-named tags into
+  an Array. If you pass this parameter, the parser will use
+  <code>getElementsByTagName</code> on the XML document, and
+  parse the resulting nodeList instead of the entire document.
+</p>
+
+<h3>Description</h3>
+
+<p>
+  Parses an XML document into a JavaScript Object. Same-named
+  tags at the same document hierarchy are parsed into an Array.
+</p>
+
+<h3>Examples</h3>
+
+<pre><code>function handleUserList(xml) {
+  // Get the array of &lt;USER&gt; tags
+  var users = fleegix.xml.parse(xml, 'USER');
+  var userCount = users.length;
+  var firstUserUsername = users[0].username;
+}
+
+fleegix.xhr.doGet(handleUserList, 'user_list.rbx', 'xml');</code></pre>
+
+
+

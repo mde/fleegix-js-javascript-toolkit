@@ -1,0 +1,84 @@
+<% t = Time.now
+year = t.strftime('%Y') %>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Fleegix.js JavaScript Toolkit: a lightweight JavaScript library -- <%= @title %></title>
+    <script type="text/javascript" src="/fleegix.js"></script>
+    <script type="text/javascript" src="/site.js"></script>
+    <link media="all" rel="stylesheet" type="text/css" href="/main.css"/>
+    <!--[if IE 6]>
+      <style type="text/css">
+        /* Max-width hack for IE6 */
+        #container {
+          width: expression(document.body.clientWidth > 799 ?
+            '800px' : document.body.clientWidth + 'px');
+        }
+      </style>
+    <![endif]-->
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="logoHome">
+        <a id="logoAnchor" href="/">
+          <img src="/images/fleegix_js_logo.gif" width="508"
+            height="125" alt="Fleegix.js"/>
+          </a>
+      </div>
+      <div id="tagLine">
+        <img src="/images/simple_useful.gif" width="344" height="54"
+          alt="Simple. Useful. JavaScript."/>
+      </div>
+      <div class="clearBoth"></div>
+      <div id="sidebar">
+        <div id="web2Badge">
+          <img src="/images/web2_badge.gif" width="173" height="152"
+            alt="Requisite Web 2.0 badge"/>
+        </div>
+      </div>
+      <div id="main">
+        <div id="navLinks">
+          <a href="/">Home</a>
+          <span class="divider"> | </span>
+          <a href="/download">Download</a>
+          <span class="divider"> | </span>
+          <a href="/build">Build</a>
+          <span class="divider"> | </span>
+          <a href="/contribute">Contribute</a>
+          <span class="divider"> | </span>
+          <a href="/ref">Docs</a>
+          <span class="divider"> | </span>
+          <a href="/plugins">Plugins</a>
+        </div>
+        <div id="content" class="bgGradient">
+          <div class="topBar"></div>
+            <div id="contentBody" class="middleMargins">
+              <%= yield %>
+            </div>
+          <div class="bottomBar"></div>
+        </div>
+      </div>
+      <div class="clearBoth"></div>
+      <div id="footerSpacer"></div>
+    </div>
+    <div id="footer">
+      Fleegix.js copyright 2002-<%= year %> Matthew Eernisse
+    </div>
+    <%# Only need the analytics in prod-mode %>
+    <% if @environment == :production %>
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+      var pageTracker = _gat._getTracker("UA-5555148-2");
+      pageTracker._trackPageview();
+    </script>
+    <% end %>
+  </body>
+</html>
+

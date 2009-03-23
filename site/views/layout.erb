@@ -1,0 +1,90 @@
+<% t = Time.now
+year = t.strftime('%Y') %>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title>
+      Fleegix.js JavaScript Toolkit: a lightweight JavaScript library -- <%= @title %>
+    </title>
+    <link media="all" rel="stylesheet" type="text/css" href="/css/global.css"/>
+    <!--[if lte IE 8]>
+      <style type="text/css">
+        /* No rounded corners for you */
+        #content hr.top-bar {
+          height: 0;
+          border: 1px solid transparent;
+        }
+        #content hr.bottom-bar {
+          height: 0;
+          border: 1px solid transparent;
+        }
+      </style>
+    <![endif]-->
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <a class="logo" href="/">
+          Fleegix.js JavaScript Toolkit
+        </a>
+        <div class="tagline">
+          Simple. Useful. Javascript.
+        </div>
+        <ul class="badge">
+          <li>Lightweight, compact</li>
+          <li>Apache 2 License</li>
+          <li>FF1+, IE6+, Safari2+</li>
+          <li>API ref with examples</li>
+          <li>Plays nicely with others</li>
+        </ul>
+        <ul id="navigation">
+          <li class="first">
+            <a href="/">Home</a>
+          </li>
+          <li>
+            <a href="/download">Download</a>
+          </li>
+          <li>
+            <a href="/build">Build</a>
+          </li>
+          <li>
+            <a href="/contribute">Contribute</a>
+          </li>
+          <li>
+            <a href="/ref">Docs</a>
+          </li>
+          <li class="last">
+            <a href="/plugins">Plugins</a>
+          </li>
+        </ul>
+      </div>
+      <div id="content">
+        <hr class="top-bar"/>
+        <div id="content-main">
+          <%= yield %>
+        </div>
+        <hr class="bottom-bar"/>
+      </div>
+      <div class="push"></div>
+    </div>
+    <div id="footer">
+      Fleegix.js copyright 2002-<%= year %> Matthew Eernisse
+    </div>
+    <% if @environment == :production %>
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+      var pageTracker = _gat._getTracker("UA-5555148-2");
+      pageTracker._trackPageview();
+    </script>
+    <% end %>
+  </body>
+</html>
+
+

@@ -1,0 +1,112 @@
+<h1>Plugins: fleegix.ejs</h1>
+
+<hr/>
+
+<p>
+  Embed JavaScript in client-side HTML templates with the
+  familiar &lt;% %&gt; tags.
+</p>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/ejs/ejs.js?raw=true">Download
+  fleegix.ejs (3KB)</a>
+</p>
+
+<h2>Overview</h2>
+
+<p>
+  The fleegix.ejs.Template object allows you to use snippets
+  of HTML as templates in your client-side code.
+</p>
+
+<p>
+  Rather than inventing yet another language just for the
+  templates, fleegix.ejs uses plain JavaScript as an embedded
+  scripting language directly in your templates. This approach
+  should be familiar to anyone who has used PHP, Ruby's ERB,
+  etc.
+</p>
+
+<p>
+  As you might expect, code in &lt;% %&gt; tags is simply
+  executed. Code in &lt;%= %&gt; tags is executed and any
+  result is added to the output.
+</p>
+
+<h2>Usage</h2>
+
+<p>
+  Template objects are instantiated like so:
+</p>
+
+<pre><code>var str = '&lt;p&gt;Howdy, &lt;%= dudesName %&gt;&lt;/p&gt;.';
+var templ = new fleegix.ejs.Template({ text: str });</code></pre>
+
+<p>
+  You can provide template text from three different sources:
+</p>
+
+<ul>
+  <li>
+    text -- A simple string of template text.
+  </li>
+  <li>
+    node -- A textarea element containing template text.
+  </li>
+  <li>
+    url -- The URL for a text file on the Web server containing template text.
+  </li>
+</ul>
+
+<p>
+  Some other examples:
+</p>
+
+<pre><code>// Use a text node as the source
+var elem = document.getElementById('templateTextArea');
+var templ = new fleegix.ejs.Template({ node: elem });
+
+// Use a text file on the server
+var templ = new fleegix.ejs.Template({ url:
+  '/some_template.html.ejs' });</code></pre>
+
+<p>
+  You can then use your shiny new template by calling the
+  <code>process</code> method, passing it data and the DOM
+  node you want to insert the template results into:
+</p>
+
+<pre><code>// Create a new node
+var node = document.createElement('div');
+// Data to use in the template
+var templData = { dudesName: 'Geddy' };
+
+// Execute the template and insert the text into
+// the DOM node
+var templ.process({ domNode: node, data: templData });
+
+alert(node.innerHTML); // Alerts "&lt;p&gt;Howdy, Geddy.&lt;p&gt;"
+</code></pre>
+
+<h2>Tags</h2>
+
+<p>
+  The fleegix.ejs templates recognize the same set of tags as Ruby's ERB templates:
+</p>
+
+<ul>
+  <li>
+    &lt;% %&gt; -- Executes the code in the tags.
+  </li>
+  <li>
+    &lt;%= %&gt; -- Executes the code in the tags, appends any result to the output.
+  </li>
+  <li>
+    &lt;%# %&gt; -- Comments -- does nothing.
+  </li>
+  <li>
+    &lt;%% %&gt; -- Inserts literal &lt;% %&gt; tags.
+  </li>
+</ul>
+
+

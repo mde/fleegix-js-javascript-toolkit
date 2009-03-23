@@ -1,0 +1,53 @@
+<h1>Plugins: fleegix.form.diff</h1>
+
+<hr/>
+
+<p>
+  Allows you to restore a form from a serialized representation
+  of its fields.
+</p>
+
+<p>
+  <a href="<%= FLEEGIX_REPO %>/plugins/form/restore.js?raw=true">Download
+  fleegix.form.restore (2.5KB)</a>
+</p>
+
+<h2>fleegix.form.restore</h2>
+
+<h3>Syntax</h3>
+
+<p>fleegix.form.restore(formElement, serializedString);</p>
+
+<h3>Parameters</h3>
+
+<p>formElement <span class="dataType">(Object)</span> -- The HTML form you want to
+restore from a string.</p>
+
+<p>serializedString <span class="dataType">(String)</span> -- The query-string-style string of
+serialized form data you want to use to restore the form-element
+values.</p>
+
+<h3>Description</h3>
+
+<p>Allows you to restore a blank form to the state it was in when
+it was serialized to a string. This can be nice if you don't
+want to fill your server-side code with a bunch of conditionals
+to pre-fill a form from values in the database.</p>
+
+<h3>Examples</h3>
+
+<pre><code>function getDataAndRestore(userId) {
+  fleegix.xhr.doGet(doRestore,
+        '/get_user_settings.rbx?userId=' + userId);
+}
+
+function doRestore(str) {
+  var settingsForm = document.getElementById('settingsForm');
+  fleegix.form.restore(settingsForm, str);
+}
+
+getDataAndRestore();
+=> Pulls the original serialized form data used to save the
+user settings, and uses them to pre-fill the form</code></pre>
+
+
