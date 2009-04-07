@@ -333,6 +333,9 @@ fleegix.date.timezone = new function() {
   var regionMap = {'EST':'northamerica','MST':'northamerica','HST':'northamerica','EST5EDT':'northamerica','CST6CDT':'northamerica','MST7MDT':'northamerica','PST8PDT':'northamerica','America':'northamerica','Pacific':'australasia','Atlantic':'europe','Africa':'africa','Indian':'africa','Antarctica':'antarctica','Asia':'asia','Australia':'australasia','Europe':'europe','WET':'europe','CET':'europe','MET':'europe','EET':'europe'};
   var regionExceptions = {'Pacific/Honolulu':'northamerica','Atlantic/Bermuda':'northamerica','Atlantic/Cape_Verde':'africa','Atlantic/St_Helena':'africa','Indian/Kerguelen':'antarctica','Indian/Chagos':'asia','Indian/Maldives':'asia','Indian/Christmas':'australasia','Indian/Cocos':'australasia','America/Danmarkshavn':'europe','America/Scoresbysund':'europe','America/Godthab':'europe','America/Thule':'europe','Asia/Yekaterinburg':'europe','Asia/Omsk':'europe','Asia/Novosibirsk':'europe','Asia/Krasnoyarsk':'europe','Asia/Irkutsk':'europe','Asia/Yakutsk':'europe','Asia/Vladivostok':'europe','Asia/Sakhalin':'europe','Asia/Magadan':'europe','Asia/Kamchatka':'europe','Asia/Anadyr':'europe','Africa/Ceuta':'europe','America/Argentina/Buenos_Aires':'southamerica','America/Argentina/Cordoba':'southamerica','America/Argentina/Tucuman':'southamerica','America/Argentina/La_Rioja':'southamerica','America/Argentina/San_Juan':'southamerica','America/Argentina/Jujuy':'southamerica','America/Argentina/Catamarca':'southamerica','America/Argentina/Mendoza':'southamerica','America/Argentina/Rio_Gallegos':'southamerica','America/Argentina/Ushuaia':'southamerica','America/Aruba':'southamerica','America/La_Paz':'southamerica','America/Noronha':'southamerica','America/Belem':'southamerica','America/Fortaleza':'southamerica','America/Recife':'southamerica','America/Araguaina':'southamerica','America/Maceio':'southamerica','America/Bahia':'southamerica','America/Sao_Paulo':'southamerica','America/Campo_Grande':'southamerica','America/Cuiaba':'southamerica','America/Porto_Velho':'southamerica','America/Boa_Vista':'southamerica','America/Manaus':'southamerica','America/Eirunepe':'southamerica','America/Rio_Branco':'southamerica','America/Santiago':'southamerica','Pacific/Easter':'southamerica','America/Bogota':'southamerica','America/Curacao':'southamerica','America/Guayaquil':'southamerica','Pacific/Galapagos':'southamerica','Atlantic/Stanley':'southamerica','America/Cayenne':'southamerica','America/Guyana':'southamerica','America/Asuncion':'southamerica','America/Lima':'southamerica','Atlantic/South_Georgia':'southamerica','America/Paramaribo':'southamerica','America/Port_of_Spain':'southamerica','America/Montevideo':'southamerica','America/Caracas':'southamerica'};
 
+  function invalidTZError(t) {
+    throw new Error('Timezone "' + t + '" is either incorrect, or not loaded in the timezone registry.');
+  }
   function builtInLoadZoneFile(fileName, sync) {
     if (typeof fleegix.xhr == 'undefined') {
       throw new Error('Please use the Fleegix.js XHR module, or define your own transport mechanism for downloading zone files.');
@@ -350,12 +353,41 @@ fleegix.date.timezone = new function() {
   }
   function getRegionForTimezone(tz) {
     var exc = regionExceptions[tz];
+    var ret;
     if (exc) {
       return exc;
     }
     else {
       reg = tz.split('/')[0];
-      return regionMap[reg];
+      ret = regionMap[reg];
+      // If there's nothing listed in the main regions for
+      // this TZ, check the 'backward' links
+      if (!ret) {
+        var link = _this.zones[tz];
+        if (typeof link == 'string') {
+          return getRegionForTimezone(link);
+        }
+        else {
+          // Backward-compat file hasn't loaded yet, try looking in there
+          if (!_this.loadedZones.backward) {
+            // This is for obvious legacy zones (e.g., Iceland) that
+            // don't even have a prefix like "America/" that look like
+            // normal zones
+            var res = _this.loadZoneFile('backward', true);
+            if (res.length) {
+              _this.parseZones(res);
+            }
+            else {
+              throw new Error('Error loading "backward" zoneinfo file.');
+            }
+            return getRegionForTimezone(tz);
+          }
+          else {
+            invalidTZError(tz);
+          }
+        }
+      }
+      return ret;
     }
   }
   function parseTimeString(str) {
@@ -375,7 +407,22 @@ fleegix.date.timezone = new function() {
       zoneList = _this.zones[t];
     }
     if (!zoneList) {
-      throw new Error('"' + t + '" is either incorrect, or not loaded in the timezone registry.');
+      // Backward-compat file hasn't loaded yet, try looking in there
+      if (!_this.loadedZones.backward) {
+        // This is for backward entries like "America/Fort_Wayne" that
+        // getRegionForTimezone *thinks* it has a region file and zone
+        // for (e.g., America => 'northamerica'), but in reality it's a
+        // legacy zone we need the backward file for
+        var res = _this.loadZoneFile('backward', true);
+        if (res.length) {
+          _this.parseZones(res);
+        }
+        else {
+          throw new Error('Error loading "backward" zoneinfo file.');
+        }
+        return getZone(dt, tz);
+      }
+      invalidTZError(t);
     }
     for(var i = 0; i < zoneList.length; i++) {
       var z = zoneList[i];
@@ -556,7 +603,7 @@ fleegix.date.timezone = new function() {
   this.init = function () {
     var def = this.defaultZoneFile;
     if (typeof def == 'string') {
-      this.loadZoneFile(this.defaultZoneFile);
+      this.loadZoneFile(def);
     }
     else {
       for (var i = 0; i < def.length; i++) {
@@ -638,8 +685,11 @@ fleegix.date.timezone = new function() {
             _this.rules[rule].push(arr);
             break;
           case 'Link':
-            // Shouldn't exist
-            if (_this.zones[arr[1]]) { throw new Error('Error with Link ' + arr[1]); }
+            // No zones for these should already exist
+            if (_this.zones[arr[1]]) {
+              throw new Error('Error with Link ' + arr[1]);
+            }
+            // Create the link
             _this.zones[arr[1]] = arr[0];
             break;
           case 'Leap':
