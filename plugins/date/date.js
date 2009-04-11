@@ -483,7 +483,7 @@ fleegix.date.timezone = new function() {
       r = rules[i];
       // Only look at applicable rules -- throw out:
       // 1. Rules with a 'to' year earlier than the year
-      // 2. Rules which are confined to the 'from' year, and are
+      // 2. Rules which are confined to the 'from' year, and
       //  are earlier than the year
       // 3. Rules where the 'from' starts after
       if ((r[1] < year) ||

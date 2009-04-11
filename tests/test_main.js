@@ -6,7 +6,7 @@ windmill.jsTest.require('event.js');
 windmill.jsTest.require('xhr.js');
 windmill.jsTest.require('url.js');
 windmill.jsTest.require('string.js');
-windmill.jsTest.require('string_hotlink.js');
+windmill.jsTest.require('string_auto_hyperlink.js');
 
 var test_main = new function () {
   this.test_fleegixCookie = fleegixMain.test_fleegixCookie;
@@ -16,5 +16,5 @@ var test_main = new function () {
   this.test_fleegixEvent = fleegixMain.test_fleegixEvent;
   this.test_fleegixUrl = fleegixMain.test_fleegixUrl;
   this.test_fleegixString = fleegixMain.test_fleegixString;
-  this.test_fleegixStringHotlink = fleegixMain.test_fleegixStringHotlink;
+  this.test_fleegixStringAutoHyperlink = fleegixMain.test_fleegixStringAutoHyperlink;
 };
