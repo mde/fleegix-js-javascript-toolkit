@@ -12,8 +12,12 @@
 
 <script type="text/javascript">
 
+var testTimezone = function () {
+  var dtA = new fleegix.date.Date('10/31/2008', 'America/New_York');
+  alert(dtA.getTimezoneOffset());
+};
 fleegix.date.timezone.zoneFileBasePath = '/tz';
-fleegix.date.timezone.init();
+fleegix.date.timezone.init({ callback: testTimezone });
 
 </script>
 

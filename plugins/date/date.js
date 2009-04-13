@@ -336,19 +336,34 @@ fleegix.date.timezone = new function() {
   function invalidTZError(t) {
     throw new Error('Timezone "' + t + '" is either incorrect, or not loaded in the timezone registry.');
   }
-  function builtInLoadZoneFile(fileName, sync) {
+  function builtInLoadZoneFile(fileName, opts) {
     if (typeof fleegix.xhr == 'undefined') {
       throw new Error('Please use the Fleegix.js XHR module, or define your own transport mechanism for downloading zone files.');
     }
     var url = _this.zoneFileBasePath + '/' + fileName;
-    if (sync) {
-      return fleegix.xhr.doReq({
+    if (!opts.async) {
+      var ret = fleegix.xhr.doReq({
         url: url,
         async: false
       });
+      return _this.parseZones(ret);
     }
     else {
-      return fleegix.xhr.doGet(_this.parseZones, url);
+      return fleegix.xhr.send({
+        url: url,
+        method: 'get',
+        handleSuccess: function (str) {
+          if (_this.parseZones(str)) {
+            if (typeof opts.callback == 'function') {
+              opts.callback();
+            }
+          }
+          return true;
+        },
+        handleErr: function () {
+          throw new Error('Error retrieving "' + url + '" zoneinfo file.');
+        }
+      });
     }
   }
   function getRegionForTimezone(tz) {
@@ -373,13 +388,7 @@ fleegix.date.timezone = new function() {
             // This is for obvious legacy zones (e.g., Iceland) that
             // don't even have a prefix like "America/" that look like
             // normal zones
-            var res = _this.loadZoneFile('backward', true);
-            if (res.length) {
-              _this.parseZones(res);
-            }
-            else {
-              throw new Error('Error loading "backward" zoneinfo file.');
-            }
+            var parsed = _this.loadZoneFile('backward', true);
             return getRegionForTimezone(tz);
           }
           else {
@@ -413,13 +422,7 @@ fleegix.date.timezone = new function() {
         // getRegionForTimezone *thinks* it has a region file and zone
         // for (e.g., America => 'northamerica'), but in reality it's a
         // legacy zone we need the backward file for
-        var res = _this.loadZoneFile('backward', true);
-        if (res.length) {
-          _this.parseZones(res);
-        }
-        else {
-          throw new Error('Error loading "backward" zoneinfo file.');
-        }
+        var parsed = _this.loadZoneFile('backward', true);
         return getZone(dt, tz);
       }
       invalidTZError(t);
@@ -600,21 +603,31 @@ fleegix.date.timezone = new function() {
   this.zones = {};
   this.rules = {};
 
-  this.init = function () {
+  this.init = function (o) {
+    var opts = { async: true };
+    var sync = false;
     var def = this.defaultZoneFile;
+    var parsed;
+    // Override default with any passed-in opts
+    for (var p in o) {
+      opts[p] = o[p];
+    }
     if (typeof def == 'string') {
-      this.loadZoneFile(def);
+      parsed = this.loadZoneFile(def, opts);
     }
     else {
+      if (opts.callback) {
+        throw new Error('Async load with callback is not supported for multiple default zonefiles.');
+      }
       for (var i = 0; i < def.length; i++) {
-        this.loadZoneFile(def[i]);
+        parsed = this.loadZoneFile(def[i], opts);
       }
     }
   };
   // Get the zone files via XHR -- if the sync flag
   // is set to true, it's being called by the lazy-loading
   // mechanism, so the result needs to be returned inline
-  this.loadZoneFile = function (fileName, sync) {
+  this.loadZoneFile = function (fileName, opts) {
     if (typeof this.zoneFileBasePath == 'undefined') {
       throw new Error('Please define a base path to your zone file directory -- fleegix.date.timezone.zoneFileBasePath.');
     }
@@ -623,7 +636,7 @@ fleegix.date.timezone = new function() {
     // and comment out the default below
     // ========================
     this.loadedZones[fileName] = true;
-    return builtInLoadZoneFile(fileName, sync);
+    return builtInLoadZoneFile(fileName, opts);
   };
   this.loadZoneJSONData = function (url, sync) {
     var processData = function (data) {
@@ -713,13 +726,7 @@ fleegix.date.timezone = new function() {
       else {
         if (!this.loadedZones[zoneFile]) {
           // Get the file and parse it -- use synchronous XHR
-          var res = this.loadZoneFile(zoneFile, true);
-          if (res.length) {
-            this.parseZones(res);
-          }
-          else {
-            throw new Error('Error loading zone file for ' + zoneFile);
-          }
+          var parsed = this.loadZoneFile(zoneFile, true);
         }
       }
     }
