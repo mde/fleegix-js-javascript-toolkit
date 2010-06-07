@@ -117,17 +117,17 @@ fleegix.ejs.Template.prototype = new function () {
   this.process = function (p) {
     var params = p || {};
     this.data = params.data || {};
-    var domNode = params.node;
+    var domNode = params.domNode;
     // Cache/reuse the generated template source for speed
     this.source = this.source || '';
     if (!this.source) { this.generateSource(); }
-    
+
     // Eval the template with the passed data
     // Use 'with' to give local scoping to data obj props
     // ========================
     var _output = ''; // Inner scope var for eval output
     with (this.data) {
-      eval(this.source); 
+      eval(this.source);
     }
     this.markup = _output;
 
@@ -172,8 +172,8 @@ fleegix.ejs.Template.prototype = new function () {
   this.scanLine = function (line) {
     var _this = this;
     var _addOutput = function () {
-      line = line.replace(/\n/, '\\n');
-      line = line.replace(/"/g, '\\"');
+      line = line.replace(/\n/g, '\\n').replace(/\r/g,
+          '\\r').replace(/"/g, '\\"');
       _this.source += '_output += "' + line + '";';
     };
     switch (line) {
