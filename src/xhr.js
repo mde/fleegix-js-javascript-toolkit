@@ -35,9 +35,19 @@ fleegix.xhr = new function () {
   // If false, failures always hand back the whole request object
   this.useDefaultErrHandlerForSync = true;
   // Possible formats for the XHR response
-  this.responseFormats = { TXT: 'text',
-   XML: 'xml',
-   OBJ: 'object' };
+  var _formats = {
+    TXT: 'text',
+    XML: 'xml',
+    OBJ: 'object',
+    JSON: 'json'
+   };
+   this.formats = _formats;
+   this.contentTypes = {
+    'application/json': _formats.JSON,
+    'text/json': _formats.JSON,
+    'application/xml': _formats.XML,
+    'text/xml': _formats.XML
+   };
 
   // Public methods
   // ================================
@@ -60,17 +70,17 @@ fleegix.xhr = new function () {
         o[p] = opts[p];
       }
     }
-    // Normal order-based params of URL, [responseFormat]
+    // Normal order-based params of URL, [format]
     else {
-      o.responseFormat = args.shift() || 'text';
+      o.format = args.shift() || 'text';
     }
-    o.handleSuccess = hand;
+    o.success = hand;
     o.url = url;
     return this.doReq(o);
   };
   this.doGet = function () {
     return this.get.apply(this, arguments);
-  }
+  };
   this.post = function () {
     var o = {};
     var hand = null;
@@ -91,11 +101,11 @@ fleegix.xhr = new function () {
         o[p] = opts[p];
       }
     }
-    // Normal order-based params of URL, [responseFormat]
+    // Normal order-based params of URL, [format]
     else {
-      o.responseFormat = args.shift() || 'text';
+      o.format = args.shift() || 'text';
     }
-    o.handleSuccess = hand;
+    o.success = hand;
     o.url = url;
     o.data = data;
     o.method = 'POST';
@@ -103,14 +113,18 @@ fleegix.xhr = new function () {
   };
   this.doPost = function () {
     return this.post.apply(this, arguments);
-  }
+  };
   this.doReq = function (opts) {
     return this.send(opts);
-  }
+  };
   this.send = function (o) {
     var opts = o || {};
     var req = new fleegix.xhr.Request();
     var xhrId = null;
+
+    if (opts.contentType && this.contentTypes[opts.contentType]) {
+      opts.format = this.contentTypes[opts.contentType];
+    }
 
     // Override default request opts with any specified
     for (var p in opts) {
@@ -118,6 +132,7 @@ fleegix.xhr = new function () {
         req[p] = opts[p];
       }
     }
+
     // HTTP req method all-caps
     req.method = req.method.toUpperCase();
 
@@ -238,7 +253,6 @@ fleegix.xhr = new function () {
   // ================================
   // The XHR object factory
   var _spawnXhr = function (isSync) {
-    var i = 0;
     var t = [
       'Msxml2.XMLHTTP.6.0',
       'MSXML2.XMLHTTP.3.0',
@@ -343,6 +357,7 @@ fleegix.xhr = new function () {
       if (!req.data) {
         req.data = '';
       }
+      /*
       // Set content-length for picky servers, but *only*
       // in nice browsers that allow it
       if (!fleegix.isSafari) {
@@ -350,6 +365,7 @@ fleegix.xhr = new function () {
           req.data.length : 0;
         xhrObj.setRequestHeader('Content-Length', contentLength);
       }
+      */
       // Set content-type to urlencoded if nothing
       // else specified
       if (typeof req.headers['Content-Type'] == 'undefined') {
@@ -426,9 +442,23 @@ fleegix.xhr = new function () {
   var _handleResponse = function (xhrObj, req) {
     // Grab the desired response type
     var resp;
-    switch(req.responseFormat) {
+    switch(req.format) {
+      // JSON
+      case _formats.JSON:
+        if (typeof JSON != 'undefined') {
+          resp = JSON.parse(xhrObj.responseText);
+        }
+        else {
+          if (typeof fleegix.json == 'undefined') {
+            throw new Error('Need fleegix.json module to parse JSON.');
+          }
+          else {
+            resp = fleegix.json.parse(resp);
+          }
+        }
+        break;
       // XML
-      case 'xml':
+      case _formats.XML:
         if (req.xmlDocFromResponseText && typeof fleegix.xml != 'undefined') {
           resp = fleegix.xml.createDoc(xhrObj.responseText);
         }
@@ -437,11 +467,11 @@ fleegix.xhr = new function () {
         }
         break;
       // The object itself
-      case 'object':
+      case _formats.OBJ:
         resp = xhrObj;
         break;
       // Text
-      case 'text':
+      case _formats.TXT:
       default:
         resp = xhrObj.responseText;
         break;
@@ -449,8 +479,8 @@ fleegix.xhr = new function () {
     // If we have a One True Event Handler, use that
     // Best for odd cases such as Safari's 'undefined' status
     // or 0 (zero) status from trying to load local files or chrome
-    if (req.handleAll) {
-      req.handleAll(resp, req.id);
+    if (req.all) {
+      req.all(resp, req.id);
     }
     // Otherwise hand to either success/failure
     else {
@@ -460,12 +490,12 @@ fleegix.xhr = new function () {
           case _this.isReqSuccessful(xhrObj):
             if (req.async) {
               // Make sure handler is defined
-              if (!req.handleSuccess) {
+              if (!req.success) {
                 throw new Error('No response handler defined ' +
                   'for this request');
               }
               else {
-                req.handleSuccess(resp, req.id);
+                window.setTimeout(function () { req.success(resp, req.id) }, 0);
               }
             }
             // Blocking requests return the result inline on success
@@ -474,7 +504,7 @@ fleegix.xhr = new function () {
             }
             break;
           // Status of 0 -- in FF, user may have hit ESC while processing
-          case (xhrObj.status == 0):
+          case (xhrObj.status === 0):
             if (_this.debug) {
               throw new Error('XMLHttpRequest HTTP status is zero.');
             }
@@ -482,7 +512,7 @@ fleegix.xhr = new function () {
           // Status of null or undefined -- yes, null == undefined
           case (xhrObj.status == _UNDEFINED_VALUE):
             // Squelch -- if you want to get local files or
-            // chrome, use 'handleAll' above
+            // chrome, use 'all' above
             if (_this.debug) {
               throw new Error('XMLHttpRequest HTTP status not set.');
             }
@@ -496,11 +526,11 @@ fleegix.xhr = new function () {
               return  resp;
             }
             else {
-              if (req.handleErr) {
-                req.handleErr(resp, req.id);
+              if (req.error) {
+                req.error(resp, req.id);
               }
               else {
-                _handleErrDefault(xhrObj);
+                _errorDefault(xhrObj);
               }
             }
             break;
@@ -521,8 +551,8 @@ fleegix.xhr = new function () {
   };
   var _timeout = function (req) {
     if (_this.abort.apply(_this, [req.id])) {
-      if (typeof req.handleTimeout == 'function') {
-        req.handleTimeout();
+      if (typeof req.timeout == 'function') {
+        req.timeout();
       }
       else {
         alert('XMLHttpRequest to ' + req.url + ' timed out.');
@@ -546,7 +576,7 @@ fleegix.xhr = new function () {
       _idleXhrs.push(req.xhrId);
     }
   };
-  var _handleErrDefault = function (r) {
+  var _errorDefault = function (r) {
     var errorWin;
     // Create new window and display error
     try {
@@ -574,11 +604,12 @@ fleegix.xhr.Request = function () {
   this.readyState = null;
   this.responseText = null;
   this.responseXML = null;
-  this.handleSuccess = null;
-  this.handleErr = null;
-  this.handleAll = null;
-  this.handleTimeout = null;
-  this.responseFormat = fleegix.xhr.responseFormats.TXT; // TXT, XML, OBJ
+  this.success = null;
+  this.error = null;
+  this.all = null;
+  this.timeout = null;
+  this.contentType = null;
+  this.format = fleegix.xhr.formats.TXT; // TXT, XML, OBJ, JSON
   this.xmlDocFromResponseText = false;
   this.mimeType = null;
   this.username = '';
