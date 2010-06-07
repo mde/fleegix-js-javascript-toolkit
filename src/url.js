@@ -224,6 +224,15 @@ fleegix.url = new function () {
   this.getBase = function (s) {
     return s.split(_QS_SIMPLE)[0];
   };
+
+  this.getFileExtension = function (str) {
+    var ext = null;
+    var pathArr = str.split('.');
+    if (pathArr.length > 1) {
+      ext = pathArr[pathArr.length - 1];
+    }
+    return ext;
+  };
 };
 // Backward-compat shim
 fleegix.uri = new function () {
