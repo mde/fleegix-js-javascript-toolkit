@@ -2,7 +2,7 @@
 
 $YUI_COMPRESSOR_PATH = 'lib/yuicompressor-2.1.2.jar'
 $COMPRESSION = true
-$GZIP = true 
+$GZIP = true
 
 def get_source_file_list
   require 'find'
@@ -39,7 +39,7 @@ def get_plugin_file_list(param)
   plugins
 end
 
-def concat_sourcefiles(files, filename)
+def concat_sourcefiles(files, filename, exports)
   dist = File.new(filename + '.uncompressed.js', 'w')
   js_file = File.new('./src/base.js')
   js = js_file.readlines.join
@@ -54,6 +54,15 @@ def concat_sourcefiles(files, filename)
       dist << js
     end
   end
+  # Copy all modules onto the exports obj for CommonJS usage
+  if exports
+    dist << <<-eos
+for (var p in fleegix) {
+  exports[p] = fleegix[p];
+}
+    eos
+  end
+
   dist.close
   true
 end
@@ -85,6 +94,7 @@ task :default do
     conf = JSON.parse(file)
     plugins_only = conf['plugins_only'].to_s
     plugins = conf['plugins']
+    exports = conf['exports'] || false
     base_modules = conf['base_modules']
     compression = conf['compression'].to_s
     gzip = conf['gzip'].to_s
@@ -92,6 +102,7 @@ task :default do
   else
     plugins_only = ENV['plugins_only']
     plugins = ENV['plugins']
+    exports = ENV['exports'] || false
     base_modules = ENV['base_modules']
     compression = ENV['compression']
     gzip = ENV['gzip']
@@ -132,7 +143,7 @@ task :default do
   end
 
   puts 'Reading and concatenating source files ...'
-  concat_sourcefiles(files, filename)
+  concat_sourcefiles(files, filename, exports)
   puts 'Built ' + filename + '.uncompresed.js'
 
   if compression
