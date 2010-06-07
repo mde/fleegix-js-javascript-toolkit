@@ -231,7 +231,7 @@ fleegix.hash.Hash.prototype = new function () {
     var pos = this.count-1;
     var ret = this.items[this.order[pos]];
     if (typeof ret != 'undefined') {
-      this.removeAtPos(pos);
+      this.removeByIndex(pos);
       return ret;
     }
     else {
@@ -246,7 +246,7 @@ fleegix.hash.Hash.prototype = new function () {
     var pos = 0;
     var ret = this.items[this.order[pos]];
     if (typeof ret != 'undefined') {
-      this.removeAtPos(pos);
+      this.removeByIndex(pos);
       return ret;
     }
     else {
