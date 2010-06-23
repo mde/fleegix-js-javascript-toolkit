@@ -127,7 +127,6 @@ fleegix.ejs.Template.prototype = new function () {
     // Use 'with' to give local scoping to data obj props
     // ========================
     var _output = ''; // Inner scope var for eval output
-    console.log(this.source);
     with (this.data) {
       eval(this.source);
     }
