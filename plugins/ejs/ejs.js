@@ -114,6 +114,7 @@ fleegix.ejs.Template.prototype = new function () {
       }
     }
   };
+  
   this.process = function (p) {
     var params = p || {};
     this.data = params.data || {};
@@ -126,6 +127,7 @@ fleegix.ejs.Template.prototype = new function () {
     // Use 'with' to give local scoping to data obj props
     // ========================
     var _output = ''; // Inner scope var for eval output
+    console.log(this.source);
     with (this.data) {
       eval(this.source);
     }
@@ -136,6 +138,7 @@ fleegix.ejs.Template.prototype = new function () {
     }
     return this.markup;
   };
+  
   this.generateSource = function () {
     var line = '';
     var matches = this.parseTemplateText();
@@ -148,6 +151,7 @@ fleegix.ejs.Template.prototype = new function () {
       }
     }
   };
+
   this.parseTemplateText = function() {
     var str = this.templateText;
     var pat = _REGEX;
@@ -169,8 +173,9 @@ fleegix.ejs.Template.prototype = new function () {
     }
     return arr;
   };
+
   this.scanLine = function (line) {
-    var _this = this;
+    var li, _this = this;
     var _addOutput = function () {
       line = line.replace(/\n/g, '\\n').replace(/\r/g,
           '\\r').replace(/"/g, '\\"');
@@ -203,12 +208,13 @@ fleegix.ejs.Template.prototype = new function () {
           switch (this.mode) {
             // Just executing code
             case this.modes.EVAL:
-              this.source += line;
+              this.source += line + ';';
               break;
             // Exec and output
             case this.modes.OUTPUT:
               // Add the exec'd result to the output
-              this.source += '_output += ' + line + ';';
+              li = line.replace(/\s*;/, '');
+              this.source += '_output += (' + li + ' || "");';
               break;
             case this.modes.COMMENT:
               // Do nothing
